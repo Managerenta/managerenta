@@ -4,7 +4,7 @@ import { memo, type ReactNode, useContext } from "react";
 import { BoxStyled as Box } from "@/components/Box/styled";
 import { AppContextProvider } from "@/hooks";
 import { MainStyled } from "./styled";
-import { Toast } from "@/layouts";
+import { Navbar, Toast } from "@/layouts";
 
 export const Modal = dynamic(
 	() => import("@/layouts").then((mod) => mod.Modal),
@@ -25,6 +25,7 @@ function Main({ children }: IProps) {
 			<Box className="body-wrapper">
 				<Toast />
 
+				<Navbar navHeight={navHeight} background="var(--Secondary-600)" />
 				<Box className="body-container-max-width">{children}</Box>
 			</Box>
 		</MainStyled>
