@@ -56,7 +56,7 @@ export default async function RootLayout({
 
 	const env = defaultEnvOptions();
 
-	const url = `${env.AUTHENTICATION_SERVICE_URL}/api/login/verify?chainId=${env.chainId}`;
+	const url = `${env.MAIN_SERVICE_URL}/api/login/verify`;
 	const isUserSessionActive = await verifyUserLogin({ url, cookieHeader });
 
 	// useReportWebVitals((metric) => {
