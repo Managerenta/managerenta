@@ -1,0 +1,45 @@
+"use client";
+import { motion } from "motion/react";
+import NextTopLoader from "nextjs-toploader";
+import type React from "react";
+import { SWRConfig } from "swr";
+import { config, type IEnv } from "@/constants";
+import { AppContext } from "@/hooks";
+import { GlobalStyle } from "@/styles";
+import { Main } from "./components";
+
+interface IProps {
+	children: React.ReactNode;
+	env: IEnv;
+	isUserSessionActive: boolean;
+}
+
+export default function BodyWrapper({
+	children,
+	env,
+	isUserSessionActive,
+}: IProps) {
+	return (
+		<motion.div
+			initial={{ opacity: 0 }}
+			animate={{ opacity: 1 }}
+			exit={{ opacity: 0 }}
+			transition={{ duration: 0 }}>
+			<GlobalStyle />
+			<NextTopLoader />
+			<SWRConfig
+				value={{
+					shouldRetryOnError: false,
+					revalidateOnFocus: false,
+					revalidateOnMount: false,
+					revalidateOnReconnect: true,
+					refreshWhenOffline: true,
+					refreshWhenHidden: false,
+				}}>
+				<AppContext env={env} isUserSessionActive={isUserSessionActive}>
+					<Main>{children}</Main>
+				</AppContext>
+			</SWRConfig>
+		</motion.div>
+	);
+}
