@@ -6,7 +6,7 @@ import {
 	useMemo,
 	useState,
 } from "react";
-import { api, type IEnv, verifyUserLogin } from "../../constants";
+import { api, IEnv, verifyUserLogin } from "../../constants";
 
 interface IProps {
 	env: IEnv;
@@ -32,7 +32,7 @@ export default function AppContext({
 	const [_isUserLoggedIn, _setIsUserLoggedIn] =
 		useState<boolean>(isUserSessionActive);
 
-	const [navHeight] = useState<string>("90px");
+	const [navHeight] = useState<string>("70px");
 
 	const isUserLoggedIn = useMemo(() => _isUserLoggedIn, [_isUserLoggedIn]);
 
@@ -52,14 +52,14 @@ export default function AppContext({
 	}, []);
 
 	const reAuthenticateUserSession = useCallback(async () => {
-		const url = `${env.AUTHENTICATION_SERVICE_URL}/api/login/verify`;
+		const url = `${env.MAIN_SERVICE_URL}/api/login/verify`;
 
 		const result = await verifyUserLogin({
 			url,
 		});
 
 		_setIsUserLoggedIn(result);
-	}, [env.AUTHENTICATION_SERVICE_URL]);
+	}, [env.MAIN_SERVICE_URL]);
 
 	useEffect(() => {
 		if (!isBrowser) return;
