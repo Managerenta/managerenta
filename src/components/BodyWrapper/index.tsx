@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import NextTopLoader from "nextjs-toploader";
 import type React from "react";
 import { SWRConfig } from "swr";
-import { config, type IEnv } from "@/constants";
+import { type IEnv } from "@/constants";
 import { AppContext } from "@/hooks";
 import { GlobalStyle } from "@/styles";
 import { Main } from "./components";
