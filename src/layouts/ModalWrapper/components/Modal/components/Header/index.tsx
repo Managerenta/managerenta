@@ -16,12 +16,14 @@ function Header({ title }: IProps) {
 			$w="100%"
 			$h="50px"
 			$padding="5px 20px"
-			$borderBot={`1px solid var(--dark-10)`}>
+			$borderBot={`1px solid var(--dark-10)`}
+		>
 			<Box $grid $centerV $w="100%" $h="100%">
 				<Text
 					bold
 					size="l"
-					style={{ letterSpacing: ".5px", wordSpacing: "2px" }}>
+					style={{ letterSpacing: ".5px", wordSpacing: "2px" }}
+				>
 					{title}
 				</Text>
 			</Box>
