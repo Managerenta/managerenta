@@ -46,7 +46,10 @@ function Modal({
 
 	const handleClickOutside = useCallback(
 		(event: MouseEvent) => {
-			if (modalRef.current && !modalRef.current.contains(event.target as Node))
+			if (
+				modalRef.current &&
+				!modalRef.current.contains(event.target as Node)
+			)
 				close();
 		},
 		[close],
@@ -58,7 +61,8 @@ function Modal({
 		if (!autoCloseOnClickOutside || !isBrowser) return;
 		if (open) document.addEventListener("mousedown", handleClickOutside);
 
-		return () => document.removeEventListener("mousedown", handleClickOutside);
+		return () =>
+			document.removeEventListener("mousedown", handleClickOutside);
 	}, [handleClickOutside, open, isBrowser, autoCloseOnClickOutside]);
 
 	const modal = useMemo(() => {
@@ -69,7 +73,8 @@ function Modal({
 				$color={color}
 				$background={background}
 				$border={border}
-				$zIndex={zIndex}>
+				$zIndex={zIndex}
+			>
 				<Box className="container">
 					<Box className="wrapper">
 						<Box
@@ -77,7 +82,8 @@ function Modal({
 							ref={modalRef}
 							style={{
 								...style,
-							}}>
+							}}
+						>
 							{title && <Header title={title} />}
 
 							{children}
