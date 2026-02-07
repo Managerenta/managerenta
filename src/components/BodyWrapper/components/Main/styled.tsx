@@ -9,6 +9,7 @@ export const MainStyled = styled(Box)<{
 }>`
 	width: 100%;
 	height: auto;
+	font-family: roboto;
 
 	.body-wrapper {
 		height: auto;
