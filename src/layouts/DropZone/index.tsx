@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { type JSX, memo, useCallback, useEffect, useMemo } from "react";
 import { useDropzone } from "react-dropzone";
-import { Box } from "../../components";
 import { useDragZone } from "@/hooks";
+import { Box } from "../../components";
 
 interface IProps {
 	elem: JSX.Element;
