@@ -1,7 +1,7 @@
 "use client";
 
-import { Box } from "@/components";
 import styled from "styled-components";
+import { Box } from "@/components";
 
 export const NavbarStyled = styled(Box)<{
 	$navHeight: string;
