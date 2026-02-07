@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import NextTopLoader from "nextjs-toploader";
 import type React from "react";
 import { SWRConfig } from "swr";
-import { type IEnv } from "@/constants";
+import type { IEnv } from "@/constants";
 import { AppContext } from "@/hooks";
 import { GlobalStyle } from "@/styles";
 import { Main } from "./components";
@@ -24,7 +24,8 @@ export default function BodyWrapper({
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
-			transition={{ duration: 0 }}>
+			transition={{ duration: 0 }}
+		>
 			<GlobalStyle />
 			<NextTopLoader />
 			<SWRConfig
@@ -35,7 +36,8 @@ export default function BodyWrapper({
 					revalidateOnReconnect: true,
 					refreshWhenOffline: true,
 					refreshWhenHidden: false,
-				}}>
+				}}
+			>
 				<AppContext env={env} isUserSessionActive={isUserSessionActive}>
 					<Main>{children}</Main>
 				</AppContext>
