@@ -6,7 +6,7 @@ import {
 	useMemo,
 	useState,
 } from "react";
-import { api, IEnv, verifyUserLogin } from "../../constants";
+import { api, type IEnv, verifyUserLogin } from "../../constants";
 
 interface IProps {
 	env: IEnv;
@@ -79,7 +79,8 @@ export default function AppContext({
 				isBrowser,
 				isUserLoggedIn,
 				reAuthenticateUserSession,
-			}}>
+			}}
+		>
 			{children}
 		</AppContextProvider.Provider>
 	);
