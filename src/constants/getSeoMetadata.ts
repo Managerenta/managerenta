@@ -13,19 +13,16 @@ interface IProps {
 }
 
 const defaultKeywords = [
-	"gkoi",
-	"koi",
-	"nft",
-	"web3",
-	"web3.0",
-	"collection",
-	"art",
-	"legend",
-	"japan",
-	"home",
-	"universe",
-	"digital collectibles",
-	"collectibles",
+	"project management",
+	"task management",
+	"team collaboration",
+	"project tracking",
+	"agile project management",
+	"kanban board",
+	"gantt chart",
+	"time tracking",
+	"resource management",
+	"project planning",
 ];
 
 async function getSeoMetadata({
@@ -45,7 +42,7 @@ async function getSeoMetadata({
 		openGraph: {
 			type: "website",
 			url: urlPath,
-			siteName: "Gkoi",
+			siteName: "PropertyTrack",
 			images: [
 				{
 					url: image || "/opengraph-image.png",
@@ -57,11 +54,11 @@ async function getSeoMetadata({
 			images: [
 				{
 					url: image || "/opengraph-image.png",
-					alt: "Gkoi",
+					alt: "PropertyTrack - Project Management Tool",
 				},
 			],
 		},
-		authors: [{ name: "Gkoi Team", url: APP_HOSTNAME }],
+		authors: [{ name: "PropertyTrack Team", url: APP_HOSTNAME }],
 		keywords: [...defaultKeywords, ...(keywords || [])],
 		alternates: { canonical: urlPath },
 	};
