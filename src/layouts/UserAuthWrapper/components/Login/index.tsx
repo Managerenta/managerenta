@@ -1,9 +1,11 @@
 "use client";
 import Link from "next/link";
-import { type ReactNode, useMemo, useReducer } from "react";
+import { memo, type ReactNode, useMemo, useReducer } from "react";
 import { FaLock, FaUser } from "react-icons/fa";
 import { GrSecure } from "react-icons/gr";
 import { Box, Button, Input, Text } from "@/components";
+import AlternativeSeparator from "@/layouts/AlternativeSeparator";
+import Header from "../Header";
 import { LoginStyled } from "./styled";
 
 interface LoginState {
@@ -31,7 +33,7 @@ function loginReducer(state: LoginState, action: LoginAction): LoginState {
 	}
 }
 
-export default function Login() {
+function Login() {
 	const [state, dispatch] = useReducer(loginReducer, initialState);
 
 	const renderedInputFields = useMemo(() => {
@@ -92,10 +94,7 @@ export default function Login() {
 
 	return (
 		<LoginStyled>
-			<header>
-				<h1>Welcome Back</h1>
-				<Text>Sign in to your account</Text>
-			</header>
+			<Header title="Welcome Back" subtext="Sign in to your account" />
 
 			<form>{renderedInputFields}</form>
 
@@ -111,11 +110,7 @@ export default function Login() {
 
 			<Button title="Sign In" />
 
-			<Box className="or-separator">
-				<hr />
-				<Text>Or</Text>
-				<hr />
-			</Box>
+			<AlternativeSeparator />
 
 			<Box className="register">
 				<Text>Don't have an account?</Text>
@@ -137,3 +132,5 @@ export default function Login() {
 		</LoginStyled>
 	);
 }
+
+export default memo(Login);
