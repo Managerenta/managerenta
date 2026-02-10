@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { Box, Image, Text } from "@/components";
 import { useReviews } from "@/hooks";
 import { ReviewsStyled } from "./styled";
 
-export default function Reviews() {
+function Reviews() {
 	const { reviews } = useReviews();
 
 	const reviewsList = useMemo(() => {
@@ -27,3 +27,5 @@ export default function Reviews() {
 
 	return <ReviewsStyled>{reviewsList}</ReviewsStyled>;
 }
+
+export default memo(Reviews);
