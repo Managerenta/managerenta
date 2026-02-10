@@ -1,3 +1,4 @@
+export { default as AlternativeSeparator } from "./AlternativeSeparator";
 export * from "./Carousel";
 export { default as CloseSVG } from "./CloseSVG";
 export { default as DropZone } from "./DropZone";
