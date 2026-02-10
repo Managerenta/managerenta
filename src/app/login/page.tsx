@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { LoginWrapper } from "@/libs";
 
-export default function Vault() {
+export default function Login() {
 	return (
 		<Suspense>
 			<LoginWrapper />
