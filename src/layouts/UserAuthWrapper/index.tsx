@@ -1,7 +1,7 @@
 "use client";
 import { memo } from "react";
 import { Box } from "@/components";
-import { KeyHighlights, Login } from "./components";
+import { KeyHighlights, Login, Signup } from "./components";
 import { UserAuthWrapperStyled } from "./styled";
 
 interface IProps {
@@ -15,7 +15,9 @@ function UserAuthWrapper({ type }: IProps) {
 				<Box className="details">
 					<KeyHighlights />
 				</Box>
-				<Box className="main">{type === "login" ? <Login /> : <Login />}</Box>
+				<Box className="main">
+					{type === "login" ? <Login /> : <Signup />}
+				</Box>
 			</Box>
 		</UserAuthWrapperStyled>
 	);
