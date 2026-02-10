@@ -12,24 +12,6 @@ export const LoginStyled = styled(Box)`
 	flex-direction: column;
 	gap: 15px;
 
-	header {
-		display: flex;
-		flex-direction: column;
-		gap: 5px;
-		align-items: center;
-		justify-content: center;
-
-		h1 {
-			font-size: 24px;
-			font-weight: 700;
-		}
-
-		p {
-			font-size: 16px;
-			color: var(--Secondary-100);
-		}
-	}
-
 	form {
 		display: flex;
 		flex-direction: column;
@@ -56,7 +38,7 @@ export const LoginStyled = styled(Box)`
 					top: 50%;
 					transform: translateY(-50%);
 					color: var(--Secondary-100);
-					font-size: 14px;
+					font-size: 30px;
 				}
 
 				input {
@@ -115,31 +97,12 @@ export const LoginStyled = styled(Box)`
 		height: 51px;
 		border-radius: 8px;
 		font-size: 14px;
-		font-weight: 600;
+		font-weight: 500;
 		color: var(--White);
 		border: none;
 		cursor: pointer;
 		transition: background-color 0.3s;
 		background: var(--Main-Blue);
-	}
-
-	.or-separator {
-		display: flex;
-		align-items: center;
-		gap: 10px;
-		/* margin: 20px 0; */
-
-		hr {
-			flex: 1;
-			border: none;
-			border-top: 1px solid var(--Secondary-100);
-		}
-
-		p {
-			font-size: 14px;
-			color: var(--Secondary-100);
-			font-weight: 400;
-		}
 	}
 
 	.register {
