@@ -1,6 +1,8 @@
 export * from "./Context";
+export * from "./Dashboard";
+export * from "./Property";
 export * from "./Reviews";
-
+export * from "./Tenant";
 export { default as useClipboard } from "./useClipboard";
 export { default as useDragZone } from "./useDragZone";
 export { default as useStyleMediaQuery } from "./useStyleMediaQuery";
