@@ -1,5 +1,4 @@
 "use client";
-
 import styled from "styled-components";
 import { Box } from "@/components";
 
@@ -38,7 +37,7 @@ export const LoginStyled = styled(Box)`
 					top: 50%;
 					transform: translateY(-50%);
 					color: var(--Secondary-100);
-					font-size: 30px;
+					font-size: 15px;
 				}
 
 				input {

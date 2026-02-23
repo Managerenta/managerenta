@@ -1,5 +1,4 @@
 "use client";
-
 import styled from "styled-components";
 import { Box } from "@/components";
 
@@ -36,7 +35,7 @@ export const SignupStyled = styled(Box)`
 					top: 50%;
 					transform: translateY(-50%);
 					color: var(--Secondary-100);
-					font-size: 14px;
+					font-size: 17px;
 				}
 
 				input {
