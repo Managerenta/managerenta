@@ -1,5 +1,10 @@
-import { Box } from "@/components";
+import { Suspense } from "react";
+import { SignupWrapper } from "@/libs";
 
 export default function Home() {
-	return <Box>Hello World!</Box>;
+	return (
+		<Suspense>
+			<SignupWrapper />
+		</Suspense>
+	);
 }
