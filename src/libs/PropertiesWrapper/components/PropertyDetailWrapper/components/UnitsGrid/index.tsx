@@ -1,0 +1,235 @@
+"use client";
+import { usePathname, useSearchParams } from "next/navigation";
+import { memo, useCallback, useMemo, useState } from "react";
+import { Box, Button, Text } from "@/components";
+import type { IPropertyUnit } from "@/types";
+import { UnitsGridStyled } from "./styled";
+
+interface IProps {
+	units: IPropertyUnit[];
+	totalCount: number;
+}
+
+function getPaymentStatusColor(status: string): { bg: string; text: string } {
+	switch (status) {
+		case "Paid":
+			return { bg: "transparent", text: "#16a34a" };
+		case "Due Soon":
+			return { bg: "transparent", text: "#ca8a04" };
+		case "Overdue":
+			return { bg: "transparent", text: "#ef4444" };
+		default:
+			return { bg: "transparent", text: "#64748b" };
+	}
+}
+
+function UnitsGrid({ units, totalCount }: IProps) {
+	const [activeFilter, setActiveFilter] = useState<string>("all");
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
+
+	const handleViewTenant = useCallback(
+		(tenantId: string) => {
+			const newSearchParams = new URLSearchParams(
+				searchParams.toString(),
+			);
+			newSearchParams.set("tenantId", tenantId);
+
+			window.history.replaceState(
+				{},
+				"",
+				`${pathname}?${newSearchParams.toString()}`,
+			);
+		},
+		[pathname, searchParams],
+	);
+
+	const filterTabs = useMemo(() => {
+		return [
+			{ id: "tab-all", label: "All Units", value: "all" },
+			{ id: "tab-occupied", label: "Occupied", value: "occupied" },
+			{ id: "tab-vacant", label: "Vacant", value: "vacant" },
+		];
+	}, []);
+
+	const renderedFilterTabs = useMemo(() => {
+		return filterTabs.map(({ id, label, value }) => (
+			<Box
+				key={id}
+				className={`filter-tab ${activeFilter === value ? "active" : ""}`}
+			>
+				<Button
+					type="button"
+					title={label}
+					handleClick={() => setActiveFilter(value)}
+				/>
+			</Box>
+		));
+	}, [filterTabs, activeFilter]);
+
+	const filteredUnits = useMemo(() => {
+		if (activeFilter === "all") return units;
+		if (activeFilter === "occupied")
+			return units.filter((u) => u.status === "Occupied");
+		if (activeFilter === "vacant")
+			return units.filter((u) => u.status === "Vacant");
+		return units;
+	}, [units, activeFilter]);
+
+	const renderedUnits = useMemo(() => {
+		return filteredUnits.map(
+			({
+				id,
+				name,
+				status,
+				tenantName,
+				// tenantAvatar,
+				rent,
+				dueDate,
+				paymentStatus,
+				vacantDays,
+			}) => {
+				const isOccupied = status === "Occupied";
+				const paymentColors = paymentStatus
+					? getPaymentStatusColor(paymentStatus)
+					: null;
+
+				return (
+					<Box key={id} className="unit-card">
+						<Text className="unit-name">{name}</Text>
+
+						<Box
+							className="status-badge"
+							style={{
+								background: isOccupied ? "#dcfce7" : "#fee2e2",
+								color: isOccupied ? "#16a34a" : "#ef4444",
+							}}
+						>
+							{status}
+						</Box>
+
+						{isOccupied && tenantName && (
+							<Box className="tenant-row">
+								{/* TODO: Replace placeholder with Image when avatars are ready */}
+								<Box className="avatar-placeholder" />
+								<Text className="tenant-name">
+									{tenantName}
+								</Text>
+							</Box>
+						)}
+
+						<Text className="unit-rent">{rent}</Text>
+
+						{isOccupied && dueDate && (
+							<Text className="due-date">{dueDate}</Text>
+						)}
+
+						{isOccupied && paymentStatus && paymentColors && (
+							<Box className="payment-status">
+								<Box
+									className="payment-dot"
+									style={{ background: paymentColors.text }}
+								/>
+								<Text
+									style={{
+										color: paymentColors.text,
+										fontSize: "13px",
+									}}
+								>
+									{paymentStatus}
+								</Text>
+							</Box>
+						)}
+
+						{!isOccupied && vacantDays && (
+							<Text className="vacant-info">
+								Vacant for {vacantDays} days
+							</Text>
+						)}
+
+						{!isOccupied && (
+							<Text className="expected-rent">Expected rent</Text>
+						)}
+
+						<Box className="unit-actions">
+							{isOccupied ? (
+								<>
+									<Box className="view-tenant-btn">
+										<Button
+											type="button"
+											title="View Tenant"
+											background="#16a34a"
+											color="white"
+											borderRadius="8px"
+											handleClick={() =>
+												handleViewTenant(id)
+											}
+										/>
+									</Box>
+									<Box className="record-btn">
+										<Button
+											type="button"
+											title="Record Payment"
+											background="#ef4444"
+											color="white"
+											borderRadius="8px"
+										/>
+									</Box>
+								</>
+							) : (
+								<Box className="add-tenant-btn">
+									<Button
+										type="button"
+										title={
+											<Box
+												style={{
+													display: "flex",
+													alignItems: "center",
+													gap: "6px",
+												}}
+											>
+												<span>+ Add Tenant</span>
+											</Box>
+										}
+										background="var(--Main-Blue)"
+										color="white"
+										borderRadius="8px"
+										width="100%"
+									/>
+								</Box>
+							)}
+						</Box>
+					</Box>
+				);
+			},
+		);
+	}, [filteredUnits, handleViewTenant]);
+
+	return (
+		<UnitsGridStyled>
+			<Box className="units-header">
+				<Box className="units-title-row">
+					<Text className="units-title">Units</Text>
+					<Box className="units-count">{totalCount}</Box>
+				</Box>
+
+				<Box className="units-filters">
+					<Box className="filter-tabs">{renderedFilterTabs}</Box>
+
+					<select
+						className="sort-dropdown"
+						defaultValue="unit-number"
+					>
+						<option value="unit-number">Unit Number</option>
+						<option value="status">Status</option>
+						<option value="rent">Rent</option>
+					</select>
+				</Box>
+			</Box>
+
+			<Box className="units-grid">{renderedUnits}</Box>
+		</UnitsGridStyled>
+	);
+}
+
+export default memo(UnitsGrid);
