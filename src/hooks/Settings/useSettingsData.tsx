@@ -1,10 +1,10 @@
 "use client";
 import { useMemo } from "react";
-import { FiUser, FiBell, FiClock, FiShield } from "react-icons/fi";
+import { FiBell, FiClock, FiShield, FiUser } from "react-icons/fi";
 import type {
+	ILanguageOption,
 	ISettingsTab,
 	IThemeOption,
-	ILanguageOption,
 	ITimezoneOption,
 } from "@/types";
 
@@ -59,10 +59,26 @@ export default function useSettingsData() {
 	const timezoneOptions = useMemo<ITimezoneOption[]>(() => {
 		return [
 			{ id: "tz-001", label: "(GMT+1) West Africa Time", value: "WAT" },
-			{ id: "tz-002", label: "(GMT+0) Greenwich Mean Time", value: "GMT" },
-			{ id: "tz-003", label: "(GMT+2) Central Africa Time", value: "CAT" },
-			{ id: "tz-004", label: "(GMT-5) Eastern Standard Time", value: "EST" },
-			{ id: "tz-005", label: "(GMT+1) Central European Time", value: "CET" },
+			{
+				id: "tz-002",
+				label: "(GMT+0) Greenwich Mean Time",
+				value: "GMT",
+			},
+			{
+				id: "tz-003",
+				label: "(GMT+2) Central Africa Time",
+				value: "CAT",
+			},
+			{
+				id: "tz-004",
+				label: "(GMT-5) Eastern Standard Time",
+				value: "EST",
+			},
+			{
+				id: "tz-005",
+				label: "(GMT+1) Central European Time",
+				value: "CET",
+			},
 		];
 	}, []);
 

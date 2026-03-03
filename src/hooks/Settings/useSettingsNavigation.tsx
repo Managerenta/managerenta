@@ -12,7 +12,9 @@ export default function useSettingsNavigation() {
 
 	const openTab = useCallback(
 		(tabValue: string) => {
-			const newSearchParams = new URLSearchParams(searchParams.toString());
+			const newSearchParams = new URLSearchParams(
+				searchParams.toString(),
+			);
 			newSearchParams.set("tab", tabValue);
 
 			window.history.replaceState(

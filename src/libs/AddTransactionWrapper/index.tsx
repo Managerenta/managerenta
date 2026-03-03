@@ -3,11 +3,11 @@ import { memo } from "react";
 import { Box } from "@/components";
 import {
 	AddTransactionHeader,
-	TenantSummary,
-	TransactionForm,
+	KeyboardShortcutsPanel,
 	PaymentHistoryPanel,
 	SmartSuggestionsPanel,
-	KeyboardShortcutsPanel,
+	TenantSummary,
+	TransactionForm,
 } from "./components";
 import { AddTransactionWrapperStyled } from "./styled";
 

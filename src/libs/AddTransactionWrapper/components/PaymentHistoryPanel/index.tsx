@@ -16,11 +16,17 @@ function PaymentHistoryPanel() {
 						<Text className="history-date">{date}</Text>
 					</Box>
 					<Box className="history-right">
-						<Text className="history-amount" style={{ color: amountColor }}>
+						<Text
+							className="history-amount"
+							style={{ color: amountColor }}
+						>
 							{amount}
 						</Text>
 						{note && (
-							<Text className="history-note" style={{ color: noteColor }}>
+							<Text
+								className="history-note"
+								style={{ color: noteColor }}
+							>
 								{note}
 							</Text>
 						)}

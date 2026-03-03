@@ -1,5 +1,5 @@
 "use client";
-import { memo, useState, useMemo, useCallback } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { FiUpload } from "react-icons/fi";
 import { Box, Button, Input, Text } from "@/components";
 import { useAddTransactionData, useAddTransactionNavigation } from "@/hooks";
@@ -9,7 +9,8 @@ function TransactionForm() {
 	const [selectedType, setSelectedType] = useState<string>("rent");
 	const [amount, setAmount] = useState<string>("450,000");
 	const [notes, setNotes] = useState<string>("");
-	const [transactionDate, setTransactionDate] = useState<string>("2024-12-20");
+	const [transactionDate, setTransactionDate] =
+		useState<string>("2024-12-20");
 	const [paymentMethod, setPaymentMethod] = useState<string>("bank-transfer");
 
 	const { transactionTypes, paymentMethods } = useAddTransactionData();
@@ -20,7 +21,8 @@ function TransactionForm() {
 			<Box
 				key={id}
 				className={`type-card ${selectedType === value ? "active" : ""}`}
-				onClick={() => setSelectedType(value)}>
+				onClick={() => setSelectedType(value)}
+			>
 				<Box className="type-icon">{icon}</Box>
 				<Text className="type-label">{label}</Text>
 			</Box>
@@ -64,16 +66,18 @@ function TransactionForm() {
 						<Input
 							type="text"
 							value={amount}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-								setAmount(e.target.value)
-							}
+							onChange={(
+								e: React.ChangeEvent<HTMLInputElement>,
+							) => setAmount(e.target.value)}
 							placeholder="0"
 						/>
 					</Box>
 				</Box>
 
 				<Box className="form-field">
-					<Text className="field-label">Description/Notes (Optional)</Text>
+					<Text className="field-label">
+						Description/Notes (Optional)
+					</Text>
 					<textarea
 						className="notes-textarea"
 						value={notes}
@@ -97,12 +101,18 @@ function TransactionForm() {
 				</Box>
 
 				<Box className="form-field">
-					<Text className="field-label">Receipt/Proof (Optional)</Text>
+					<Text className="field-label">
+						Receipt/Proof (Optional)
+					</Text>
 					<Box className="upload-zone">
 						<FiUpload size={24} />
-						<Text className="upload-text">Drag & drop files here or</Text>
+						<Text className="upload-text">
+							Drag & drop files here or
+						</Text>
 						<Text className="upload-link">Choose File</Text>
-						<Text className="upload-hint">JPG, PNG, PDF up to 10MB</Text>
+						<Text className="upload-hint">
+							JPG, PNG, PDF up to 10MB
+						</Text>
 					</Box>
 				</Box>
 			</Box>
@@ -113,7 +123,8 @@ function TransactionForm() {
 					<select
 						className="method-select"
 						value={paymentMethod}
-						onChange={(e) => setPaymentMethod(e.target.value)}>
+						onChange={(e) => setPaymentMethod(e.target.value)}
+					>
 						{renderedPaymentMethods}
 					</select>
 				</Box>

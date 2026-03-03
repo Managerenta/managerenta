@@ -13,12 +13,19 @@ function SmartSuggestionsPanel() {
 				<Box
 					key={id}
 					className="suggestion-card"
-					style={{ background: bgColor }}>
-					<Box className="suggestion-icon" style={{ color: iconColor }}>
+					style={{ background: bgColor }}
+				>
+					<Box
+						className="suggestion-icon"
+						style={{ color: iconColor }}
+					>
 						{icon}
 					</Box>
 					<Box className="suggestion-content">
-						<Text className="suggestion-label" style={{ color: iconColor }}>
+						<Text
+							className="suggestion-label"
+							style={{ color: iconColor }}
+						>
 							{label}
 						</Text>
 						<Text className="suggestion-desc">{description}</Text>

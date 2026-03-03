@@ -2,11 +2,11 @@
 import { memo } from "react";
 import { useSettingsNavigation } from "@/hooks";
 import {
-	SettingsHeader,
+	Preferences,
 	ProfileInformation,
 	Security,
-	Preferences,
 	SettingsFooter,
+	SettingsHeader,
 } from "./components";
 import { SettingsWrapperStyled } from "./styled";
 
