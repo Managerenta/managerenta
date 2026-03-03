@@ -1,20 +1,26 @@
 "use client";
 import { memo } from "react";
 import { Box } from "@/components";
-import { useTenantDetail, useTenantNavigation } from "@/hooks";
 import {
-	ContactInfo,
-	PaymentStatistics,
-	PaymentSummary,
-	RecentActivity,
+	useTenantDetail,
+	useTenantNavigation,
+	useAddTransactionNavigation,
+} from "@/hooks";
+import { AddTransactionWrapper } from "@/libs";
+import {
 	TenantDetailHeader,
-	TenantQuickActions,
+	ContactInfo,
+	PaymentSummary,
 	TransactionHistory,
+	TenantQuickActions,
+	PaymentStatistics,
+	RecentActivity,
 } from "./components";
 import { TenantDetailWrapperStyled } from "./styled";
 
 function TenantDetailWrapper() {
 	const { selectedTenantId } = useTenantNavigation();
+	const { isAddTransactionView } = useAddTransactionNavigation();
 
 	const {
 		tenantDetail,
@@ -26,6 +32,10 @@ function TenantDetailWrapper() {
 	} = useTenantDetail(selectedTenantId);
 
 	if (!tenantDetail) return null;
+
+	if (isAddTransactionView) {
+		return <AddTransactionWrapper />;
+	}
 
 	return (
 		<TenantDetailWrapperStyled>

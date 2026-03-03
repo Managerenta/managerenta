@@ -1,6 +1,7 @@
 "use client";
 import { memo, useMemo } from "react";
 import { FiBell, FiDownload, FiHome, FiPlus } from "react-icons/fi";
+import { useAddTransactionNavigation } from "@/hooks";
 import { Box, Button, Text } from "@/components";
 import { TenantQuickActionsStyled } from "./styled";
 
@@ -11,6 +12,8 @@ interface QuickActionItem {
 }
 
 function TenantQuickActions() {
+	const { openAddTransaction } = useAddTransactionNavigation();
+
 	const actions = useMemo((): QuickActionItem[] => {
 		return [
 			{
@@ -50,8 +53,7 @@ function TenantQuickActions() {
 										alignItems: "center",
 										gap: "8px",
 										justifyContent: "center",
-									}}
-								>
+									}}>
 									{icon}
 									<span>{label}</span>
 								</Box>
@@ -60,6 +62,7 @@ function TenantQuickActions() {
 							color="white"
 							borderRadius="8px"
 							width="100%"
+							handleClick={openAddTransaction}
 						/>
 					</Box>
 				);

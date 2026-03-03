@@ -4,3 +4,5 @@ export * from "./mimetypes";
 export * from "./property";
 export * from "./response";
 export * from "./tenants";
+export * from "./transactions";
+export * from "./settings";
