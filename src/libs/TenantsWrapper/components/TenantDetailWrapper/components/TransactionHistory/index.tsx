@@ -1,6 +1,6 @@
 "use client";
 import { memo, useMemo } from "react";
-import { FiHome, FiTool, FiEye, FiDownload, FiZap } from "react-icons/fi";
+import { FiDownload, FiEye, FiHome, FiTool, FiZap } from "react-icons/fi";
 import { Box, Button, Input, Text } from "@/components";
 import type { ITenantTransaction } from "@/types";
 import { TransactionHistoryStyled } from "./styled";
@@ -76,7 +76,9 @@ function TransactionHistory({ transactions, totals }: IProps) {
 				runningBalance,
 			}) => (
 				<Box key={id} className="transaction-card">
-					<Box className={`txn-icon ${amountType}`}>{getTypeIcon(type)}</Box>
+					<Box className={`txn-icon ${amountType}`}>
+						{getTypeIcon(type)}
+					</Box>
 					<Box className="txn-content">
 						<Text className="txn-description">{description}</Text>
 						<Text className="txn-meta">
@@ -88,7 +90,9 @@ function TransactionHistory({ transactions, totals }: IProps) {
 							{amountType === "debit" ? "" : "+"}
 							{amount}
 						</Text>
-						<Text className="txn-balance">Balance: {runningBalance}</Text>
+						<Text className="txn-balance">
+							Balance: {runningBalance}
+						</Text>
 					</Box>
 				</Box>
 			),
@@ -121,7 +125,12 @@ function TransactionHistory({ transactions, totals }: IProps) {
 						type="button"
 						title={
 							<Box
-								style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+								style={{
+									display: "flex",
+									alignItems: "center",
+									gap: "6px",
+								}}
+							>
 								<FiDownload size={14} />
 								<span>Export</span>
 							</Box>

@@ -2,19 +2,19 @@
 import { memo } from "react";
 import { Box } from "@/components";
 import {
+	useAddTransactionNavigation,
 	useTenantDetail,
 	useTenantNavigation,
-	useAddTransactionNavigation,
 } from "@/hooks";
 import { AddTransactionWrapper } from "@/libs";
 import {
-	TenantDetailHeader,
 	ContactInfo,
-	PaymentSummary,
-	TransactionHistory,
-	TenantQuickActions,
 	PaymentStatistics,
+	PaymentSummary,
 	RecentActivity,
+	TenantDetailHeader,
+	TenantQuickActions,
+	TransactionHistory,
 } from "./components";
 import { TenantDetailWrapperStyled } from "./styled";
 

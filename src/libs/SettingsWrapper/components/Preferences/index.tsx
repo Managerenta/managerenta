@@ -1,6 +1,6 @@
 "use client";
-import { memo, useState, useMemo } from "react";
-import { Box, Input, Text } from "@/components";
+import { memo, useMemo, useState } from "react";
+import { Box, Text } from "@/components";
 import { useSettingsData } from "@/hooks";
 import { PreferencesStyled } from "./styled";
 
@@ -45,8 +45,14 @@ function Preferences() {
 
 	const renderedThemeOptions = useMemo(() => {
 		return themeOptions.map(({ id, label, value }) => (
-			<Box key={id} className="radio-item" onClick={() => setTheme(value)}>
-				<Box className={`radio-circle ${theme === value ? "active" : ""}`}>
+			<Box
+				key={id}
+				className="radio-item"
+				onClick={() => setTheme(value)}
+			>
+				<Box
+					className={`radio-circle ${theme === value ? "active" : ""}`}
+				>
 					{theme === value && <Box className="radio-dot" />}
 				</Box>
 				<Text className="radio-label">{label}</Text>
@@ -73,7 +79,8 @@ function Preferences() {
 						<select
 							className="pref-select"
 							value={currency}
-							onChange={(e) => setCurrency(e.target.value)}>
+							onChange={(e) => setCurrency(e.target.value)}
+						>
 							{renderedCurrencyOptions}
 						</select>
 					</Box>
@@ -83,7 +90,8 @@ function Preferences() {
 						<select
 							className="pref-select"
 							value={dateFormat}
-							onChange={(e) => setDateFormat(e.target.value)}>
+							onChange={(e) => setDateFormat(e.target.value)}
+						>
 							{renderedDateFormatOptions}
 						</select>
 					</Box>
@@ -93,7 +101,8 @@ function Preferences() {
 						<select
 							className="pref-select"
 							value={language}
-							onChange={(e) => setLanguage(e.target.value)}>
+							onChange={(e) => setLanguage(e.target.value)}
+						>
 							{renderedLanguageOptions}
 						</select>
 					</Box>
@@ -102,7 +111,9 @@ function Preferences() {
 				<Box className="right-prefs">
 					<Box className="form-field">
 						<Text className="field-label">Theme</Text>
-						<Box className="radio-group">{renderedThemeOptions}</Box>
+						<Box className="radio-group">
+							{renderedThemeOptions}
+						</Box>
 					</Box>
 
 					<Box className="form-field">
@@ -110,7 +121,8 @@ function Preferences() {
 						<select
 							className="pref-select"
 							value={timezone}
-							onChange={(e) => setTimezone(e.target.value)}>
+							onChange={(e) => setTimezone(e.target.value)}
+						>
 							{renderedTimezoneOptions}
 						</select>
 					</Box>

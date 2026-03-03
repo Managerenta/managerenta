@@ -2,9 +2,9 @@
 import Link from "next/link";
 import { memo, useCallback } from "react";
 import { FiBell, FiEdit2 } from "react-icons/fi";
-import { usePropertiesNavigation, useTenantNavigation } from "@/hooks";
 import { Box, Button, Text } from "@/components";
-import { ITenantDetail } from "@/types";
+import { usePropertiesNavigation, useTenantNavigation } from "@/hooks";
+import type { ITenantDetail } from "@/types";
 import { TenantDetailHeaderStyled } from "./styled";
 
 interface IProps {
@@ -29,7 +29,10 @@ function TenantDetailHeader({ tenantDetail }: IProps) {
 			<Box className="breadcrumb">
 				<Link href="/dashboard">Dashboard</Link>
 				<span className="separator">&gt;</span>
-				<Box className="breadcrumb-link" onClick={handleBackToProperties}>
+				<Box
+					className="breadcrumb-link"
+					onClick={handleBackToProperties}
+				>
 					<Text>Properties</Text>
 				</Box>
 				<span className="separator">&gt;</span>
@@ -64,7 +67,8 @@ function TenantDetailHeader({ tenantDetail }: IProps) {
 										display: "flex",
 										alignItems: "center",
 										gap: "8px",
-									}}>
+									}}
+								>
 									<FiEdit2 size={16} />
 									<span>Edit Tenant</span>
 								</Box>
@@ -84,7 +88,8 @@ function TenantDetailHeader({ tenantDetail }: IProps) {
 										display: "flex",
 										alignItems: "center",
 										gap: "8px",
-									}}>
+									}}
+								>
 									<FiBell size={16} />
 									<span>Send Reminder</span>
 								</Box>

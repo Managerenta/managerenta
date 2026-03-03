@@ -1,5 +1,5 @@
 "use client";
-import { memo, useState, useCallback } from "react";
+import { memo, useCallback, useState } from "react";
 import { Box, Button, Input, Text } from "@/components";
 import { ProfileInformationStyled } from "./styled";
 
@@ -34,9 +34,9 @@ function ProfileInformation() {
 						<Input
 							type="text"
 							value={fullName}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-								setFullName(e.target.value)
-							}
+							onChange={(
+								e: React.ChangeEvent<HTMLInputElement>,
+							) => setFullName(e.target.value)}
 						/>
 					</Box>
 
@@ -46,9 +46,9 @@ function ProfileInformation() {
 							<Input
 								type="email"
 								value={email}
-								onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-									setEmail(e.target.value)
-								}
+								onChange={(
+									e: React.ChangeEvent<HTMLInputElement>,
+								) => setEmail(e.target.value)}
 							/>
 							<Box className="verified-icon">✓</Box>
 						</Box>
@@ -59,9 +59,9 @@ function ProfileInformation() {
 						<Input
 							type="text"
 							value={phone}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-								setPhone(e.target.value)
-							}
+							onChange={(
+								e: React.ChangeEvent<HTMLInputElement>,
+							) => setPhone(e.target.value)}
 						/>
 					</Box>
 

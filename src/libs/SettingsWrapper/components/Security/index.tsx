@@ -1,6 +1,5 @@
 "use client";
-import { memo, useState, useCallback, useMemo } from "react";
-import { FiX } from "react-icons/fi";
+import { memo, useCallback, useMemo, useState } from "react";
 import { Box, Button, Input, Text } from "@/components";
 import { SecurityStyled } from "./styled";
 
@@ -38,7 +37,9 @@ function Security() {
 				className="strength-bar"
 				style={{
 					background:
-						segment <= strengthInfo.segments ? strengthInfo.color : "#e2e8f0",
+						segment <= strengthInfo.segments
+							? strengthInfo.color
+							: "#e2e8f0",
 				}}
 			/>
 		));
@@ -65,9 +66,9 @@ function Security() {
 						<Input
 							type="password"
 							value={currentPassword}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-								setCurrentPassword(e.target.value)
-							}
+							onChange={(
+								e: React.ChangeEvent<HTMLInputElement>,
+							) => setCurrentPassword(e.target.value)}
 						/>
 					</Box>
 
@@ -76,16 +77,19 @@ function Security() {
 						<Input
 							type="password"
 							value={newPassword}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-								setNewPassword(e.target.value)
-							}
+							onChange={(
+								e: React.ChangeEvent<HTMLInputElement>,
+							) => setNewPassword(e.target.value)}
 						/>
 						{newPassword.length > 0 && (
 							<>
-								<Box className="strength-bars">{renderedStrengthBars}</Box>
+								<Box className="strength-bars">
+									{renderedStrengthBars}
+								</Box>
 								<Text
 									className="strength-label"
-									style={{ color: strengthInfo.color }}>
+									style={{ color: strengthInfo.color }}
+								>
 									{strengthInfo.label}
 								</Text>
 							</>
@@ -93,13 +97,15 @@ function Security() {
 					</Box>
 
 					<Box className="form-field">
-						<Text className="field-label">Confirm New Password</Text>
+						<Text className="field-label">
+							Confirm New Password
+						</Text>
 						<Input
 							type="password"
 							value={confirmPassword}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-								setConfirmPassword(e.target.value)
-							}
+							onChange={(
+								e: React.ChangeEvent<HTMLInputElement>,
+							) => setConfirmPassword(e.target.value)}
 						/>
 					</Box>
 
@@ -127,7 +133,8 @@ function Security() {
 						</Box>
 						<Box
 							className={`toggle-switch ${is2FAEnabled ? "active" : ""}`}
-							onClick={() => setIs2FAEnabled(!is2FAEnabled)}>
+							onClick={() => setIs2FAEnabled(!is2FAEnabled)}
+						>
 							<Box className="toggle-thumb" />
 						</Box>
 					</Box>

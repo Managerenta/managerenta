@@ -1,10 +1,10 @@
 "use client";
 import Link from "next/link";
-import { memo, useMemo, useCallback } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { FiEdit2, FiPlus } from "react-icons/fi";
-import { usePropertiesNavigation } from "@/hooks";
 import { Box, Button, Text } from "@/components";
-import { IPropertyDetail } from "@/types";
+import { usePropertiesNavigation } from "@/hooks";
+import type { IPropertyDetail } from "@/types";
 import { PropertyDetailHeaderStyled } from "./styled";
 
 interface IProps {
@@ -34,13 +34,19 @@ function PropertyDetailHeader({ propertyDetail, stats }: IProps) {
 				<Box key={id} className="stat-card">
 					<Box className="stat-top">
 						<Text className="stat-label">{label}</Text>
-						<Box className="stat-icon" style={{ background: iconBg }}>
+						<Box
+							className="stat-icon"
+							style={{ background: iconBg }}
+						>
 							{icon}
 						</Box>
 					</Box>
 					<Text className="stat-value">{value}</Text>
 					{subtext && (
-						<Text className="stat-subtext" style={{ color: subtextColor }}>
+						<Text
+							className="stat-subtext"
+							style={{ color: subtextColor }}
+						>
 							{subtext}
 						</Text>
 					)}
@@ -54,7 +60,10 @@ function PropertyDetailHeader({ propertyDetail, stats }: IProps) {
 			<Box className="breadcrumb">
 				<Link href="/dashboard">Dashboard</Link>
 				<span className="separator">&gt;</span>
-				<Box className="breadcrumb-link" onClick={handleBackToProperties}>
+				<Box
+					className="breadcrumb-link"
+					onClick={handleBackToProperties}
+				>
 					<Text>Properties</Text>
 				</Box>
 				<span className="separator">&gt;</span>
@@ -78,7 +87,8 @@ function PropertyDetailHeader({ propertyDetail, stats }: IProps) {
 										display: "flex",
 										alignItems: "center",
 										gap: "8px",
-									}}>
+									}}
+								>
 									<FiEdit2 size={16} />
 									<span>Edit Property</span>
 								</Box>
@@ -98,7 +108,8 @@ function PropertyDetailHeader({ propertyDetail, stats }: IProps) {
 										display: "flex",
 										alignItems: "center",
 										gap: "8px",
-									}}>
+									}}
+								>
 									<FiPlus size={16} />
 									<span>Add New Unit</span>
 								</Box>

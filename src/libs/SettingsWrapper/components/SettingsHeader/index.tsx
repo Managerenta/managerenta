@@ -12,11 +12,18 @@ function SettingsHeader() {
 		return tabs.map(({ id, label, value, icon }) => (
 			<Box
 				key={id}
-				className={`tab-item ${activeTab === value ? "active" : ""}`}>
+				className={`tab-item ${activeTab === value ? "active" : ""}`}
+			>
 				<Button
 					type="button"
 					title={
-						<Box style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+						<Box
+							style={{
+								display: "flex",
+								alignItems: "center",
+								gap: "6px",
+							}}
+						>
 							{icon}
 							<span>{label}</span>
 						</Box>
