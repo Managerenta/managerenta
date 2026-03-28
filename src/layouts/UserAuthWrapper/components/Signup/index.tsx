@@ -1,12 +1,21 @@
 "use client";
 import Link from "next/link";
-import { type ReactNode, useMemo, useReducer } from "react";
+import { useRouter } from "next/navigation";
+import {
+	type ReactNode,
+	useContext,
+	useMemo,
+	useReducer,
+	useState,
+} from "react";
 import { FaLock, FaUser } from "react-icons/fa";
 import { FaRegCircleUser } from "react-icons/fa6";
 import { HiOutlineMail } from "react-icons/hi";
-// import { GrSecure } from "react-icons/gr";
+import { toast } from "react-toastify";
 import { Box, Button, Input, Text } from "@/components";
-import AlternativeSeparator from "@/layouts/AlternativeSeparator";
+import { api } from "@/constants";
+import { AppContextProvider } from "@/hooks";
+import { AlternativeSeparator } from "@/layouts";
 import Header from "../Header";
 import { SignupStyled } from "./styled";
 
@@ -57,6 +66,41 @@ function signupReducer(state: SignupState, action: SignupAction): SignupState {
 
 export default function Signup() {
 	const [state, dispatch] = useReducer(signupReducer, initialState);
+	const [isLoading, setIsLoading] = useState(false);
+
+	const { env } = useContext(AppContextProvider);
+	const router = useRouter();
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+
+		if (state.createPassword !== state.confirmPassword) {
+			toast.error("Passwords do not match");
+			return;
+		}
+
+		setIsLoading(true);
+
+		try {
+			const formData = new FormData();
+			formData.append("name", `${state.firstName} ${state.lastName}`.trim());
+			formData.append("username", state.username);
+			formData.append("email", state.email);
+			formData.append("password", state.createPassword);
+
+			await api().post(`${env.MAIN_SERVICE_URL}/api/auth/signup`, formData);
+
+			toast.success("Account created! Please sign in.");
+			router.push("/login");
+		} catch (err: unknown) {
+			const message =
+				(err as { response?: { data?: { message?: string } } })?.response?.data
+					?.message ?? "Failed to create account";
+			toast.error(message);
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
 	const renderedInputFields = useMemo(() => {
 		const inputs: {
@@ -73,10 +117,7 @@ export default function Signup() {
 							placeholder="Enter your first name"
 							value={state.firstName}
 							onChange={(e) =>
-								dispatch({
-									type: "SET_FIRST_NAME",
-									payload: e.target.value,
-								})
+								dispatch({ type: "SET_FIRST_NAME", payload: e.target.value })
 							}
 						/>
 					</section>
@@ -92,10 +133,7 @@ export default function Signup() {
 							placeholder="Enter your last name"
 							value={state.lastName}
 							onChange={(e) =>
-								dispatch({
-									type: "SET_LAST_NAME",
-									payload: e.target.value,
-								})
+								dispatch({ type: "SET_LAST_NAME", payload: e.target.value })
 							}
 						/>
 					</section>
@@ -111,10 +149,7 @@ export default function Signup() {
 							placeholder="Enter your email"
 							value={state.email}
 							onChange={(e) =>
-								dispatch({
-									type: "SET_EMAIL",
-									payload: e.target.value,
-								})
+								dispatch({ type: "SET_EMAIL", payload: e.target.value })
 							}
 						/>
 					</section>
@@ -130,10 +165,7 @@ export default function Signup() {
 							placeholder="Enter your username"
 							value={state.username}
 							onChange={(e) =>
-								dispatch({
-									type: "SET_USERNAME",
-									payload: e.target.value,
-								})
+								dispatch({ type: "SET_USERNAME", payload: e.target.value })
 							}
 						/>
 					</section>
@@ -178,18 +210,14 @@ export default function Signup() {
 				),
 			},
 		];
-		return inputs.map((item, index) => {
-			return (
-				<Box key={index} className="form-field">
-					<label
-						htmlFor={item.label.toLowerCase().replaceAll(" ", "-")}
-					>
-						{item.label}
-					</label>
-					{item.elem}
-				</Box>
-			);
-		});
+		return inputs.map((item, index) => (
+			<Box key={index} className="form-field">
+				<label htmlFor={item.label.toLowerCase().replaceAll(" ", "-")}>
+					{item.label}
+				</label>
+				{item.elem}
+			</Box>
+		));
 	}, [
 		state.firstName,
 		state.lastName,
@@ -206,20 +234,25 @@ export default function Signup() {
 				subtext="Get started in less than 2 minutes"
 			/>
 
-			<form>{renderedInputFields}</form>
+			<form onSubmit={handleSubmit}>{renderedInputFields}</form>
 
 			<Box className="options">
 				<Box className="privacy-terms">
 					<Input type="checkbox" id="check-me" />
 					<label htmlFor="check-me">
 						I agree to PropertyTrack's{" "}
-						<Link href="/terms-of-service">Terms of Service</Link>{" "}
-						and <Link href="/privacy-policy">Privacy Policy</Link>
+						<Link href="/terms-of-service">Terms of Service</Link> and{" "}
+						<Link href="/privacy-policy">Privacy Policy</Link>
 					</label>
 				</Box>
 			</Box>
 
-			<Button title="Create Account" />
+			<Button
+				title={isLoading ? "Creating account..." : "Create Account"}
+				type="submit"
+				handleClick={handleSubmit}
+				disabled={isLoading}
+			/>
 
 			<AlternativeSeparator />
 
