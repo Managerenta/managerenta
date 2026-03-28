@@ -1,6 +1,9 @@
 "use client";
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useContext, useMemo, useState } from "react";
+import { toast } from "react-toastify";
 import { Box, Button, Input, Text } from "@/components";
+import { api } from "@/constants";
+import { AppContextProvider } from "@/hooks";
 import { SecurityStyled } from "./styled";
 
 function getStrengthInfo(password: string): {
@@ -12,18 +15,31 @@ function getStrengthInfo(password: string): {
 		return { label: "", color: "#e2e8f0", segments: 0 };
 	if (password.length < 6)
 		return { label: "Weak", color: "#ef4444", segments: 1 };
-	if (password.length < 10)
+
+	if (password.length < 8)
 		return { label: "Fair", color: "#f59e0b", segments: 2 };
-	if (password.length < 14)
-		return { label: "Good strength", color: "#22c55e", segments: 3 };
+
+	const hasUpper = /[A-Z]/.test(password);
+	const hasNumber = /[0-9]/.test(password);
+	const hasSpecial = /[^A-Za-z0-9]/.test(password);
+	const isLong = password.length >= 12;
+
+	const score = [hasUpper, hasNumber, hasSpecial, isLong].filter(
+		Boolean,
+	).length;
+
+	if (score <= 1) return { label: "Fair", color: "#f59e0b", segments: 2 };
+	if (score === 2) return { label: "Good", color: "#22c55e", segments: 3 };
 	return { label: "Strong", color: "#16a34a", segments: 4 };
 }
 
 function Security() {
+	const { env } = useContext(AppContextProvider);
 	const [currentPassword, setCurrentPassword] = useState<string>("");
 	const [newPassword, setNewPassword] = useState<string>("");
 	const [confirmPassword, setConfirmPassword] = useState<string>("");
 	const [is2FAEnabled, setIs2FAEnabled] = useState<boolean>(false);
+	const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
 	const strengthInfo = useMemo(
 		() => getStrengthInfo(newPassword),
@@ -37,21 +53,45 @@ function Security() {
 				className="strength-bar"
 				style={{
 					background:
-						segment <= strengthInfo.segments
-							? strengthInfo.color
-							: "#e2e8f0",
+						segment <= strengthInfo.segments ? strengthInfo.color : "#e2e8f0",
 				}}
 			/>
 		));
 	}, [strengthInfo]);
 
-	const handleUpdatePassword = useCallback(() => {
-		console.log("Update password:", {
-			currentPassword,
-			newPassword,
-			confirmPassword,
-		});
-	}, [currentPassword, newPassword, confirmPassword]);
+	const handleUpdatePassword = useCallback(async () => {
+		if (!currentPassword || !newPassword || !confirmPassword) {
+			toast.error("Please fill in all password fields");
+			return;
+		}
+		if (newPassword !== confirmPassword) {
+			toast.error("New passwords do not match");
+			return;
+		}
+		if (newPassword.length < 6) {
+			toast.error("New password must be at least 6 characters");
+			return;
+		}
+
+		setIsUpdating(true);
+		try {
+			await api().post(`${env.MAIN_SERVICE_URL}/api/users/change-password`, {
+				currentPassword,
+				newPassword,
+			});
+			toast.success("Password updated successfully");
+			setCurrentPassword("");
+			setNewPassword("");
+			setConfirmPassword("");
+		} catch (err: unknown) {
+			const message =
+				(err as { response?: { data?: { message?: string } } })?.response?.data
+					?.message ?? "Failed to update password";
+			toast.error(message);
+		} finally {
+			setIsUpdating(false);
+		}
+	}, [env.MAIN_SERVICE_URL, currentPassword, newPassword, confirmPassword]);
 
 	return (
 		<SecurityStyled>
@@ -66,9 +106,9 @@ function Security() {
 						<Input
 							type="password"
 							value={currentPassword}
-							onChange={(
-								e: React.ChangeEvent<HTMLInputElement>,
-							) => setCurrentPassword(e.target.value)}
+							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+								setCurrentPassword(e.target.value)
+							}
 						/>
 					</Box>
 
@@ -77,19 +117,16 @@ function Security() {
 						<Input
 							type="password"
 							value={newPassword}
-							onChange={(
-								e: React.ChangeEvent<HTMLInputElement>,
-							) => setNewPassword(e.target.value)}
+							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+								setNewPassword(e.target.value)
+							}
 						/>
 						{newPassword.length > 0 && (
 							<>
-								<Box className="strength-bars">
-									{renderedStrengthBars}
-								</Box>
+								<Box className="strength-bars">{renderedStrengthBars}</Box>
 								<Text
 									className="strength-label"
-									style={{ color: strengthInfo.color }}
-								>
+									style={{ color: strengthInfo.color }}>
 									{strengthInfo.label}
 								</Text>
 							</>
@@ -97,23 +134,22 @@ function Security() {
 					</Box>
 
 					<Box className="form-field">
-						<Text className="field-label">
-							Confirm New Password
-						</Text>
+						<Text className="field-label">Confirm New Password</Text>
 						<Input
 							type="password"
 							value={confirmPassword}
-							onChange={(
-								e: React.ChangeEvent<HTMLInputElement>,
-							) => setConfirmPassword(e.target.value)}
+							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+								setConfirmPassword(e.target.value)
+							}
 						/>
 					</Box>
 
 					<Box className="update-btn">
 						<Button
 							type="button"
-							title="Update Password"
+							title={isUpdating ? "Updating..." : "Update Password"}
 							handleClick={handleUpdatePassword}
+							disabled={isUpdating}
 							background="#ef4444"
 							color="white"
 							borderRadius="8px"
@@ -133,8 +169,7 @@ function Security() {
 						</Box>
 						<Box
 							className={`toggle-switch ${is2FAEnabled ? "active" : ""}`}
-							onClick={() => setIs2FAEnabled(!is2FAEnabled)}
-						>
+							onClick={() => setIs2FAEnabled(!is2FAEnabled)}>
 							<Box className="toggle-thumb" />
 						</Box>
 					</Box>
