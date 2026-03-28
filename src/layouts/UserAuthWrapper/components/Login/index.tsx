@@ -1,31 +1,42 @@
 "use client";
 import Link from "next/link";
-import { memo, type ReactNode, useMemo, useReducer } from "react";
+import { useRouter } from "next/navigation";
+import {
+	memo,
+	type ReactNode,
+	useContext,
+	useMemo,
+	useReducer,
+	useState,
+} from "react";
 import { FaLock, FaUser } from "react-icons/fa";
 import { GrSecure } from "react-icons/gr";
+import { toast } from "react-toastify";
 import { Box, Button, Input, Text } from "@/components";
+import { api } from "@/constants";
+import { AppContextProvider } from "@/hooks";
 import AlternativeSeparator from "@/layouts/AlternativeSeparator";
 import Header from "../Header";
 import { LoginStyled } from "./styled";
 
 interface LoginState {
-	username: string;
+	email: string;
 	password: string;
 }
 
 type LoginAction =
-	| { type: "SET_USERNAME"; payload: string }
+	| { type: "SET_EMAIL"; payload: string }
 	| { type: "SET_PASSWORD"; payload: string };
 
 const initialState: LoginState = {
-	username: "",
+	email: "",
 	password: "",
 };
 
 function loginReducer(state: LoginState, action: LoginAction): LoginState {
 	switch (action.type) {
-		case "SET_USERNAME":
-			return { ...state, username: action.payload };
+		case "SET_EMAIL":
+			return { ...state, email: action.payload };
 		case "SET_PASSWORD":
 			return { ...state, password: action.payload };
 		default:
@@ -35,6 +46,39 @@ function loginReducer(state: LoginState, action: LoginAction): LoginState {
 
 function Login() {
 	const [state, dispatch] = useReducer(loginReducer, initialState);
+	const [isLoading, setIsLoading] = useState(false);
+
+	const { env, reAuthenticateUserSession } = useContext(AppContextProvider);
+	const router = useRouter();
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+
+		if (!state.email || !state.password) {
+			toast.error("Please fill in all fields");
+			return;
+		}
+
+		setIsLoading(true);
+
+		try {
+			await api().post(`${env.MAIN_SERVICE_URL}/api/auth/login`, {
+				email: state.email,
+				password: state.password,
+			});
+
+			await reAuthenticateUserSession();
+			router.push("/dashboard");
+			router.refresh();
+		} catch (err: unknown) {
+			const message =
+				(err as { response?: { data?: { message?: string } } })?.response?.data
+					?.message ?? "Invalid username or password";
+			toast.error(message);
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
 	const renderedInputFields = useMemo(() => {
 		const inputs: {
@@ -42,17 +86,17 @@ function Login() {
 			elem: ReactNode;
 		}[] = [
 			{
-				label: "Username",
+				label: "Email",
 				elem: (
 					<section>
 						<FaUser />
 						<Input
-							type="text"
-							placeholder="Enter your username"
-							value={state.username}
+							type="email"
+							placeholder="Enter your email"
+							value={state.email}
 							onChange={(e) =>
 								dispatch({
-									type: "SET_USERNAME",
+									type: "SET_EMAIL",
 									payload: e.target.value,
 								})
 							}
@@ -83,20 +127,18 @@ function Login() {
 		return inputs.map((item, index) => {
 			return (
 				<Box key={index} className="form-field">
-					<label htmlFor={item.label.toLowerCase()}>
-						{item.label}
-					</label>
+					<label htmlFor={item.label.toLowerCase()}>{item.label}</label>
 					{item.elem}
 				</Box>
 			);
 		});
-	}, [state.username, state.password]);
+	}, [state.email, state.password]);
 
 	return (
 		<LoginStyled>
 			<Header title="Welcome Back" subtext="Sign in to your account" />
 
-			<form>{renderedInputFields}</form>
+			<form onSubmit={handleSubmit}>{renderedInputFields}</form>
 
 			<Box className="options">
 				<Box className="remember-me">
@@ -108,7 +150,12 @@ function Login() {
 				</Box>
 			</Box>
 
-			<Button title="Sign In" />
+			<Button
+				title={isLoading ? "Signing in..." : "Sign In"}
+				type="submit"
+				handleClick={handleSubmit}
+				disabled={isLoading}
+			/>
 
 			<AlternativeSeparator />
 
