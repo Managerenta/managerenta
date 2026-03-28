@@ -1,10 +1,5 @@
-import { Suspense } from "react";
-import { SignupWrapper } from "@/libs";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-	return (
-		<Suspense>
-			<SignupWrapper />
-		</Suspense>
-	);
+	redirect("/signup");
 }
