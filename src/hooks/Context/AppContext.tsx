@@ -11,9 +11,10 @@ import { api, type IEnv, verifyUserLogin } from "../../constants";
 interface IProps {
 	env: IEnv;
 	navHeight: string;
-	deleteAllCookies: () => void;
+	deleteAllCookies: () => Promise<boolean>;
 	isBrowser: boolean;
 	isUserLoggedIn: boolean;
+	userName: string;
 	reAuthenticateUserSession: () => Promise<void>;
 }
 
@@ -24,13 +25,16 @@ export default function AppContext({
 	children,
 	env: _env,
 	isUserSessionActive,
+	userName: _userName,
 }: {
 	children: React.ReactNode;
 	env: IEnv;
 	isUserSessionActive: boolean;
+	userName: string;
 }) {
 	const [_isUserLoggedIn, _setIsUserLoggedIn] =
 		useState<boolean>(isUserSessionActive);
+	const userName = useMemo(() => _userName, [_userName]);
 
 	const [navHeight] = useState<string>("70px");
 
@@ -43,8 +47,9 @@ export default function AppContext({
 	const deleteAllCookies = useCallback(async (): Promise<boolean> => {
 		try {
 			const url = "/api/logout";
-			const { status } = await api().delete(url);
+			const { status } = await api().post(url);
 			if (status !== 200) return false;
+			_setIsUserLoggedIn(false);
 			return true;
 		} catch {
 			return false;
@@ -52,7 +57,7 @@ export default function AppContext({
 	}, []);
 
 	const reAuthenticateUserSession = useCallback(async () => {
-		const url = `${env.MAIN_SERVICE_URL}/api/login/verify`;
+		const url = `${env.MAIN_SERVICE_URL}/api/auth/verify`;
 
 		const result = await verifyUserLogin({
 			url,
@@ -78,9 +83,9 @@ export default function AppContext({
 				deleteAllCookies,
 				isBrowser,
 				isUserLoggedIn,
+				userName,
 				reAuthenticateUserSession,
-			}}
-		>
+			}}>
 			{children}
 		</AppContextProvider.Provider>
 	);
