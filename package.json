@@ -21,7 +21,7 @@
 		"froala-editor": "^5.0.0",
 		"jose": "^6.2.2",
 		"motion": "^12.29.2",
-		"next": "16.1.6",
+		"next": "16.1.7",
 		"nextjs-toploader": "^3.9.17",
 		"react": "19.2.3",
 		"react-dom": "19.2.3",
