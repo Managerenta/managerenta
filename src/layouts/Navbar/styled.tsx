@@ -82,6 +82,8 @@ export const NavbarStyled = styled(Box)<{
 			align-items: center;
 			gap: 10px;
 			cursor: pointer;
+			position: relative;
+			user-select: none;
 
 			.avatar {
 				width: 36px;
@@ -94,12 +96,53 @@ export const NavbarStyled = styled(Box)<{
 				justify-content: center;
 				font-size: 13px;
 				font-weight: 600;
+				flex-shrink: 0;
 			}
 
 			.user-name {
 				font-size: 14px;
 				font-weight: 500;
 				color: var(--Black);
+			}
+
+			.chevron {
+				color: #64748b;
+				transition: transform 0.2s ease;
+				&.open {
+					transform: rotate(180deg);
+				}
+			}
+
+			.user-dropdown {
+				position: absolute;
+				top: calc(100% + 3px);
+				right: 0;
+				min-width: 140px;
+				background: #fff;
+				border: 1px solid #e2e8f0;
+				border-radius: 8px;
+				box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+				overflow: hidden;
+				z-index: 100;
+
+				.logout-btn {
+					width: 100%;
+					display: flex;
+					align-items: center;
+					gap: 8px;
+					padding: 10px 14px;
+					background: none;
+					border: none;
+					cursor: pointer;
+					font-size: 14px;
+					font-weight: 500;
+					color: #ef4444;
+					transition: background 0.15s ease;
+
+					&:hover {
+						background: #fef2f2;
+					}
+				}
 			}
 		}
 	}
