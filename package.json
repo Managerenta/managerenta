@@ -19,6 +19,7 @@
 		"embla-carousel": "^8.6.0",
 		"embla-carousel-react": "^8.6.0",
 		"froala-editor": "^5.0.0",
+		"jose": "^6.2.2",
 		"motion": "^12.29.2",
 		"next": "16.1.6",
 		"nextjs-toploader": "^3.9.17",
