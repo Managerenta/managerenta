@@ -12,12 +12,14 @@ interface IProps {
 	children: React.ReactNode;
 	env: IEnv;
 	isUserSessionActive: boolean;
+	userName: string;
 }
 
 export default function BodyWrapper({
 	children,
 	env,
 	isUserSessionActive,
+	userName,
 }: IProps) {
 	return (
 		<motion.div
@@ -38,7 +40,7 @@ export default function BodyWrapper({
 					refreshWhenHidden: false,
 				}}
 			>
-				<AppContext env={env} isUserSessionActive={isUserSessionActive}>
+				<AppContext env={env} isUserSessionActive={isUserSessionActive} userName={userName}>
 					<Main>{children}</Main>
 				</AppContext>
 			</SWRConfig>
