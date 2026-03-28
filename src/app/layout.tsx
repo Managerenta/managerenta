@@ -7,9 +7,10 @@ import {
 	// Ysabeau_Office,
 	Roboto,
 } from "next/font/google";
+import { decodeJwt } from "jose";
 import { cookies } from "next/headers";
 import { BodyWrapper } from "@/components";
-import { defaultEnvOptions, verifyUserLogin } from "@/constants";
+import { defaultEnvOptions } from "@/constants";
 
 const dm_sans = DM_Sans({
 	subsets: ["latin"],
@@ -58,12 +59,31 @@ export default async function RootLayout({
 	children: React.ReactNode;
 }>) {
 	const cookieStore = await cookies();
-	const cookieHeader = cookieStore.toString();
 
 	const env = defaultEnvOptions();
 
-	const url = `${env.MAIN_SERVICE_URL}/api/login/verify`;
-	const isUserSessionActive = await verifyUserLogin({ url, cookieHeader });
+	const accessToken = cookieStore.get("accessToken")?.value;
+	let isUserSessionActive = false;
+	let userName = "";
+
+	if (accessToken) {
+		try {
+			decodeJwt(accessToken);
+			isUserSessionActive = true;
+
+			const cookieHeader = cookieStore.toString();
+			const profileRes = await fetch(
+				`${env.MAIN_SERVICE_URL}/api/users/user-profile`,
+				{ headers: { Cookie: cookieHeader } },
+			);
+			if (profileRes.ok) {
+				const body = await profileRes.json();
+				userName = body?.data?.name ?? body?.name ?? "";
+			}
+		} catch {
+			isUserSessionActive = false;
+		}
+	}
 
 	// useReportWebVitals((metric) => {
 	// 	// console.log(metric);
@@ -76,7 +96,7 @@ export default async function RootLayout({
 				<BodyWrapper
 					env={env}
 					isUserSessionActive={isUserSessionActive}
-				>
+					userName={userName}>
 					{children}
 				</BodyWrapper>
 			</body>
