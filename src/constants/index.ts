@@ -1,4 +1,5 @@
 export { default as api } from "./api";
+export * from "./auth";
 export { default as base64BlobUrls } from "./base64BlobUrls";
 export { default as convertBlobToBase64 } from "./convertBlobToBase64";
 export * from "./defaultEnvOptions";
