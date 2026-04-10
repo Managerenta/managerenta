@@ -5,7 +5,7 @@ import { Box } from "@/components";
 export const TransactionHistoryStyled = styled(Box)`
 	background: white;
 	border-radius: 12px;
-	padding: 24px;
+	padding: 10px 5px;
 	border: 1px solid #f1f5f9;
 	display: flex;
 	flex-direction: column;
