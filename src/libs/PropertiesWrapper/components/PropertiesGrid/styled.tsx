@@ -6,7 +6,7 @@ export const PropertiesGridStyled = styled(Box)`
 	.grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 20px;
+		gap: 15px;
 	}
 
 	.property-card {
@@ -22,7 +22,7 @@ export const PropertiesGridStyled = styled(Box)`
 
 		.card-image {
 			width: 100%;
-			height: 180px;
+			height: 200px;
 			overflow: hidden;
 
 			.image-placeholder {
@@ -34,7 +34,7 @@ export const PropertiesGridStyled = styled(Box)`
 			img {
 				width: 100%;
 				height: 100%;
-				object-fit: cover;
+				object-fit: contain;
 			}
 		}
 
@@ -42,7 +42,7 @@ export const PropertiesGridStyled = styled(Box)`
 			padding: 16px;
 			display: flex;
 			flex-direction: column;
-			gap: 8px;
+			gap: 6px;
 
 			.card-name {
 				font-size: 16px;
@@ -51,9 +51,9 @@ export const PropertiesGridStyled = styled(Box)`
 			}
 
 			.card-address {
-				font-size: 13px;
+				font-size: 14px;
 				color: #64748b;
-				line-height: 1.4;
+				line-height: 1;
 			}
 
 			.type-badge {
@@ -129,16 +129,13 @@ export const PropertiesGridStyled = styled(Box)`
 			}
 
 			.card-revenue {
-				font-size: 18px;
+				font-size: 20px;
 				font-weight: 700;
 				color: var(--Black);
-				margin-top: 4px;
 			}
 
 			.card-footer {
 				border-top: 1px solid #f1f5f9;
-				padding-top: 12px;
-				margin-top: 4px;
 
 				button {
 					width: 100%;
@@ -147,7 +144,7 @@ export const PropertiesGridStyled = styled(Box)`
 					border: none;
 					color: #64748b;
 					font-size: 14px;
-					font-weight: 500;
+					font-weight: 600;
 					cursor: pointer;
 
 					&:hover {

@@ -1,9 +1,14 @@
 "use client";
 import { memo, useCallback, useMemo } from "react";
-// import { Image } from "@/components";
-import { Box, Button, Text } from "@/components";
-import { usePropertiesData, usePropertiesNavigation } from "@/hooks";
+import { Box, Button, Image, Text } from "@/components";
+import { usePropertiesNavigation } from "@/hooks";
+import type { IPropertyList } from "@/types";
 import { PropertiesGridStyled } from "./styled";
+
+interface IProps {
+	properties: IPropertyList[];
+	isLoading: boolean;
+}
 
 function getStatusColor(status: string): { bg: string; text: string } {
 	switch (status) {
@@ -18,27 +23,21 @@ function getStatusColor(status: string): { bg: string; text: string } {
 	}
 }
 
-function getTypeBadgeColor(type: string): { bg: string; text: string } {
-	switch (type) {
-		case "Apartment Building":
-			return { bg: "#dbeafe", text: "#2563eb" };
-		case "Duplex":
-			return { bg: "#fce7f3", text: "#db2777" };
-		case "Office Building":
-			return { bg: "#d1fae5", text: "#059669" };
-		case "Residential Estate":
-			return { bg: "#ede9fe", text: "#7c3aed" };
-		case "Bungalow":
-			return { bg: "#fef3c7", text: "#d97706" };
-		case "High-rise":
-			return { bg: "#e0f2fe", text: "#0284c7" };
-		default:
-			return { bg: "#f1f5f9", text: "#64748b" };
-	}
+function getTypeBadgeColors(type: string): { bg: string; text: string } {
+	const map: Record<string, { bg: string; text: string }> = {
+		Apartment: { bg: "#dbeafe", text: "#2563eb" },
+		Duplex: { bg: "#fce7f3", text: "#db2777" },
+		Studio: { bg: "#fce7f3", text: "#db2777" },
+		Commercial: { bg: "#d1fae5", text: "#059669" },
+		House: { bg: "#ede9fe", text: "#7c3aed" },
+		Bungalow: { bg: "#fef3c7", text: "#d97706" },
+		Land: { bg: "#fef3c7", text: "#d97706" },
+		"High-rise": { bg: "#e0f2fe", text: "#0284c7" },
+	};
+	return map[type] ?? { bg: "#f1f5f9", text: "#64748b" };
 }
 
-function PropertiesGrid() {
-	const { properties } = usePropertiesData();
+function PropertiesGrid({ properties, isLoading }: IProps) {
 	const { openPropertyDetail } = usePropertiesNavigation();
 
 	const handleViewDetails = useCallback(
@@ -49,37 +48,63 @@ function PropertiesGrid() {
 	);
 
 	const renderedProperties = useMemo(() => {
+		if (isLoading) {
+			return Array.from({ length: 6 }, (_, i) => (
+				<Box key={i} className="property-card skeleton" />
+			));
+		}
+
+		if (properties.length === 0) {
+			return (
+				<Box
+					className="empty-state"
+					style={{
+						color: "var(--Secondary-700)",
+						fontWeight: "600",
+					}}
+				>
+					<Text>
+						No properties found. Add your first property to get
+						started.
+					</Text>
+				</Box>
+			);
+		}
+
 		return properties.map(
 			({
 				id,
 				name,
 				address,
 				type,
-				// image,
 				totalUnits,
 				occupied,
 				vacant,
 				monthlyRevenue,
 				occupancyStatus,
+				image,
 			}) => {
-				const occupancyPercent = Math.round(
-					(occupied / totalUnits) * 100,
-				);
+				const occupancyPercent =
+					totalUnits > 0
+						? Math.round((occupied / totalUnits) * 100)
+						: 0;
 				const statusColors = getStatusColor(occupancyStatus);
-				const typeColors = getTypeBadgeColor(type);
+				const typeColors = getTypeBadgeColors(type);
 
 				return (
 					<Box key={id} className="property-card">
 						<Box className="card-image">
-							{/* TODO: Replace placeholder with Image when ready */}
-							{/* <Image
-								alt={name}
-								url={image}
-								width="100%"
-								height="180px"
-								aspectRatio={16 / 9}
-							/> */}
-							<Box className="image-placeholder" />
+							{image ? (
+								<Image
+									url={image}
+									alt={name}
+									width="100%"
+									height="100%"
+									style={{ objectFit: "cover" }}
+								/>
+							) : (
+								<Box className="image-placeholder" />
+							)}
 						</Box>
 
 						<Box className="card-body">
@@ -160,7 +185,7 @@ function PropertiesGrid() {
 				);
 			},
 		);
-	}, [properties, handleViewDetails]);
+	}, [properties, isLoading, handleViewDetails]);
 
 	return (
 		<PropertiesGridStyled>
