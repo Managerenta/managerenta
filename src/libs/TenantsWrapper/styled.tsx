@@ -7,7 +7,7 @@ export const TenantsWrapperStyled = styled(Box)`
 	flex-direction: column;
 	gap: 24px;
 	width: 100%;
-	padding: 20px;
+	padding: 10px 5px;
 	background: #f8fafc;
 
 	.pagination-footer {
