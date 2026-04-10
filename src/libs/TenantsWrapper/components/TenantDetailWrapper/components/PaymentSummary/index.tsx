@@ -17,6 +17,8 @@ function getBlockColor(status: string): string {
 			return "#f59e0b";
 		case "overdue":
 			return "#ef4444";
+		case "upcoming":
+			return "#e2e8f0";
 		default:
 			return "#e2e8f0";
 	}
@@ -33,12 +35,14 @@ function PaymentSummary({ tenantDetail, paymentHistory }: IProps) {
 	} = tenantDetail;
 
 	const renderedBlocks = useMemo(() => {
-		return paymentHistory.map(({ id, status }) => (
-			<Box
-				key={id}
-				className="history-block"
-				style={{ background: getBlockColor(status) }}
-			/>
+		return paymentHistory.map(({ id, month, status }) => (
+			<Box key={id} className="history-block-wrap">
+				<Box
+					className={`history-block ${status === "upcoming" ? "upcoming" : ""}`}
+					style={{ background: getBlockColor(status) }}
+				/>
+				<Text className="block-month">{month}</Text>
+			</Box>
 		));
 	}, [paymentHistory]);
 
@@ -97,6 +101,16 @@ function PaymentSummary({ tenantDetail, paymentHistory }: IProps) {
 							style={{ background: "#ef4444" }}
 						/>
 						<Text>Overdue</Text>
+					</Box>
+					<Box className="legend-item">
+						<Box
+							className="legend-dot"
+							style={{
+								background: "#e2e8f0",
+								border: "1px solid #cbd5e1",
+							}}
+						/>
+						<Text>Upcoming</Text>
 					</Box>
 				</Box>
 			</Box>
