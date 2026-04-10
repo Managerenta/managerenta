@@ -1,91 +1,107 @@
 "use client";
-import { useMemo } from "react";
+import { useContext, useMemo } from "react";
 import { FiAlertCircle, FiHome, FiLayers, FiUsers } from "react-icons/fi";
+import useSWR from "swr";
+import { api } from "@/constants";
 import type { IPropertyDetail, IPropertyUnit, ITopTenant } from "@/types";
+import { AppContextProvider } from "../Context";
 
-export default function usePropertyDetailData(propertyId: string | null) {
+interface IRawUnit {
+	_id: string;
+	name: string;
+	status: "Occupied" | "Vacant";
+	tenant?: { _id: string; name: string; avatar?: string };
+	rent: number;
+	dueDate?: string;
+	paymentStatus?: "Paid" | "Due Soon" | "Overdue";
+	vacantDays?: number;
+}
+
+interface IRawPropertyDetail {
+	_id: string;
+	name: string;
+	address: string;
+	type: string;
+	totalUnits: number;
+	occupied: number;
+	monthlyRent: number;
+	image?: string;
+	createdAt: string;
+	units?: IRawUnit[];
+	topTenants?: { _id: string; name: string; totalPaid: number }[];
+}
+
+function formatDate(iso: string): string {
+	return new Date(iso).toLocaleDateString("en-GB");
+}
+
+export default function usePropertyDetail(propertyId: string | null) {
+	const { env } = useContext(AppContextProvider);
+
+	const { data, isLoading, mutate } = useSWR<IRawPropertyDetail>(
+		propertyId
+			? `${env.MAIN_SERVICE_URL}/api/properties/${propertyId}`
+			: null,
+		(u: string) =>
+			api()
+				.get(u)
+				.then((r) => r.data?.data),
+		{ revalidateOnMount: true },
+	);
+
 	const propertyDetail = useMemo<IPropertyDetail | null>(() => {
-		if (!propertyId) return null;
+		if (!data) return null;
+		const occupied =
+			data.units && data.units.length > 0
+				? data.units.filter((u) => u.status === "Occupied").length
+				: (data.occupied ?? 0);
+		const vacant = data.totalUnits - occupied;
+		const occupancyRate =
+			data.totalUnits > 0
+				? Math.round((occupied / data.totalUnits) * 100)
+				: 0;
+		const unitRentTotal =
+			data.units && data.units.length > 0
+				? data.units.reduce((sum, u) => sum + u.rent, 0)
+				: data.monthlyRent * data.totalUnits;
 
 		return {
-			id: "prop-001",
-			name: "Sunrise Apartments",
-			address: "15 Admiralty Way, Lekki Phase 1, Lagos",
-			type: "Apartment Building",
-			dateAdded: "15/03/2024",
-			monthlyRentTotal: "₦17,280,000",
-			totalUnits: 24,
-			occupied: 22,
-			vacant: 2,
-			occupancyRate: 92,
+			id: data._id,
+			name: data.name,
+			address: data.address,
+			type: data.type,
+			dateAdded: formatDate(data.createdAt),
+			monthlyRent: data.monthlyRent,
+			monthlyRentTotal: `₦${unitRentTotal.toLocaleString("en-NG")}`,
+			totalUnits: data.totalUnits,
+			occupied,
+			vacant,
+			occupancyRate,
 			units: [],
 		};
-	}, [propertyId]);
+	}, [data]);
 
 	const units = useMemo<IPropertyUnit[]>(() => {
-		if (!propertyId) return [];
-
-		return [
-			{
-				id: "unit-001",
-				name: "Block A, Flat 1",
-				status: "Occupied",
-				tenantName: "Kemi Ajayi",
-				tenantAvatar: "/images/tenants/kemi.webp",
-				rent: "₦720,000/month",
-				dueDate: "Due: 01/01/2025",
-				paymentStatus: "Paid",
-			},
-			{
-				id: "unit-002",
-				name: "Block A, Flat 2",
-				status: "Occupied",
-				tenantName: "David Okonkwo",
-				tenantAvatar: "/images/tenants/david.webp",
-				rent: "₦720,000/month",
-				dueDate: "Due: 28/12/2024",
-				paymentStatus: "Due Soon",
-			},
-			{
-				id: "unit-003",
-				name: "Block A, Flat 3",
-				status: "Occupied",
-				tenantName: "Funmi Adebayo",
-				tenantAvatar: "/images/tenants/funmi.webp",
-				rent: "₦720,000/month",
-				dueDate: "Due: 10/12/2024",
-				paymentStatus: "Overdue",
-			},
-			{
-				id: "unit-004",
-				name: "Block B, Flat 1",
-				status: "Vacant",
-				rent: "₦720,000/month",
-				vacantDays: 15,
-			},
-			{
-				id: "unit-005",
-				name: "Block B, Flat 2",
-				status: "Vacant",
-				rent: "₦720,000/month",
-				vacantDays: 8,
-			},
-			{
-				id: "unit-006",
-				name: "Block A, Flat 4",
-				status: "Occupied",
-				tenantName: "Sarah Ibrahim",
-				tenantAvatar: "/images/tenants/sarah.webp",
-				rent: "₦720,000/month",
-				dueDate: "Due: 15/01/2025",
-				paymentStatus: "Paid",
-			},
-		];
-	}, [propertyId]);
+		if (!data?.units) return [];
+		return data.units.map((u) => ({
+			id: u._id,
+			name: u.name,
+			status: u.status,
+			tenantId: u.tenant?._id,
+			tenantName: u.tenant?.name,
+			tenantAvatar: u.tenant?.avatar,
+			rent: `₦${u.rent.toLocaleString("en-NG")}/month`,
+			rentAmount: u.rent,
+			dueDate: u.dueDate
+				? `Due: ${new Date(u.dueDate).toLocaleDateString("en-GB")}`
+				: undefined,
+			paymentStatus: u.paymentStatus,
+			vacantDays: u.vacantDays,
+		}));
+	}, [data]);
 
 	const detailStats = useMemo(() => {
 		if (!propertyDetail) return [];
-
 		return [
 			{
 				id: "stat-001",
@@ -94,7 +110,7 @@ export default function usePropertyDetailData(propertyId: string | null) {
 				subtext: "",
 				subtextColor: "#64748b",
 				icon: <FiHome size={18} />,
-				iconBg: "#dbeafe",
+				iconBg: "#9cc1f1",
 			},
 			{
 				id: "stat-002",
@@ -103,7 +119,7 @@ export default function usePropertyDetailData(propertyId: string | null) {
 				subtext: `${propertyDetail.occupancyRate}% occupied`,
 				subtextColor: "#16a34a",
 				icon: <FiUsers size={18} />,
-				iconBg: "#d1fae5",
+				iconBg: "#a5f2ca",
 			},
 			{
 				id: "stat-003",
@@ -112,7 +128,7 @@ export default function usePropertyDetailData(propertyId: string | null) {
 				subtext: `${100 - propertyDetail.occupancyRate}% vacant`,
 				subtextColor: "#ef4444",
 				icon: <FiAlertCircle size={18} />,
-				iconBg: "#fee2e2",
+				iconBg: "#f19696",
 			},
 			{
 				id: "stat-004",
@@ -121,23 +137,26 @@ export default function usePropertyDetailData(propertyId: string | null) {
 				subtext: "",
 				subtextColor: "#64748b",
 				icon: <FiLayers size={18} />,
-				iconBg: "#d1fae5",
+				iconBg: "#91eebe",
 			},
 		];
 	}, [propertyDetail]);
 
 	const topTenants = useMemo<ITopTenant[]>(() => {
-		return [
-			{ id: "tt-001", name: "Kemi Ajayi", amount: "₦720,000" },
-			{ id: "tt-002", name: "David Okonkwo", amount: "₦720,000" },
-			{ id: "tt-003", name: "Sarah Ibrahim", amount: "₦720,000" },
-		];
-	}, []);
+		if (!data?.topTenants) return [];
+		return data.topTenants.map((t) => ({
+			id: t._id,
+			name: t.name,
+			amount: `₦${t.totalPaid.toLocaleString("en-NG")}`,
+		}));
+	}, [data]);
 
 	return {
 		propertyDetail,
 		units,
 		detailStats,
 		topTenants,
+		isLoading,
+		mutate,
 	};
 }
