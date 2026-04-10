@@ -16,9 +16,9 @@ const GlobalStyle = createGlobalStyle`
 
 
         --Secondary-100: #525252;
-        /* --border-1: #a2a2a2; */
+        --border-1: #a2a2a2;
 
-        /* --Off-White: #f1f5f8;
+        --Off-White: #f1f5f8;
         --Red: red;
         --Green: green;
         --Primary-Blue-main: #2F80ED;
@@ -38,7 +38,7 @@ const GlobalStyle = createGlobalStyle`
         --Secondary-600: #2C2C30;
         --Secondary-700: #161618;
         --Secondary-800: #111113;
-        --Secondary-900: #020408; */
+        --Secondary-900: #020408;
 
         --Success-700: #027a48;
         --Error-600: #d92d20;
