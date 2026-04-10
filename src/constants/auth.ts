@@ -4,7 +4,10 @@ import defaultEnvOptions from "./defaultEnvOptions";
 const getBaseUrl = () => defaultEnvOptions().MAIN_SERVICE_URL;
 
 export async function loginUser(email: string, password: string) {
-	return await api().post(`${getBaseUrl()}/api/auth/login`, { email, password });
+	return await api().post(`${getBaseUrl()}/api/auth/login`, {
+		email,
+		password,
+	});
 }
 
 export async function signupUser(payload: {

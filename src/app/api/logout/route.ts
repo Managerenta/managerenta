@@ -6,10 +6,13 @@ export async function POST() {
 	const cookieHeader = cookieStore.toString();
 
 	try {
-		await fetch(`${process.env.NEXT_PUBLIC_MAIN_SERVICE_URL}/api/auth/logout`, {
-			method: "POST",
-			headers: { Cookie: cookieHeader },
-		});
+		await fetch(
+			`${process.env.NEXT_PUBLIC_MAIN_SERVICE_URL}/api/auth/logout`,
+			{
+				method: "POST",
+				headers: { Cookie: cookieHeader },
+			},
+		);
 	} catch {
 		// still clear local cookies even if backend call fails
 	}

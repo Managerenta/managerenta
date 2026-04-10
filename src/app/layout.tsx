@@ -1,4 +1,5 @@
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { decodeJwt } from "jose";
 import {
 	DM_Sans,
 	// Iceland,
@@ -7,7 +8,6 @@ import {
 	// Ysabeau_Office,
 	Roboto,
 } from "next/font/google";
-import { decodeJwt } from "jose";
 import { cookies } from "next/headers";
 import { BodyWrapper } from "@/components";
 import { defaultEnvOptions } from "@/constants";
@@ -96,7 +96,8 @@ export default async function RootLayout({
 				<BodyWrapper
 					env={env}
 					isUserSessionActive={isUserSessionActive}
-					userName={userName}>
+					userName={userName}
+				>
 					{children}
 				</BodyWrapper>
 			</body>

@@ -40,7 +40,11 @@ export default function BodyWrapper({
 					refreshWhenHidden: false,
 				}}
 			>
-				<AppContext env={env} isUserSessionActive={isUserSessionActive} userName={userName}>
+				<AppContext
+					env={env}
+					isUserSessionActive={isUserSessionActive}
+					userName={userName}
+				>
 					<Main>{children}</Main>
 				</AppContext>
 			</SWRConfig>
