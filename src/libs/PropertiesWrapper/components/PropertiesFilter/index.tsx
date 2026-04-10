@@ -5,7 +5,23 @@ import { Box, Button, Input } from "@/components";
 import { usePropertiesData } from "@/hooks";
 import { PropertiesFilterStyled } from "./styled";
 
-function PropertiesFilter() {
+interface IProps {
+	search: string;
+	onSearchChange: (value: string) => void;
+	filterType: string;
+	onFilterChange: (value: string) => void;
+	sortBy: string;
+	onSortChange: (value: string) => void;
+}
+
+function PropertiesFilter({
+	search,
+	onSearchChange,
+	filterType,
+	onFilterChange,
+	sortBy,
+	onSortChange,
+}: IProps) {
 	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 	const { filterOptions, sortOptions } = usePropertiesData();
 
@@ -28,18 +44,31 @@ function PropertiesFilter() {
 	return (
 		<PropertiesFilterStyled>
 			<Box className="left-filters">
-				<select className="filter-dropdown" defaultValue="all">
+				<select
+					className="filter-dropdown"
+					value={filterType}
+					onChange={(e) => onFilterChange(e.target.value)}
+				>
 					{renderedFilterOptions}
 				</select>
 
 				<Box className="search-bar">
 					<FiSearch size={16} />
-					<Input type="text" placeholder="Search properties..." />
+					<Input
+						type="text"
+						placeholder="Search properties..."
+						value={search}
+						onChange={(e) => onSearchChange(e.target.value)}
+					/>
 				</Box>
 			</Box>
 
 			<Box className="right-filters">
-				<select className="sort-dropdown" defaultValue="name">
+				<select
+					className="sort-dropdown"
+					value={sortBy}
+					onChange={(e) => onSortChange(e.target.value)}
+				>
 					{renderedSortOptions}
 				</select>
 
