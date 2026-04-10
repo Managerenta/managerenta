@@ -1,9 +1,15 @@
 "use client";
 import { memo, useCallback, useMemo } from "react";
 import { FiCalendar, FiMail, FiPhone } from "react-icons/fi";
-import { Box, Button, Text } from "@/components";
-import { useTenantNavigation, useTenants } from "@/hooks";
+import { Box, Button, Image, Text } from "@/components";
+import { useTenantNavigation } from "@/hooks";
+import type { ITenantListItem } from "@/types";
 import { TenantsGridStyled } from "./styled";
+
+interface IProps {
+	tenants: ITenantListItem[];
+	isLoading: boolean;
+}
 
 function getPaymentStatusStyle(status: string): { bg: string; text: string } {
 	switch (status) {
@@ -18,8 +24,7 @@ function getPaymentStatusStyle(status: string): { bg: string; text: string } {
 	}
 }
 
-function TenantsGrid() {
-	const { tenants } = useTenants();
+function TenantsGrid({ tenants, isLoading }: IProps) {
 	const { openTenantDetail } = useTenantNavigation();
 
 	const handleViewTenant = useCallback(
@@ -30,11 +35,29 @@ function TenantsGrid() {
 	);
 
 	const renderedTenants = useMemo(() => {
+		if (isLoading) {
+			return Array.from({ length: 6 }, (_, i) => (
+				<Box key={i} className="tenant-card skeleton" />
+			));
+		}
+		if (tenants.length === 0) {
+			return (
+				<Box
+					className="empty-state"
+					style={{
+						color: "var(--Secondary-700)",
+						fontWeight: "600",
+					}}
+				>
+					<Text>No tenants found.</Text>
+				</Box>
+			);
+		}
 		return tenants.map(
 			({
 				id,
 				name,
-				// avatar,
+				avatar,
 				property,
 				unit,
 				monthlyRent,
@@ -50,8 +73,21 @@ function TenantsGrid() {
 					<Box key={id} className="tenant-card">
 						<Box className="card-top">
 							<Box className="tenant-info">
-								{/* TODO: Replace with Image when avatars ready */}
-								<Box className="avatar-placeholder" />
+								{avatar ? (
+									<Image
+										url={avatar}
+										alt={name}
+										width="60px"
+										height="60px"
+										borderRadius="50%"
+										style={{
+											objectFit: "cover",
+											flexShrink: 0,
+										}}
+									/>
+								) : (
+									<Box className="avatar-placeholder" />
+								)}
 								<Box className="info-text">
 									<Text className="tenant-name">{name}</Text>
 									<Text className="tenant-property">
@@ -72,15 +108,15 @@ function TenantsGrid() {
 
 						<Box className="card-details">
 							<Box className="detail-row">
-								<FiPhone size={13} />
+								<FiPhone size={18} />
 								<Text className="detail-value">{phone}</Text>
 							</Box>
 							<Box className="detail-row">
-								<FiMail size={13} />
+								<FiMail size={18} />
 								<Text className="detail-value">{email}</Text>
 							</Box>
 							<Box className="detail-row">
-								<FiCalendar size={13} />
+								<FiCalendar size={18} />
 								<Text className="detail-value">
 									Move-in: {moveInDate}
 								</Text>
@@ -108,6 +144,7 @@ function TenantsGrid() {
 							<Button
 								type="button"
 								title="View Tenant"
+								background="inherit"
 								handleClick={() => handleViewTenant(id)}
 							/>
 						</Box>
@@ -115,7 +152,7 @@ function TenantsGrid() {
 				);
 			},
 		);
-	}, [tenants, handleViewTenant]);
+	}, [tenants, isLoading, handleViewTenant]);
 
 	return (
 		<TenantsGridStyled>

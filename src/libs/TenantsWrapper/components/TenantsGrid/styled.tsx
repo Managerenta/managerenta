@@ -16,7 +16,7 @@ export const TenantsGridStyled = styled(Box)`
 		padding: 20px;
 		display: flex;
 		flex-direction: column;
-		gap: 16px;
+		gap: 14px;
 		transition: box-shadow 0.2s;
 
 		&:hover {
@@ -27,7 +27,6 @@ export const TenantsGridStyled = styled(Box)`
 			display: flex;
 			align-items: flex-start;
 			justify-content: space-between;
-			gap: 12px;
 
 			.tenant-info {
 				display: flex;
@@ -35,8 +34,8 @@ export const TenantsGridStyled = styled(Box)`
 				gap: 12px;
 
 				.avatar-placeholder {
-					width: 44px;
-					height: 44px;
+					width: 60px;
+					height: 60px;
 					border-radius: 50%;
 					background: linear-gradient(135deg, #94a3b8, #cbd5e1);
 					flex-shrink: 0;
@@ -45,16 +44,15 @@ export const TenantsGridStyled = styled(Box)`
 				.info-text {
 					display: flex;
 					flex-direction: column;
-					gap: 2px;
 
 					.tenant-name {
-						font-size: 16px;
+						font-size: 17px;
 						font-weight: 700;
 						color: var(--Black);
 					}
 
 					.tenant-property {
-						font-size: 13px;
+						font-size: 14px;
 						color: #64748b;
 					}
 				}
@@ -73,7 +71,7 @@ export const TenantsGridStyled = styled(Box)`
 		.card-details {
 			display: flex;
 			flex-direction: column;
-			gap: 8px;
+			gap: 5px;
 			padding: 12px 0;
 			border-top: 1px solid #f1f5f9;
 			border-bottom: 1px solid #f1f5f9;
@@ -89,8 +87,9 @@ export const TenantsGridStyled = styled(Box)`
 				}
 
 				.detail-value {
-					font-size: 13px;
+					font-size: 14px;
 					color: #64748b;
+					letter-spacing: 0.5px;
 				}
 			}
 		}
@@ -98,7 +97,6 @@ export const TenantsGridStyled = styled(Box)`
 		.card-footer {
 			display: flex;
 			justify-content: space-between;
-			gap: 12px;
 
 			.rent-info,
 			.lease-info {
@@ -108,7 +106,7 @@ export const TenantsGridStyled = styled(Box)`
 
 				.rent-label,
 				.lease-label {
-					font-size: 12px;
+					font-size: 14px;
 					color: #94a3b8;
 				}
 
@@ -128,7 +126,6 @@ export const TenantsGridStyled = styled(Box)`
 
 		.card-action {
 			border-top: 1px solid #f1f5f9;
-			padding-top: 12px;
 
 			button {
 				width: 100%;
@@ -136,8 +133,8 @@ export const TenantsGridStyled = styled(Box)`
 				background: none;
 				border: none;
 				color: #64748b;
-				font-size: 14px;
-				font-weight: 500;
+				font-size: 16px;
+				font-weight: 600;
 				cursor: pointer;
 
 				&:hover {
