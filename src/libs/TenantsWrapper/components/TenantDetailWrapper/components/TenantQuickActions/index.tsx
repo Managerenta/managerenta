@@ -11,7 +11,11 @@ interface QuickActionItem {
 	icon: React.ReactNode;
 }
 
-function TenantQuickActions() {
+interface IProps {
+	tenantId: string;
+}
+
+function TenantQuickActions({ tenantId }: IProps) {
 	const { openAddTransaction } = useAddTransactionNavigation();
 
 	const actions = useMemo((): QuickActionItem[] => {
@@ -63,7 +67,7 @@ function TenantQuickActions() {
 							color="white"
 							borderRadius="8px"
 							width="100%"
-							handleClick={openAddTransaction}
+							handleClick={() => openAddTransaction(tenantId)}
 						/>
 					</Box>
 				);
@@ -76,7 +80,7 @@ function TenantQuickActions() {
 				</Box>
 			);
 		});
-	}, [actions, openAddTransaction]);
+	}, [actions, openAddTransaction, tenantId]);
 
 	return (
 		<TenantQuickActionsStyled>
