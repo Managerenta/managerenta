@@ -82,12 +82,32 @@ export const PaymentSummaryStyled = styled(Box)`
 		.history-blocks {
 			display: flex;
 			gap: 4px;
-			flex-wrap: wrap;
+			flex-wrap: nowrap;
+			overflow-x: auto;
 
-			.history-block {
-				width: 28px;
-				height: 12px;
-				border-radius: 3px;
+			.history-block-wrap {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 4px;
+				flex-shrink: 0;
+
+				.history-block {
+					width: 28px;
+					height: 12px;
+					border-radius: 3px;
+
+					&.upcoming {
+						border: 1px dashed #cbd5e1;
+						background: #f8fafc !important;
+					}
+				}
+
+				.block-month {
+					font-size: 10px;
+					color: #94a3b8;
+					white-space: nowrap;
+				}
 			}
 		}
 
@@ -151,9 +171,14 @@ export const PaymentSummaryStyled = styled(Box)`
 
 		.history-section {
 			.history-blocks {
-				.history-block {
-					width: 22px;
-					height: 10px;
+				.history-block-wrap {
+					.history-block {
+						width: 20px;
+						height: 10px;
+					}
+					.block-month {
+						font-size: 9px;
+					}
 				}
 			}
 		}
