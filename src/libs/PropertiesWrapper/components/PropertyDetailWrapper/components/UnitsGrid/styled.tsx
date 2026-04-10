@@ -5,19 +5,18 @@ import { Box } from "@/components";
 export const UnitsGridStyled = styled(Box)`
 	display: flex;
 	flex-direction: column;
-	gap: 20px;
+	gap: 15px;
 
 	.units-header {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		flex-wrap: wrap;
-		gap: 16px;
+		gap: 10px;
 
 		.units-title-row {
 			display: flex;
 			align-items: center;
-			gap: 10px;
 
 			.units-title {
 				font-size: 20px;
@@ -90,116 +89,112 @@ export const UnitsGridStyled = styled(Box)`
 	.units-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 16px;
-	}
+		gap: 15px;
 
-	.unit-card {
-		background: white;
-		border-radius: 12px;
-		padding: 20px;
-		border: 1px solid #f1f5f9;
-		display: flex;
-		flex-direction: column;
-		gap: 10px;
-
-		.unit-name {
-			font-size: 16px;
-			font-weight: 700;
-			color: var(--Black);
-		}
-
-		.status-badge {
-			display: inline-flex;
-			align-self: flex-start;
-			padding: 4px 10px;
-			border-radius: 6px;
-			font-size: 12px;
-			font-weight: 600;
-		}
-
-		.tenant-row {
+		.unit-card {
+			background: white;
+			border-radius: 12px;
+			padding: 15px 20px;
+			border: 1px solid #f1f5f9;
 			display: flex;
-			align-items: center;
-			gap: 8px;
+			flex-direction: column;
+			gap: 10px;
 
-			.avatar-placeholder {
-				width: 28px;
-				height: 28px;
-				border-radius: 50%;
-				background: #e2e8f0;
-				flex-shrink: 0;
-			}
-
-			img {
-				width: 28px;
-				height: 28px;
-				object-fit: cover;
-				border-radius: 50%;
-			}
-
-			.tenant-name {
-				font-size: 14px;
-				font-weight: 500;
+			.unit-name {
+				font-size: 16px;
+				font-weight: 700;
 				color: var(--Black);
 			}
-		}
 
-		.unit-rent {
-			font-size: 16px;
-			font-weight: 700;
-			color: var(--Black);
-		}
-
-		.due-date {
-			font-size: 13px;
-			color: #64748b;
-		}
-
-		.payment-status {
-			display: flex;
-			align-items: center;
-			gap: 6px;
-
-			.payment-dot {
-				width: 8px;
-				height: 8px;
-				border-radius: 50%;
+			.status-badge {
+				display: inline-flex;
+				align-self: flex-start;
+				padding: 4px 10px;
+				border-radius: 6px;
+				font-size: 12px;
+				font-weight: 600;
 			}
-		}
 
-		.vacant-info {
-			font-size: 13px;
-			color: #64748b;
-		}
+			.tenant-row {
+				display: flex;
+				align-items: center;
+				gap: 5px;
 
-		.expected-rent {
-			font-size: 13px;
-			color: #94a3b8;
-		}
+				img {
+					width: 38px;
+					height: 38px;
+					object-fit: cover;
+					border-radius: 50%;
+				}
 
-		.unit-actions {
-			display: flex;
-			gap: 8px;
-			margin-top: 6px;
-
-			.view-tenant-btn,
-			.record-btn {
-				flex: 1;
-
-				button {
-					width: 100%;
-					font-size: 13px;
-					padding: 8px 12px;
+				.tenant-name {
+					font-size: 15px;
+					font-weight: 600;
+					color: var(--Secondary-700);
 				}
 			}
 
-			.add-tenant-btn {
-				width: 100%;
+			.unit-rent {
+				font-size: 16px;
+				font-weight: 700;
+				color: var(--Black);
+			}
 
-				button {
+			.due-date {
+				font-size: 14px;
+				font-weight: 500;
+				color: #94a3b8;
+			}
+
+			.payment-status {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+
+				.payment-dot {
+					width: 8px;
+					height: 8px;
+					border-radius: 50%;
+				}
+			}
+
+			.vacant-info {
+				font-size: 14px;
+				font-weight: 500;
+				color: #94a3b8;
+			}
+
+			.expected-rent {
+				font-size: 14px;
+				font-weight: 500;
+				color: #94a3b8;
+			}
+
+			.unit-actions {
+				display: flex;
+				gap: 8px;
+
+				.view-tenant-btn,
+				.record-btn {
+					flex: 1;
+
+					button {
+						width: 100%;
+						font-size: 14px;
+						font-weight: 500;
+						padding: 5px 10px;
+					}
+				}
+
+				.add-tenant-btn {
 					width: 100%;
-					font-size: 13px;
-					padding: 10px 12px;
+
+					button {
+						width: 100%;
+						font-size: 14px;
+						font-weight: 500;
+						padding: 5px 10px;
+					}
 				}
 			}
 		}

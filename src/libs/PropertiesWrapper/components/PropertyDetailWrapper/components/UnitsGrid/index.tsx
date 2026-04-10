@@ -1,13 +1,14 @@
 "use client";
-import { usePathname, useSearchParams } from "next/navigation";
 import { memo, useCallback, useMemo, useState } from "react";
-import { Box, Button, Text } from "@/components";
+import { Box, Button, Image, Text } from "@/components";
+import { useTenantNavigation } from "@/hooks";
 import type { IPropertyUnit } from "@/types";
 import { UnitsGridStyled } from "./styled";
 
 interface IProps {
 	units: IPropertyUnit[];
 	totalCount: number;
+	onAddTenant: (unit: IPropertyUnit) => void;
 }
 
 function getPaymentStatusColor(status: string): { bg: string; text: string } {
@@ -23,25 +24,15 @@ function getPaymentStatusColor(status: string): { bg: string; text: string } {
 	}
 }
 
-function UnitsGrid({ units, totalCount }: IProps) {
+function UnitsGrid({ units, totalCount, onAddTenant }: IProps) {
 	const [activeFilter, setActiveFilter] = useState<string>("all");
-	const pathname = usePathname();
-	const searchParams = useSearchParams();
+	const { openTenantDetail } = useTenantNavigation();
 
 	const handleViewTenant = useCallback(
 		(tenantId: string) => {
-			const newSearchParams = new URLSearchParams(
-				searchParams.toString(),
-			);
-			newSearchParams.set("tenantId", tenantId);
-
-			window.history.replaceState(
-				{},
-				"",
-				`${pathname}?${newSearchParams.toString()}`,
-			);
+			openTenantDetail(tenantId);
 		},
-		[pathname, searchParams],
+		[openTenantDetail],
 	);
 
 	const filterTabs = useMemo(() => {
@@ -82,9 +73,11 @@ function UnitsGrid({ units, totalCount }: IProps) {
 				id,
 				name,
 				status,
+				tenantId,
 				tenantName,
-				// tenantAvatar,
+				tenantAvatar,
 				rent,
+				rentAmount,
 				dueDate,
 				paymentStatus,
 				vacantDays,
@@ -110,8 +103,21 @@ function UnitsGrid({ units, totalCount }: IProps) {
 
 						{isOccupied && tenantName && (
 							<Box className="tenant-row">
-								{/* TODO: Replace placeholder with Image when avatars are ready */}
-								<Box className="avatar-placeholder" />
+								{tenantAvatar ? (
+									<Image
+										url={tenantAvatar}
+										alt={tenantName}
+										width="38px"
+										height="38px"
+										borderRadius="50%"
+										style={{
+											objectFit: "cover",
+											flexShrink: 0,
+										}}
+									/>
+								) : (
+									<Box className="avatar-placeholder" />
+								)}
 								<Text className="tenant-name">
 									{tenantName}
 								</Text>
@@ -162,7 +168,8 @@ function UnitsGrid({ units, totalCount }: IProps) {
 											color="white"
 											borderRadius="8px"
 											handleClick={() =>
-												handleViewTenant(id)
+												tenantId &&
+												handleViewTenant(tenantId)
 											}
 										/>
 									</Box>
@@ -191,6 +198,18 @@ function UnitsGrid({ units, totalCount }: IProps) {
 												<span>+ Add Tenant</span>
 											</Box>
 										}
+										handleClick={() =>
+											onAddTenant({
+												id,
+												name,
+												status,
+												rent,
+												rentAmount,
+												dueDate,
+												paymentStatus,
+												vacantDays,
+											})
+										}
 										background="var(--Main-Blue)"
 										color="white"
 										borderRadius="8px"
@@ -203,7 +222,7 @@ function UnitsGrid({ units, totalCount }: IProps) {
 				);
 			},
 		);
-	}, [filteredUnits, handleViewTenant]);
+	}, [filteredUnits, handleViewTenant, onAddTenant]);
 
 	return (
 		<UnitsGridStyled>
