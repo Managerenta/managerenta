@@ -54,7 +54,8 @@ function Navbar({ background, navHeight }: IProps) {
 		if (dropdownOpen) {
 			document.addEventListener("mousedown", handleClickOutside);
 		}
-		return () => document.removeEventListener("mousedown", handleClickOutside);
+		return () =>
+			document.removeEventListener("mousedown", handleClickOutside);
 	}, [dropdownOpen]);
 
 	return (
@@ -81,7 +82,8 @@ function Navbar({ background, navHeight }: IProps) {
 				<Box
 					className="user-profile"
 					ref={dropdownRef}
-					onClick={() => setDropdownOpen((prev) => !prev)}>
+					onClick={() => setDropdownOpen((prev) => !prev)}
+				>
 					<Box className="avatar">{initials}</Box>
 					<Text className="user-name">{userName || "User"}</Text>
 					<FiChevronDown
@@ -94,7 +96,8 @@ function Navbar({ background, navHeight }: IProps) {
 							<button
 								type="button"
 								className="logout-btn"
-								onClick={handleLogout}>
+								onClick={handleLogout}
+							>
 								<FiLogOut size={15} />
 								<span>Logout</span>
 							</button>
