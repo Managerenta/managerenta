@@ -1,159 +1,175 @@
 "use client";
-import { useMemo } from "react";
+import { useContext, useMemo } from "react";
 import { BsCurrencyDollar } from "react-icons/bs";
 import { FiHome, FiLayers, FiTrendingUp } from "react-icons/fi";
+import useSWR from "swr";
+import { api } from "@/constants";
 import type { IPropertyList, IPropertyStatItem } from "@/types";
+import { AppContextProvider } from "../Context";
 
-export default function usePropertiesData() {
+interface IRawProperty {
+	_id: string;
+	name: string;
+	address: string;
+	type: string;
+	totalUnits: number;
+	occupied?: number;
+	monthlyRent: number;
+	image?: string;
+	createdAt: string;
+}
+
+function computeOccupancyStatus(
+	occupied: number,
+	totalUnits: number,
+): "Excellent" | "Good" | "Needs Attention" {
+	if (totalUnits === 0) return "Needs Attention";
+	const rate = occupied / totalUnits;
+	if (rate >= 0.9) return "Excellent";
+	if (rate >= 0.7) return "Good";
+	return "Needs Attention";
+}
+
+function computeTypeBadgeColor(type: string): string {
+	const map: Record<string, string> = {
+		Apartment: "#2563eb",
+		House: "#7c3aed",
+		Commercial: "#059669",
+		Land: "#d97706",
+		Studio: "#db2777",
+		Duplex: "#db2777",
+		Bungalow: "#d97706",
+		"High-rise": "#0284c7",
+	};
+	return map[type] ?? "#64748b";
+}
+
+export default function usePropertiesData(limit = 20, offset = 0) {
+	const { env } = useContext(AppContextProvider);
+
+	const url = `${env.MAIN_SERVICE_URL}/api/properties?limit=${limit}&offset=${offset}`;
+
+	const {
+		data: rawResponse,
+		isLoading,
+		mutate,
+	} = useSWR(
+		url,
+		(u: string) =>
+			api()
+				.get(u)
+				.then((r) => r.data),
+		{ revalidateOnMount: true },
+	);
+
+	const rawProperties: IRawProperty[] = rawResponse?.data ?? [];
+	const rawStats = rawResponse?.stats ?? null;
+
 	const properties = useMemo<IPropertyList[]>(() => {
-		return [
-			{
-				id: "prop-001",
-				name: "Sunrise Apartments",
-				address: "15 Admiralty Way, Lekki Phase 1, Lagos",
-				type: "Apartment Building",
-				typeBadgeColor: "#2563eb",
-				totalUnits: 24,
-				occupied: 22,
-				vacant: 2,
-				monthlyRevenue: "₦720,000/month",
-				occupancyStatus: "Excellent",
-				image: "/images/properties/sunrise-apartments.webp",
-			},
-			{
-				id: "prop-002",
-				name: "Garden View Duplex",
-				address: "8 Banana Island Road, Ikoyi, Lagos",
-				type: "Duplex",
-				typeBadgeColor: "#db2777",
-				totalUnits: 1,
-				occupied: 1,
-				vacant: 0,
-				monthlyRevenue: "₦450,000/month",
-				occupancyStatus: "Excellent",
-				image: "/images/properties/garden-view.webp",
-			},
-			{
-				id: "prop-003",
-				name: "Metro Plaza",
-				address: "45 Adeola Odeku Street, Victoria Island, Lagos",
-				type: "Office Building",
-				typeBadgeColor: "#059669",
-				totalUnits: 12,
-				occupied: 8,
-				vacant: 4,
-				monthlyRevenue: "₦960,000/month",
-				occupancyStatus: "Good",
-				image: "/images/properties/metro-plaza.webp",
-			},
-			{
-				id: "prop-004",
-				name: "Greenfield Estate",
-				address: "Plot 23, Chevron Drive, Lekki, Lagos",
-				type: "Residential Estate",
-				typeBadgeColor: "#7c3aed",
-				totalUnits: 36,
-				occupied: 30,
-				vacant: 6,
-				monthlyRevenue: "₦1,080,000/month",
-				occupancyStatus: "Good",
-				image: "/images/properties/greenfield.webp",
-			},
-			{
-				id: "prop-005",
-				name: "Serenity Bungalows",
-				address: "12 Oregun Road, Ikeja, Lagos",
-				type: "Bungalow",
-				typeBadgeColor: "#d97706",
-				totalUnits: 8,
-				occupied: 6,
-				vacant: 2,
-				monthlyRevenue: "₦320,000/month",
-				occupancyStatus: "Good",
-				image: "/images/properties/serenity.webp",
-			},
-			{
-				id: "prop-006",
-				name: "Skyline Towers",
-				address: "3 Tiamiyu Savage Street, Victoria Island, Lagos",
-				type: "High-rise",
-				typeBadgeColor: "#0284c7",
-				totalUnits: 48,
-				occupied: 20,
-				vacant: 28,
-				monthlyRevenue: "₦1,440,000/month",
-				occupancyStatus: "Needs Attention",
-				image: "/images/properties/skyline.webp",
-			},
-		];
-	}, []);
+		return rawProperties.map((p) => {
+			const occupied = p.occupied ?? 0;
+			const vacant = p.totalUnits - occupied;
+			return {
+				id: p._id,
+				name: p.name,
+				address: p.address,
+				type: p.type,
+				typeBadgeColor: computeTypeBadgeColor(p.type),
+				totalUnits: p.totalUnits,
+				occupied,
+				vacant,
+				monthlyRevenue: `₦${p.monthlyRent.toLocaleString("en-NG")}/month`,
+				occupancyStatus: computeOccupancyStatus(occupied, p.totalUnits),
+				image: p.image ?? "",
+			};
+		});
+	}, [rawProperties]);
 
 	const stats = useMemo<IPropertyStatItem[]>(() => {
+		const total = rawStats?.totalProperties ?? 0;
+		const totalUnits = rawStats?.totalUnits ?? 0;
+		const totalOccupied = rawStats?.totalOccupied ?? 0;
+		const totalMonthlyRent = rawStats?.totalMonthlyRent ?? 0;
+		const occupancyRate =
+			totalUnits > 0 ? Math.round((totalOccupied / totalUnits) * 100) : 0;
+
 		return [
 			{
 				id: "stat-001",
 				label: "Total Properties",
-				value: "24",
-				subtext: "+2 this month",
+				value: String(total),
+				subtext: "",
 				subtextColor: "#16a34a",
 				icon: <FiHome size={18} />,
-				iconBg: "#dbeafe",
+				iconBg: "#aac5e9",
 			},
 			{
 				id: "stat-002",
 				label: "Total Units",
-				value: "156",
+				value: String(totalUnits),
 				subtext: "Across all properties",
 				subtextColor: "#64748b",
 				icon: <FiLayers size={18} />,
-				iconBg: "#fef3c7",
+				iconBg: "#e1d295",
 			},
 			{
 				id: "stat-003",
 				label: "Occupancy Rate",
-				value: "87%",
+				value: `${occupancyRate}%`,
 				subtext: "",
 				subtextColor: "#64748b",
 				icon: <FiTrendingUp size={18} />,
-				iconBg: "#d1fae5",
-				progressBar: { value: 87, color: "#0ea5e9" },
+				iconBg: "#a3e9c5",
+				progressBar: { value: occupancyRate, color: "#0ea5e9" },
 			},
 			{
 				id: "stat-004",
 				label: "Monthly Rent Expected",
-				value: "₦4,850,000",
-				subtext: "+₦125,000 vs last month",
+				value: `₦${totalMonthlyRent.toLocaleString("en-NG")}`,
+				subtext: "",
 				subtextColor: "#16a34a",
 				icon: <BsCurrencyDollar size={18} />,
-				iconBg: "#fef9c3",
+				iconBg: "#e9e295",
 			},
 		];
-	}, []);
+	}, [rawStats]);
 
-	const filterOptions = useMemo(() => {
-		return [
+	const filterOptions = useMemo(
+		() => [
 			{ id: "filter-all", label: "All Properties", value: "all" },
-			{ id: "filter-apartment", label: "Apartment", value: "apartment" },
-			{ id: "filter-duplex", label: "Duplex", value: "duplex" },
-			{ id: "filter-office", label: "Office Building", value: "office" },
-			{ id: "filter-bungalow", label: "Bungalow", value: "bungalow" },
-			{ id: "filter-highrise", label: "High-rise", value: "highrise" },
-		];
-	}, []);
+			{ id: "filter-apartment", label: "Apartment", value: "Apartment" },
+			{ id: "filter-house", label: "House", value: "House" },
+			{
+				id: "filter-commercial",
+				label: "Commercial",
+				value: "Commercial",
+			},
+			{ id: "filter-land", label: "Land", value: "Land" },
+			{ id: "filter-studio", label: "Studio", value: "Studio" },
+			{ id: "filter-duplex", label: "Duplex", value: "Duplex" },
+			{ id: "filter-bungalow", label: "Bungalow", value: "Bungalow" },
+			{ id: "filter-highrise", label: "High-rise", value: "High-rise" },
+		],
+		[],
+	);
 
-	const sortOptions = useMemo(() => {
-		return [
+	const sortOptions = useMemo(
+		() => [
 			{ id: "sort-name", label: "Name", value: "name" },
 			{ id: "sort-occupancy", label: "Occupancy", value: "occupancy" },
 			{ id: "sort-revenue", label: "Revenue", value: "revenue" },
 			{ id: "sort-units", label: "Units", value: "units" },
-		];
-	}, []);
+		],
+		[],
+	);
 
 	return {
 		properties,
 		stats,
 		filterOptions,
 		sortOptions,
+		isLoading,
+		mutate,
+		total: rawResponse?.total ?? rawProperties.length,
 	};
 }
