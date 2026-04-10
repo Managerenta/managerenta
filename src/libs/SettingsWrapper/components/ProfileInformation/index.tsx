@@ -86,13 +86,13 @@ function ProfileInformation() {
 			router.refresh();
 		} catch (err: unknown) {
 			const message =
-				(err as { response?: { data?: { message?: string } } })?.response?.data
-					?.message ?? "Failed to update profile";
+				(err as { response?: { data?: { message?: string } } })
+					?.response?.data?.message ?? "Failed to update profile";
 			toast.error(message);
 		} finally {
 			setIsSaving(false);
 		}
-	}, [env.MAIN_SERVICE_URL, state, mutate]);
+	}, [env.MAIN_SERVICE_URL, state, mutate, router.refresh]);
 
 	const handleCancel = useCallback(() => {
 		if (data) {
@@ -122,9 +122,15 @@ function ProfileInformation() {
 						<Input
 							type="text"
 							value={state.name}
-							placeholder={isLoading ? "Loading..." : "Enter your full name"}
+							placeholder={
+								isLoading
+									? "Loading..."
+									: "Enter your full name"
+							}
 							disabled={isLoading}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+							onChange={(
+								e: React.ChangeEvent<HTMLInputElement>,
+							) =>
 								dispatch({
 									type: "SET_FIELD",
 									field: "name",
@@ -140,9 +146,15 @@ function ProfileInformation() {
 							<Input
 								type="email"
 								value={state.email}
-								placeholder={isLoading ? "Loading..." : "Enter your email"}
+								placeholder={
+									isLoading
+										? "Loading..."
+										: "Enter your email"
+								}
 								disabled={isLoading}
-								onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+								onChange={(
+									e: React.ChangeEvent<HTMLInputElement>,
+								) =>
 									dispatch({
 										type: "SET_FIELD",
 										field: "email",
@@ -161,7 +173,9 @@ function ProfileInformation() {
 							value={state.phone}
 							placeholder="Enter your phone number"
 							disabled={isLoading}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+							onChange={(
+								e: React.ChangeEvent<HTMLInputElement>,
+							) =>
 								dispatch({
 									type: "SET_FIELD",
 									field: "phone",

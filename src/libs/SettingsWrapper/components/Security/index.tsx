@@ -53,7 +53,9 @@ function Security() {
 				className="strength-bar"
 				style={{
 					background:
-						segment <= strengthInfo.segments ? strengthInfo.color : "#e2e8f0",
+						segment <= strengthInfo.segments
+							? strengthInfo.color
+							: "#e2e8f0",
 				}}
 			/>
 		));
@@ -75,18 +77,21 @@ function Security() {
 
 		setIsUpdating(true);
 		try {
-			await api().post(`${env.MAIN_SERVICE_URL}/api/users/change-password`, {
-				currentPassword,
-				newPassword,
-			});
+			await api().post(
+				`${env.MAIN_SERVICE_URL}/api/users/change-password`,
+				{
+					currentPassword,
+					newPassword,
+				},
+			);
 			toast.success("Password updated successfully");
 			setCurrentPassword("");
 			setNewPassword("");
 			setConfirmPassword("");
 		} catch (err: unknown) {
 			const message =
-				(err as { response?: { data?: { message?: string } } })?.response?.data
-					?.message ?? "Failed to update password";
+				(err as { response?: { data?: { message?: string } } })
+					?.response?.data?.message ?? "Failed to update password";
 			toast.error(message);
 		} finally {
 			setIsUpdating(false);
@@ -106,9 +111,9 @@ function Security() {
 						<Input
 							type="password"
 							value={currentPassword}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-								setCurrentPassword(e.target.value)
-							}
+							onChange={(
+								e: React.ChangeEvent<HTMLInputElement>,
+							) => setCurrentPassword(e.target.value)}
 						/>
 					</Box>
 
@@ -117,16 +122,19 @@ function Security() {
 						<Input
 							type="password"
 							value={newPassword}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-								setNewPassword(e.target.value)
-							}
+							onChange={(
+								e: React.ChangeEvent<HTMLInputElement>,
+							) => setNewPassword(e.target.value)}
 						/>
 						{newPassword.length > 0 && (
 							<>
-								<Box className="strength-bars">{renderedStrengthBars}</Box>
+								<Box className="strength-bars">
+									{renderedStrengthBars}
+								</Box>
 								<Text
 									className="strength-label"
-									style={{ color: strengthInfo.color }}>
+									style={{ color: strengthInfo.color }}
+								>
 									{strengthInfo.label}
 								</Text>
 							</>
@@ -134,20 +142,24 @@ function Security() {
 					</Box>
 
 					<Box className="form-field">
-						<Text className="field-label">Confirm New Password</Text>
+						<Text className="field-label">
+							Confirm New Password
+						</Text>
 						<Input
 							type="password"
 							value={confirmPassword}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-								setConfirmPassword(e.target.value)
-							}
+							onChange={(
+								e: React.ChangeEvent<HTMLInputElement>,
+							) => setConfirmPassword(e.target.value)}
 						/>
 					</Box>
 
 					<Box className="update-btn">
 						<Button
 							type="button"
-							title={isUpdating ? "Updating..." : "Update Password"}
+							title={
+								isUpdating ? "Updating..." : "Update Password"
+							}
 							handleClick={handleUpdatePassword}
 							disabled={isUpdating}
 							background="#ef4444"
@@ -169,7 +181,8 @@ function Security() {
 						</Box>
 						<Box
 							className={`toggle-switch ${is2FAEnabled ? "active" : ""}`}
-							onClick={() => setIs2FAEnabled(!is2FAEnabled)}>
+							onClick={() => setIs2FAEnabled(!is2FAEnabled)}
+						>
 							<Box className="toggle-thumb" />
 						</Box>
 					</Box>
