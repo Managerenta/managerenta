@@ -27,9 +27,11 @@ export interface IPropertyUnit {
 	id: string;
 	name: string;
 	status: "Occupied" | "Vacant";
+	tenantId?: string;
 	tenantName?: string;
 	tenantAvatar?: string;
 	rent: string;
+	rentAmount: number;
 	dueDate?: string;
 	paymentStatus?: "Paid" | "Due Soon" | "Overdue";
 	vacantDays?: number;
@@ -41,6 +43,7 @@ export interface IPropertyDetail {
 	address: string;
 	type: string;
 	dateAdded: string;
+	monthlyRent: number;
 	monthlyRentTotal: string;
 	totalUnits: number;
 	occupied: number;
