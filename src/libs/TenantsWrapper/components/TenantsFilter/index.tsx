@@ -2,12 +2,36 @@
 import { memo, useMemo, useState } from "react";
 import { FiGrid, FiList, FiSearch } from "react-icons/fi";
 import { Box, Button, Input } from "@/components";
-import { useTenants } from "@/hooks";
 import { TenantsFilterStyled } from "./styled";
 
-function TenantsFilter() {
+interface IFilterOption {
+	id: string;
+	label: string;
+	value: string;
+}
+
+interface IProps {
+	search: string;
+	onSearchChange: (value: string) => void;
+	filterStatus: string;
+	onFilterChange: (value: string) => void;
+	sortBy: string;
+	onSortChange: (value: string) => void;
+	filterOptions: IFilterOption[];
+	sortOptions: IFilterOption[];
+}
+
+function TenantsFilter({
+	search,
+	onSearchChange,
+	filterStatus,
+	onFilterChange,
+	sortBy,
+	onSortChange,
+	filterOptions,
+	sortOptions,
+}: IProps) {
 	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-	const { filterOptions, sortOptions } = useTenants();
 
 	const renderedFilterOptions = useMemo(() => {
 		return filterOptions.map(({ id, label, value }) => (
@@ -28,17 +52,30 @@ function TenantsFilter() {
 	return (
 		<TenantsFilterStyled>
 			<Box className="left-filters">
-				<select className="filter-dropdown" defaultValue="all">
+				<select
+					className="filter-dropdown"
+					value={filterStatus}
+					onChange={(e) => onFilterChange(e.target.value)}
+				>
 					{renderedFilterOptions}
 				</select>
 				<Box className="search-bar">
 					<FiSearch size={16} />
-					<Input type="text" placeholder="Search tenants..." />
+					<Input
+						type="text"
+						placeholder="Search tenants..."
+						value={search}
+						onChange={(e) => onSearchChange(e.target.value)}
+					/>
 				</Box>
 			</Box>
 
 			<Box className="right-filters">
-				<select className="sort-dropdown" defaultValue="name">
+				<select
+					className="sort-dropdown"
+					value={sortBy}
+					onChange={(e) => onSortChange(e.target.value)}
+				>
 					{renderedSortOptions}
 				</select>
 				<Box className="view-toggle">
