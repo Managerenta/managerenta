@@ -72,8 +72,8 @@ function Login() {
 			router.refresh();
 		} catch (err: unknown) {
 			const message =
-				(err as { response?: { data?: { message?: string } } })?.response?.data
-					?.message ?? "Invalid username or password";
+				(err as { response?: { data?: { message?: string } } })
+					?.response?.data?.message ?? "Invalid username or password";
 			toast.error(message);
 		} finally {
 			setIsLoading(false);
@@ -127,7 +127,9 @@ function Login() {
 		return inputs.map((item, index) => {
 			return (
 				<Box key={index} className="form-field">
-					<label htmlFor={item.label.toLowerCase()}>{item.label}</label>
+					<label htmlFor={item.label.toLowerCase()}>
+						{item.label}
+					</label>
 					{item.elem}
 				</Box>
 			);

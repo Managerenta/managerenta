@@ -16,6 +16,6 @@ export const HeaderStyled = styled.header`
 
 	p {
 		font-size: 16px;
-		color: var(--Secondary-100);
+		color: var(--Secondary-500);
 	}
 `;

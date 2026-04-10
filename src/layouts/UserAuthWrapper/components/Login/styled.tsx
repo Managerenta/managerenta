@@ -25,7 +25,7 @@ export const LoginStyled = styled(Box)`
 				display: block;
 				font-size: 14px;
 				font-weight: 400;
-				color: var(--Secondary-100);
+				color: var(--Secondary-500);
 			}
 
 			section {
@@ -36,7 +36,7 @@ export const LoginStyled = styled(Box)`
 					left: 10px;
 					top: 50%;
 					transform: translateY(-50%);
-					color: var(--Secondary-100);
+					color: var(--Secondary-500);
 					font-size: 15px;
 				}
 
@@ -47,7 +47,7 @@ export const LoginStyled = styled(Box)`
 					border-radius: 4px;
 					font-size: 14px;
 					transition: border-color 0.3s;
-					color: var(--Secondary-100);
+					color: var(--Secondary-500);
 
 					/* &:focus {
 				border-color: var(--Primary-600);
@@ -75,7 +75,7 @@ export const LoginStyled = styled(Box)`
 
 			label {
 				font-size: 14px;
-				color: var(--Secondary-100);
+				color: var(--Secondary-500);
 				font-weight: 400;
 				cursor: pointer;
 			}
@@ -112,7 +112,7 @@ export const LoginStyled = styled(Box)`
 		font-size: 16px;
 
 		p {
-			color: var(--Secondary-100);
+			color: var(--Secondary-500);
 			font-weight: 400;
 		}
 
@@ -133,7 +133,7 @@ export const LoginStyled = styled(Box)`
 		align-items: center;
 		gap: 10px;
 		font-size: 12px;
-		color: var(--Secondary-100);
+		color: var(--Secondary-500);
 
 		.privacy-terms {
 			display: flex;

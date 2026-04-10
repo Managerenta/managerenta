@@ -83,19 +83,25 @@ export default function Signup() {
 
 		try {
 			const formData = new FormData();
-			formData.append("name", `${state.firstName} ${state.lastName}`.trim());
+			formData.append(
+				"name",
+				`${state.firstName} ${state.lastName}`.trim(),
+			);
 			formData.append("username", state.username);
 			formData.append("email", state.email);
 			formData.append("password", state.createPassword);
 
-			await api().post(`${env.MAIN_SERVICE_URL}/api/auth/signup`, formData);
+			await api().post(
+				`${env.MAIN_SERVICE_URL}/api/auth/signup`,
+				formData,
+			);
 
 			toast.success("Account created! Please sign in.");
 			router.push("/login");
 		} catch (err: unknown) {
 			const message =
-				(err as { response?: { data?: { message?: string } } })?.response?.data
-					?.message ?? "Failed to create account";
+				(err as { response?: { data?: { message?: string } } })
+					?.response?.data?.message ?? "Failed to create account";
 			toast.error(message);
 		} finally {
 			setIsLoading(false);
@@ -117,7 +123,10 @@ export default function Signup() {
 							placeholder="Enter your first name"
 							value={state.firstName}
 							onChange={(e) =>
-								dispatch({ type: "SET_FIRST_NAME", payload: e.target.value })
+								dispatch({
+									type: "SET_FIRST_NAME",
+									payload: e.target.value,
+								})
 							}
 						/>
 					</section>
@@ -133,7 +142,10 @@ export default function Signup() {
 							placeholder="Enter your last name"
 							value={state.lastName}
 							onChange={(e) =>
-								dispatch({ type: "SET_LAST_NAME", payload: e.target.value })
+								dispatch({
+									type: "SET_LAST_NAME",
+									payload: e.target.value,
+								})
 							}
 						/>
 					</section>
@@ -149,7 +161,10 @@ export default function Signup() {
 							placeholder="Enter your email"
 							value={state.email}
 							onChange={(e) =>
-								dispatch({ type: "SET_EMAIL", payload: e.target.value })
+								dispatch({
+									type: "SET_EMAIL",
+									payload: e.target.value,
+								})
 							}
 						/>
 					</section>
@@ -165,7 +180,10 @@ export default function Signup() {
 							placeholder="Enter your username"
 							value={state.username}
 							onChange={(e) =>
-								dispatch({ type: "SET_USERNAME", payload: e.target.value })
+								dispatch({
+									type: "SET_USERNAME",
+									payload: e.target.value,
+								})
 							}
 						/>
 					</section>
@@ -241,8 +259,8 @@ export default function Signup() {
 					<Input type="checkbox" id="check-me" />
 					<label htmlFor="check-me">
 						I agree to PropertyTrack's{" "}
-						<Link href="/terms-of-service">Terms of Service</Link> and{" "}
-						<Link href="/privacy-policy">Privacy Policy</Link>
+						<Link href="/terms-of-service">Terms of Service</Link>{" "}
+						and <Link href="/privacy-policy">Privacy Policy</Link>
 					</label>
 				</Box>
 			</Box>
