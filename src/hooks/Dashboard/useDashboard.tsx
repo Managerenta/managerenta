@@ -1,5 +1,5 @@
 "use client";
-import { useMemo } from "react";
+import { useContext, useMemo } from "react";
 import {
 	FiAlertCircle,
 	FiBell,
@@ -10,49 +10,103 @@ import {
 	FiPlus,
 	FiUsers,
 } from "react-icons/fi";
+import useSWR from "swr";
+import { api } from "@/constants";
+import { AppContextProvider } from "@/hooks";
 import type { ITenantAction, ITransaction } from "@/types";
 
+interface IRawProperty {
+	_id: string;
+	name: string;
+	address: string;
+	totalUnits: number;
+	occupied: number;
+	monthlyRent: number;
+	image?: string;
+}
+
 export default function useDashboardData() {
+	const { env } = useContext(AppContextProvider);
+
+	const { data: dashboardStats } = useSWR(
+		`${env.MAIN_SERVICE_URL}/api/dashboard/stats`,
+		(u: string) =>
+			api()
+				.get(u)
+				.then((r) => r.data?.data ?? r.data),
+		{ revalidateOnMount: true },
+	);
+
+	const { data: propertiesData } = useSWR(
+		`${env.MAIN_SERVICE_URL}/api/properties?limit=2`,
+		(u: string) =>
+			api()
+				.get(u)
+				.then((r) => r.data),
+		{ revalidateOnMount: true },
+	);
+
+	const rawProperties: IRawProperty[] = propertiesData?.data ?? [];
+
 	const stats = useMemo(() => {
+		const totalProperties = dashboardStats?.totalProperties ?? 0;
+		const totalUnits = dashboardStats?.totalUnits ?? 0;
+		const occupiedUnits = dashboardStats?.occupiedUnits ?? 0;
+		const vacantUnits = dashboardStats?.vacantUnits ?? 0;
+		const occupancyRate =
+			totalUnits > 0 ? Math.round((occupiedUnits / totalUnits) * 100) : 0;
+
 		return [
 			{
 				id: "stat-001",
 				label: "Total Properties",
-				value: "24",
-				subtext: "↑ +2 this month",
+				value: String(totalProperties),
+				subtext: "",
 				subtextColor: "#16a34a",
 				icon: <FiHome size={18} />,
-				iconBg: "#dbeafe",
+				iconBg: "#aac5e9",
 			},
 			{
 				id: "stat-002",
 				label: "Total Units",
-				value: "156",
-				subtext: "↑ +8 this month",
+				value: String(totalUnits),
+				subtext: "",
 				subtextColor: "#16a34a",
 				icon: <FiLayers size={18} />,
-				iconBg: "#fef3c7",
+				iconBg: "#e1d295",
 			},
 			{
 				id: "stat-003",
 				label: "Occupied Units",
-				value: "142",
-				subtext: "91% occupancy",
+				value: String(occupiedUnits),
+				subtext: `${occupancyRate}% occupancy`,
 				subtextColor: "#64748b",
 				icon: <FiUsers size={18} />,
-				iconBg: "#d1fae5",
+				iconBg: "#a3e9c5",
 			},
 			{
 				id: "stat-004",
 				label: "Vacant Units",
-				value: "14",
-				subtext: "9% vacancy",
-				subtextColor: "#64748b",
+				value: String(vacantUnits),
+				subtext: `${100 - occupancyRate}% vacancy`,
+				subtextColor: "#586d89",
 				icon: <FiAlertCircle size={18} />,
-				iconBg: "#fef9c3",
+				iconBg: "#e9e295",
 			},
 		];
-	}, []);
+	}, [dashboardStats]);
+
+	const listedProperties = useMemo(() => {
+		return rawProperties.map((p) => ({
+			id: p._id,
+			name: p.name,
+			location: p.address,
+			totalUnits: p.totalUnits,
+			occupied: p.occupied ?? 0,
+			monthlyRevenue: `₦${p.monthlyRent.toLocaleString("en-NG")}/mo`,
+			image: p.image ?? "",
+		}));
+	}, [rawProperties]);
 
 	const dueToday = useMemo<ITenantAction[]>(() => {
 		return [
@@ -135,29 +189,6 @@ export default function useDashboardData() {
 				unit: "Unit 9A",
 				amount: "₦500,000",
 				type: "credit",
-			},
-		];
-	}, []);
-
-	const listedProperties = useMemo(() => {
-		return [
-			{
-				id: "prop-001",
-				name: "Lagos Estate",
-				location: "Victoria Island, Lagos",
-				totalUnits: 24,
-				occupied: 22,
-				monthlyRevenue: "₦8,400,000/mo",
-				image: "/images/properties/lagos-estate.webp",
-			},
-			{
-				id: "prop-002",
-				name: "Victoria Garden City",
-				location: "Ajah, Lagos",
-				totalUnits: 18,
-				occupied: 16,
-				monthlyRevenue: "₦5,760,000/mo",
-				image: "/images/properties/victoria-garden.webp",
 			},
 		];
 	}, []);
