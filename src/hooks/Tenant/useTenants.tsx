@@ -1,181 +1,147 @@
 "use client";
-import { useMemo } from "react";
+import { useContext, useMemo } from "react";
 import { FiAlertCircle, FiUserCheck, FiUsers, FiUserX } from "react-icons/fi";
-import type { ITenantListItem, ITenantStatItem } from "@/types";
+import useSWR from "swr";
+import { api } from "@/constants";
+import type {
+	IRawTenant,
+	IRawTenantStats,
+	ITenantListItem,
+	ITenantStatItem,
+} from "@/types";
+import { AppContextProvider } from "../Context";
 
-export default function useTenantsData() {
+function formatDate(iso: string): string {
+	if (!iso) return "";
+	return new Date(iso).toLocaleDateString("en-GB");
+}
+
+export default function useTenantsData(
+	limit = 12,
+	offset = 0,
+	status = "all",
+	search = "",
+	sort = "name",
+) {
+	const { env } = useContext(AppContextProvider);
+
+	const params = new URLSearchParams({
+		limit: String(limit),
+		offset: String(offset),
+		...(status !== "all" && { status }),
+		...(search.trim() && { search: search.trim() }),
+		...(sort && { sort }),
+	});
+
+	const url = `${env.MAIN_SERVICE_URL}/api/tenants?${params.toString()}`;
+
+	const {
+		data: rawResponse,
+		isLoading,
+		mutate,
+	} = useSWR(
+		url,
+		(u: string) =>
+			api()
+				.get(u)
+				.then((r) => r.data),
+		{ revalidateOnMount: true, revalidateOnFocus: true },
+	);
+
+	const rawTenants: IRawTenant[] = rawResponse?.data ?? [];
+	const rawStats: IRawTenantStats | null = rawResponse?.stats ?? null;
+	const total: number = rawResponse?.total ?? 0;
+
 	const tenants = useMemo<ITenantListItem[]>(() => {
-		return [
-			{
-				id: "tenant-001",
-				name: "Chioma Okoro",
-				avatar: "/images/tenants/chioma.webp",
-				property: "Sunrise Apartments",
-				unit: "Block A, Flat 2",
-				monthlyRent: "₦450,000",
-				paymentStatus: "Overdue",
-				moveInDate: "15/01/2022",
-				phone: "+234 803 123 4567",
-				email: "chioma.okoro@email.com",
-				leaseExpiry: "15/01/2026",
-			},
-			{
-				id: "tenant-002",
-				name: "Kemi Ajayi",
-				avatar: "/images/tenants/kemi.webp",
-				property: "Sunrise Apartments",
-				unit: "Block A, Flat 1",
-				monthlyRent: "₦720,000",
-				paymentStatus: "Paid",
-				moveInDate: "01/03/2023",
-				phone: "+234 805 678 9012",
-				email: "kemi.ajayi@email.com",
-				leaseExpiry: "01/03/2026",
-			},
-			{
-				id: "tenant-003",
-				name: "David Okonkwo",
-				avatar: "/images/tenants/david.webp",
-				property: "Sunrise Apartments",
-				unit: "Block A, Flat 2",
-				monthlyRent: "₦720,000",
-				paymentStatus: "Due Soon",
-				moveInDate: "10/06/2023",
-				phone: "+234 807 345 6789",
-				email: "david.okonkwo@email.com",
-				leaseExpiry: "10/06/2026",
-			},
-			{
-				id: "tenant-004",
-				name: "Funmi Adebayo",
-				avatar: "/images/tenants/funmi.webp",
-				property: "Sunrise Apartments",
-				unit: "Block A, Flat 3",
-				monthlyRent: "₦720,000",
-				paymentStatus: "Overdue",
-				moveInDate: "20/09/2022",
-				phone: "+234 809 012 3456",
-				email: "funmi.adebayo@email.com",
-				leaseExpiry: "20/09/2025",
-			},
-			{
-				id: "tenant-005",
-				name: "Sarah Ibrahim",
-				avatar: "/images/tenants/sarah.webp",
-				property: "Sunrise Apartments",
-				unit: "Block A, Flat 4",
-				monthlyRent: "₦720,000",
-				paymentStatus: "Paid",
-				moveInDate: "05/04/2024",
-				phone: "+234 802 456 7890",
-				email: "sarah.ibrahim@email.com",
-				leaseExpiry: "05/04/2027",
-			},
-			{
-				id: "tenant-006",
-				name: "Emeka Nwosu",
-				avatar: "/images/tenants/emeka.webp",
-				property: "Garden View Duplex",
-				unit: "Main Unit",
-				monthlyRent: "₦450,000",
-				paymentStatus: "Paid",
-				moveInDate: "12/11/2023",
-				phone: "+234 811 234 5678",
-				email: "emeka.nwosu@email.com",
-				leaseExpiry: "12/11/2026",
-			},
-			{
-				id: "tenant-007",
-				name: "Tunde Balogun",
-				avatar: "/images/tenants/tunde.webp",
-				property: "Greenfield Estate",
-				unit: "Unit 4B",
-				monthlyRent: "₦380,000",
-				paymentStatus: "Due Soon",
-				moveInDate: "01/08/2023",
-				phone: "+234 813 567 8901",
-				email: "tunde.balogun@email.com",
-				leaseExpiry: "01/08/2026",
-			},
-			{
-				id: "tenant-008",
-				name: "Ngozi Eze",
-				avatar: "/images/tenants/ngozi.webp",
-				property: "Metro Plaza",
-				unit: "Suite 5A",
-				monthlyRent: "₦960,000",
-				paymentStatus: "Paid",
-				moveInDate: "18/02/2024",
-				phone: "+234 815 890 1234",
-				email: "ngozi.eze@email.com",
-				leaseExpiry: "18/02/2027",
-			},
-		];
-	}, []);
+		return rawTenants.map((p) => ({
+			id: p._id,
+			name: p.name,
+			avatar: p.avatar ?? "",
+			property: p.property,
+			unit: p.unit,
+			monthlyRent: `₦${p.monthlyRent.toLocaleString("en-NG")}/month`,
+			paymentStatus: p.paymentStatus,
+			moveInDate: formatDate(p.moveInDate),
+			phone: p.phone,
+			email: p.email,
+			leaseExpiry: p.leaseExpiry ? formatDate(p.leaseExpiry) : "",
+		}));
+	}, [rawTenants]);
 
 	const stats = useMemo<ITenantStatItem[]>(() => {
+		const t = rawStats?.totalTenants ?? 0;
+		const active = rawStats?.activeTenants ?? 0;
+		const expiring = rawStats?.expiringLeases ?? 0;
+		const overdue = rawStats?.overduePayments ?? 0;
+		const activeRate = t > 0 ? Math.round((active / t) * 100) : 0;
+
 		return [
 			{
 				id: "stat-001",
 				label: "Total Tenants",
-				value: "142",
-				subtext: "+5 this month",
+				value: String(t),
+				subtext: "",
 				subtextColor: "#16a34a",
 				icon: <FiUsers size={18} />,
-				iconBg: "#dbeafe",
+				iconBg: "#9cc3f6",
 			},
 			{
 				id: "stat-002",
 				label: "Active Tenants",
-				value: "138",
-				subtext: "97% active",
+				value: String(active),
+				subtext: `${activeRate}% active`,
 				subtextColor: "#16a34a",
 				icon: <FiUserCheck size={18} />,
-				iconBg: "#d1fae5",
+				iconBg: "#86f5bb",
 			},
 			{
 				id: "stat-003",
 				label: "Expiring Leases",
-				value: "8",
-				subtext: "Within 3 months",
+				value: String(expiring),
+				subtext: "Within 30 days",
 				subtextColor: "#ca8a04",
 				icon: <FiAlertCircle size={18} />,
-				iconBg: "#fef3c7",
+				iconBg: "#f8e492",
 			},
 			{
 				id: "stat-004",
 				label: "Overdue Payments",
-				value: "12",
-				subtext: "₦4,560,000 outstanding",
-				subtextColor: "#ef4444",
+				value: String(overdue),
+				subtext: overdue > 0 ? "Needs attention" : "All clear",
+				subtextColor: overdue > 0 ? "#ef4444" : "#16a34a",
 				icon: <FiUserX size={18} />,
-				iconBg: "#fee2e2",
+				iconBg: "#f8a5a5",
 			},
 		];
-	}, []);
+	}, [rawStats]);
 
-	const filterOptions = useMemo(() => {
-		return [
+	const filterOptions = useMemo(
+		() => [
 			{ id: "filter-all", label: "All Tenants", value: "all" },
-			{ id: "filter-paid", label: "Paid", value: "paid" },
-			{ id: "filter-due-soon", label: "Due Soon", value: "due-soon" },
-			{ id: "filter-overdue", label: "Overdue", value: "overdue" },
-		];
-	}, []);
+			{ id: "filter-paid", label: "Paid", value: "Paid" },
+			{ id: "filter-due-soon", label: "Due Soon", value: "Due Soon" },
+			{ id: "filter-overdue", label: "Overdue", value: "Overdue" },
+		],
+		[],
+	);
 
-	const sortOptions = useMemo(() => {
-		return [
+	const sortOptions = useMemo(
+		() => [
 			{ id: "sort-name", label: "Name", value: "name" },
 			{ id: "sort-property", label: "Property", value: "property" },
 			{ id: "sort-rent", label: "Rent", value: "rent" },
 			{ id: "sort-status", label: "Payment Status", value: "status" },
-		];
-	}, []);
+		],
+		[],
+	);
 
 	return {
 		tenants,
 		stats,
 		filterOptions,
 		sortOptions,
+		isLoading,
+		mutate,
+		total,
 	};
 }
