@@ -2,12 +2,16 @@
 import { memo, useMemo } from "react";
 import { FiPlus } from "react-icons/fi";
 import { Box, Button, Text } from "@/components";
-import { useTenants } from "@/hooks";
+import type { ITenantStatItem } from "@/types";
 import { TenantsHeaderStyled } from "./styled";
 
-function TenantsHeader() {
-	const { stats } = useTenants();
+interface IProps {
+	stats: ITenantStatItem[];
+	isLoading: boolean;
+	onAddTenant: () => void;
+}
 
+function TenantsHeader({ stats, onAddTenant }: IProps) {
 	const renderedStats = useMemo(() => {
 		return stats.map(
 			({ id, label, value, subtext, subtextColor, icon, iconBg }) => (
@@ -54,6 +58,7 @@ function TenantsHeader() {
 								<span>Add New Tenant</span>
 							</Box>
 						}
+						handleClick={onAddTenant}
 						background="var(--Main-Blue)"
 						color="white"
 						borderRadius="8px"

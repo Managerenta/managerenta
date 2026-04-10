@@ -28,9 +28,9 @@ export const TenantsHeaderStyled = styled(Box)`
 				align-items: center;
 				justify-content: center;
 				gap: 8px;
-				padding: 25px 15px;
+				padding: 23px 8px;
 				border-radius: 8px;
-				font-size: 14px;
+				font-size: 16px;
 				font-weight: 500;
 				cursor: pointer;
 				transition: opacity 0.2s;
