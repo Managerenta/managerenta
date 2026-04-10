@@ -6,7 +6,12 @@ import { Box, Button, Text } from "@/components";
 import { useAddTransactionNavigation } from "@/hooks";
 import { AddTransactionHeaderStyled } from "./styled";
 
-function AddTransactionHeader() {
+interface IProps {
+	tenantName: string;
+	tenantId: string;
+}
+
+function AddTransactionHeader({ tenantName, tenantId }: IProps) {
 	const { closeAddTransaction } = useAddTransactionNavigation();
 
 	const handleClose = useCallback(() => {
@@ -20,9 +25,9 @@ function AddTransactionHeader() {
 				<span className="separator">&gt;</span>
 				<Link href="/tenants">Tenants</Link>
 				<span className="separator">&gt;</span>
-				<Box className="breadcrumb-text" onClick={handleClose}>
-					<Text>Chioma Okoro</Text>
-				</Box>
+				<Link href={`/tenants/${tenantId}`}>
+					{tenantName || "Tenant"}
+				</Link>
 				<span className="separator">&gt;</span>
 				<Text className="current">Add Transaction</Text>
 			</Box>
@@ -30,9 +35,11 @@ function AddTransactionHeader() {
 			<Box className="title-row">
 				<Box className="title-section">
 					<Text className="page-title">Add Transaction</Text>
-					<Text className="page-subtitle">
-						Recording transaction for Chioma Okoro
-					</Text>
+					{tenantName && (
+						<Text className="page-subtitle">
+							Recording transaction for {tenantName}
+						</Text>
+					)}
 				</Box>
 				<Box className="close-btn">
 					<Button
