@@ -1,26 +1,61 @@
 "use client";
 import { memo } from "react";
-import { Box, Text } from "@/components";
+import { Box, Image, Text } from "@/components";
 import { TenantSummaryStyled } from "./styled";
 
-function TenantSummary() {
+interface IProps {
+	name: string;
+	avatar: string;
+	property: string;
+	unit: string;
+	outstandingBalance: string;
+	isOverdue: boolean;
+	isLoading: boolean;
+}
+
+function TenantSummary({
+	name,
+	avatar,
+	property,
+	unit,
+	outstandingBalance,
+	isOverdue,
+	isLoading,
+}: IProps) {
 	return (
 		<TenantSummaryStyled>
 			<Box className="tenant-info">
-				{/* TODO: Replace with Image when avatars ready */}
-				<Box className="avatar-placeholder" />
+				{avatar ? (
+					<Image
+						url={avatar}
+						alt={name}
+						width="44px"
+						height="44px"
+						borderRadius="50%"
+						style={{ objectFit: "cover", flexShrink: 0 }}
+					/>
+				) : (
+					<Box className="avatar-placeholder" />
+				)}
 				<Box className="info-text">
-					<Text className="tenant-name">Chioma Okoro</Text>
+					<Text className="tenant-name">
+						{isLoading ? "—" : name}
+					</Text>
 					<Text className="tenant-property">
-						Sunset Apartments - Block A, Flat 2
+						{isLoading ? "—" : `${property} - ${unit}`}
 					</Text>
 				</Box>
 			</Box>
 
 			<Box className="balance-info">
-				<Text className="balance-label">Current Balance</Text>
-				<Text className="balance-value">-₦450,000</Text>
-				<Box className="overdue-badge">Overdue</Box>
+				<Text className="balance-label">Outstanding Balance</Text>
+				<Text
+					className="balance-value"
+					style={{ color: isOverdue ? "#ef4444" : "#16a34a" }}
+				>
+					{isLoading ? "—" : outstandingBalance}
+				</Text>
+				{isOverdue && <Box className="overdue-badge">Overdue</Box>}
 			</Box>
 		</TenantSummaryStyled>
 	);
