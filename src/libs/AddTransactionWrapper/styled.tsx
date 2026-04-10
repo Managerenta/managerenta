@@ -7,13 +7,13 @@ export const AddTransactionWrapperStyled = styled(Box)`
 	flex-direction: column;
 	gap: 20px;
 	width: 100%;
-	padding: 15px;
+	padding: 10px 5px;
 	background: #f8fafc;
 
 	.content-grid {
 		display: grid;
 		grid-template-columns: 2fr 1fr;
-		gap: 24px;
+		gap: 20px;
 
 		.left-column,
 		.right-column {
