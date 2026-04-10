@@ -85,7 +85,8 @@ export default function AppContext({
 				isUserLoggedIn,
 				userName,
 				reAuthenticateUserSession,
-			}}>
+			}}
+		>
 			{children}
 		</AppContextProvider.Provider>
 	);
