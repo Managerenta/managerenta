@@ -1,36 +1,125 @@
 "use client";
-import { memo, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Box } from "@/components";
-import { usePropertiesNavigation } from "@/hooks";
-import { Pagination } from "@/layouts";
+import { usePropertiesData } from "@/hooks";
+import { Pagination, PropertyModal } from "@/layouts";
+import type { IPropertyList } from "@/types";
 import {
 	PropertiesFilter,
 	PropertiesGrid,
 	PropertiesHeader,
-	PropertyDetailWrapper,
 } from "./components";
 import { PropertiesWrapperStyled } from "./styled";
 
 function PropertiesWrapper() {
+	const router = useRouter();
 	const [offset, setOffset] = useState<number>(0);
 	const [pageSize] = useState<number>(12);
-	const [totalItems] = useState<number>(24);
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [mounted, setMounted] = useState(false);
+	const [search, setSearch] = useState("");
+	const [filterType, setFilterType] = useState("all");
+	const [sortBy, setSortBy] = useState("name");
 
-	const { isDetailView, selectedPropertyId } = usePropertiesNavigation();
+	useEffect(() => setMounted(true), []);
 
+	const { properties, stats, isLoading, mutate, total } = usePropertiesData(
+		pageSize,
+		offset,
+	);
+
+	const openModal = useCallback(() => setIsModalOpen(true), []);
+	const closeModal = useCallback(() => setIsModalOpen(false), []);
+
+	const handlePropertyAdded = useCallback(async () => {
+		await mutate();
+		router.refresh();
+	}, [mutate, router]);
+
+	const handleSearchChange = useCallback((value: string) => {
+		setSearch(value);
+		setOffset(0);
+	}, []);
+
+	const handleFilterChange = useCallback((value: string) => {
+		setFilterType(value);
+		setOffset(0);
+	}, []);
+
+	const handleSortChange = useCallback((value: string) => {
+		setSortBy(value);
+		setOffset(0);
+	}, []);
+
+	const filteredProperties = useMemo<IPropertyList[]>(() => {
+		let result = properties;
+
+		if (filterType !== "all") {
+			result = result.filter(
+				(p) => p.type.toLowerCase() === filterType.toLowerCase(),
+			);
+		}
+
+		if (search.trim()) {
+			const q = search.trim().toLowerCase();
+			result = result.filter(
+				(p) =>
+					p.name.toLowerCase().includes(q) ||
+					p.address.toLowerCase().includes(q),
+			);
+		}
+
+		result = [...result].sort((a, b) => {
+			switch (sortBy) {
+				case "occupancy":
+					return (
+						b.occupied / b.totalUnits - a.occupied / a.totalUnits
+					);
+				case "revenue":
+					return b.occupied - a.occupied;
+				case "units":
+					return b.totalUnits - a.totalUnits;
+				default:
+					return a.name.localeCompare(b.name);
+			}
+		});
+
+		return result;
+	}, [properties, search, filterType, sortBy]);
+
+	const filteredTotal = filteredProperties.length;
 	const totalPages = useMemo<number>(() => {
-		return Math.ceil(totalItems / pageSize);
-	}, [totalItems, pageSize]);
-
-	if (isDetailView && selectedPropertyId) {
-		return <PropertyDetailWrapper propertyId={selectedPropertyId} />;
-	}
+		return Math.ceil((filteredTotal || 1) / pageSize);
+	}, [filteredTotal, pageSize]);
 
 	return (
 		<PropertiesWrapperStyled>
-			<PropertiesHeader />
-			<PropertiesFilter />
-			<PropertiesGrid />
+			<PropertiesHeader
+				stats={stats}
+				isLoading={isLoading}
+				onAddProperty={openModal}
+			/>
+			{mounted && (
+				<PropertyModal
+					open={isModalOpen}
+					close={closeModal}
+					mode={{ type: "add-property" }}
+					onSuccess={handlePropertyAdded}
+				/>
+			)}
+			<PropertiesFilter
+				search={search}
+				onSearchChange={handleSearchChange}
+				filterType={filterType}
+				onFilterChange={handleFilterChange}
+				sortBy={sortBy}
+				onSortChange={handleSortChange}
+			/>
+			<PropertiesGrid
+				properties={filteredProperties}
+				isLoading={isLoading}
+			/>
 
 			<Box className="pagination-footer">
 				<Box className="items-per-page">
@@ -50,9 +139,12 @@ function PropertiesWrapper() {
 				/>
 
 				<Box className="showing-info">
-					Showing {offset + 1}-
-					{Math.min(offset + pageSize, totalItems)} of {totalItems}{" "}
-					properties
+					Showing {Math.min(offset + 1, filteredTotal)}-
+					{Math.min(offset + pageSize, filteredTotal)} of{" "}
+					{filteredTotal}{" "}
+					{filteredTotal !== total
+						? `(filtered from ${total})`
+						: "properties"}
 				</Box>
 			</Box>
 		</PropertiesWrapperStyled>
