@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { memo, useCallback, useMemo } from "react";
-import { Box, Button, Text } from "@/components";
+import { Box, Button, Image, Text } from "@/components";
 import { useDashboardData } from "@/hooks";
 import { ListedPropertiesStyled } from "./styled";
 
@@ -15,21 +15,40 @@ function ListedProperties() {
 
 	const handleViewDetails = useCallback(
 		(propertyId: string) => {
-			router.push(`/properties?propertyId=${propertyId}`);
+			router.push(`/properties/${propertyId}`);
 		},
 		[router],
 	);
 
 	const renderedProperties = useMemo(() => {
 		return listedProperties.map(
-			({ id, name, location, totalUnits, occupied, monthlyRevenue }) => {
-				const occupancyPercent = Math.round(
-					(occupied / totalUnits) * 100,
-				);
+			({
+				id,
+				name,
+				location,
+				totalUnits,
+				occupied,
+				monthlyRevenue,
+				image,
+			}) => {
+				const occupancyPercent =
+					totalUnits > 0
+						? Math.round((occupied / totalUnits) * 100)
+						: 0;
 				return (
 					<Box key={id} className="property-card">
 						<Box className="property-image">
-							<Box className="image-placeholder" />
+							{image ? (
+								<Image
+									url={image}
+									alt={name}
+									width="100%"
+									height="100%"
+									style={{ objectFit: "cover" }}
+								/>
+							) : (
+								<Box className="image-placeholder" />
+							)}
 						</Box>
 						<Box className="property-details">
 							<Text className="property-name">{name}</Text>
@@ -57,6 +76,7 @@ function ListedProperties() {
 								<Box className="view-details">
 									<Button
 										type="button"
+										background="inherit"
 										title="View Details"
 										handleClick={() =>
 											handleViewDetails(id)
@@ -78,6 +98,7 @@ function ListedProperties() {
 				<Box className="view-all">
 					<Button
 						type="button"
+						background="inherit"
 						title="View All"
 						handleClick={handleViewAll}
 					/>
