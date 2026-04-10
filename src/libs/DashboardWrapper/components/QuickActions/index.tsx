@@ -12,7 +12,7 @@ function QuickActions() {
 			<Box key={index} className="quick-action-item">
 				<Box className="action-icon">{action.icon}</Box>
 				<Text className="action-label">{action.label}</Text>
-				<Button type="button" />
+				<Button type="button" background="inherit" />
 			</Box>
 		));
 	}, [quickActions]);

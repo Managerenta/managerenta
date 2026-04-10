@@ -52,7 +52,7 @@ export const QuickActionsStyled = styled(Box)`
 				width: 100%;
 				font-size: 17px;
 				font-weight: 500;
-				color: var(--Secondary-100);
+				color: var(--Secondary-700);
 			}
 		}
 	}

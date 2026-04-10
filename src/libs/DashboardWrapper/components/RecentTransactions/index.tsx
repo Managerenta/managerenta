@@ -30,7 +30,11 @@ function RecentTransactions() {
 			<Box className="section-header">
 				<Text className="section-title">Recent Transactions</Text>
 				<Box className="view-all">
-					<Button type="button" title="View All" />
+					<Button
+						type="button"
+						background="inherit"
+						title="View All"
+					/>
 				</Box>
 			</Box>
 			<Box className="transaction-list">{renderedTransactions}</Box>
