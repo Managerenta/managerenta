@@ -34,7 +34,7 @@ export const DashboardHeaderStyled = styled(Box)`
 			align-items: center;
 			justify-content: center;
 			gap: 8px;
-			padding: 5px 20px;
+			padding: 3px 20px;
 			background: var(--Main-Blue);
 			color: white;
 			border: none;

@@ -1,5 +1,6 @@
 "use client";
-import { memo, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { memo, useCallback, useMemo } from "react";
 import { FiPlus } from "react-icons/fi";
 import { Box, Button, Text } from "@/components";
 import { useDashboardData } from "@/hooks";
@@ -7,6 +8,11 @@ import { DashboardHeaderStyled } from "./styled";
 
 function DashboardHeader() {
 	const { stats } = useDashboardData();
+	const router = useRouter();
+
+	const handleAddProperty = useCallback(() => {
+		router.push("/properties");
+	}, [router]);
 
 	const formattedDate = useMemo(() => {
 		return new Date().toLocaleDateString("en-GB", {
@@ -50,6 +56,8 @@ function DashboardHeader() {
 				<Box className="add-btn">
 					<Button
 						type="button"
+						background="inherit"
+						handleClick={handleAddProperty}
 						title={
 							<Box
 								style={{
