@@ -164,15 +164,15 @@ function TransactionHistory({ transactions, totals }: IProps) {
 
 			<Box className="totals-row">
 				<Box className="total-item">
-					<Text className="total-label">Total Payments</Text>
+					<Text className="total-label">Total Rent Paid</Text>
 					<Text className="total-value green">{totalReceived}</Text>
 				</Box>
 				<Box className="total-item">
-					<Text className="total-label">Total Expenses</Text>
+					<Text className="total-label">Rent Charged</Text>
 					<Text className="total-value">{totalExpenses}</Text>
 				</Box>
 				<Box className="total-item">
-					<Text className="total-label">Net Balance</Text>
+					<Text className="total-label">Rent Net Balance</Text>
 					<Text className="total-value green bold">{netBalance}</Text>
 				</Box>
 			</Box>
