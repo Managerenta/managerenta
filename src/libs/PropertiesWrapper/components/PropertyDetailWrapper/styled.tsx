@@ -5,9 +5,9 @@ import { Box } from "@/components";
 export const PropertyDetailWrapperStyled = styled(Box)`
 	display: flex;
 	flex-direction: column;
-	gap: 24px;
+	gap: 20px;
 	width: 100%;
-	padding: 24px;
+	padding: 10px 5px;
 	background: #f8fafc;
 
 	.bottom-grid {
