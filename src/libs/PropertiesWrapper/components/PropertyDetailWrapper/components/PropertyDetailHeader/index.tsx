@@ -18,9 +18,16 @@ interface IProps {
 		icon: React.ReactNode;
 		iconBg: string;
 	}[];
+	onEditProperty: () => void;
+	onAddUnit: () => void;
 }
 
-function PropertyDetailHeader({ propertyDetail, stats }: IProps) {
+function PropertyDetailHeader({
+	propertyDetail,
+	stats,
+	onEditProperty,
+	onAddUnit,
+}: IProps) {
 	const { closePropertyDetail } = usePropertiesNavigation();
 	const { name, address, type } = propertyDetail;
 
@@ -93,6 +100,7 @@ function PropertyDetailHeader({ propertyDetail, stats }: IProps) {
 									<span>Edit Property</span>
 								</Box>
 							}
+							handleClick={onEditProperty}
 							background="white"
 							color="var(--Black)"
 							border="1px solid #e2e8f0"
@@ -114,6 +122,7 @@ function PropertyDetailHeader({ propertyDetail, stats }: IProps) {
 									<span>Add New Unit</span>
 								</Box>
 							}
+							handleClick={onAddUnit}
 							background="var(--Main-Blue)"
 							color="white"
 							borderRadius="8px"
