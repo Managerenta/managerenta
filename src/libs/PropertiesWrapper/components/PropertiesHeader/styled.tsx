@@ -23,7 +23,7 @@ export const PropertiesHeaderStyled = styled(Box)`
 			align-items: center;
 			justify-content: center;
 			gap: 8px;
-			padding: 5px 10px;
+			padding: 3px 10px;
 			background: var(--Main-Blue);
 			color: white;
 			border: none;
