@@ -7,7 +7,7 @@ export const TenantDetailWrapperStyled = styled(Box)`
 	flex-direction: column;
 	gap: 20px;
 	width: 100%;
-	padding: 20px;
+	padding: 10px 5px;
 	background: #f8fafc;
 
 	.bottom-grid {
