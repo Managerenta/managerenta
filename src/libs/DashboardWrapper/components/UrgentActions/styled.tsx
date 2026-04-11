@@ -53,6 +53,13 @@ export const UrgentActionsStyled = styled(Box)`
 		flex-direction: column;
 		gap: 10px;
 
+		.empty-state {
+			font-size: 15px;
+			color: #94a3b8;
+			padding: 12px;
+			text-align: center;
+		}
+
 		.action-row {
 			display: flex;
 			align-items: center;
