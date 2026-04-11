@@ -38,6 +38,13 @@ export const RecentTransactionsStyled = styled(Box)`
 	.transaction-list {
 		display: flex;
 		flex-direction: column;
+
+		.empty-state {
+			font-size: 15px;
+			color: #94a3b8;
+			padding: 16px;
+			text-align: center;
+		}
 	}
 
 	.transaction-row {
@@ -46,6 +53,12 @@ export const RecentTransactionsStyled = styled(Box)`
 		gap: 12px;
 		padding: 12px 0;
 		border-bottom: 1px solid #f8fafc;
+		cursor: pointer;
+		transition: background 0.15s ease;
+
+		&:hover {
+			background: #f8fafc;
+		}
 
 		&:last-child {
 			border-bottom: none;
