@@ -127,7 +127,10 @@ function TenantModal({ open, close, mode, onSuccess }: IProps) {
 			});
 			setSelectedRent(null);
 		} else if (mode.type === "add-tenant" && mode.preselectedUnit) {
-			setForm((prev) => ({ ...prev, unitId: mode.preselectedUnit?.id ?? "" }));
+			setForm((prev) => ({
+				...prev,
+				unitId: mode.preselectedUnit?.id ?? "",
+			}));
 			setSelectedRent(mode.preselectedUnit.rent);
 		} else {
 			setForm(EMPTY_FORM);
