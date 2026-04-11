@@ -60,6 +60,7 @@ export interface ITopTenant {
 
 export interface ITransaction {
 	id: string;
+	tenantId: string;
 	name: string;
 	date: string;
 	unit: string;
@@ -69,9 +70,32 @@ export interface ITransaction {
 
 export interface ITenantAction {
 	id: string;
+	tenantId: string;
 	name: string;
 	property: string;
 	amount: string;
 	avatar: string;
+	phone?: string;
 	overdueDays?: number;
+}
+
+export interface IRawDashboardUrgentAction {
+	tenantId: string;
+	name: string;
+	avatar?: string;
+	propertyName: string;
+	unitName: string;
+	amount: number;
+	phone?: string;
+	overdueDays?: number;
+}
+
+export interface IRawDashboardTransaction {
+	_id: string;
+	tenantId: string;
+	tenantName: string;
+	unitName: string;
+	date: string;
+	amount: number;
+	type: "credit" | "debit";
 }
