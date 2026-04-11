@@ -13,7 +13,12 @@ import {
 import useSWR from "swr";
 import { api } from "@/constants";
 import { AppContextProvider } from "@/hooks";
-import type { ITenantAction, ITransaction } from "@/types";
+import type {
+	IRawDashboardTransaction,
+	IRawDashboardUrgentAction,
+	ITenantAction,
+	ITransaction,
+} from "@/types";
 
 interface IRawProperty {
 	_id: string;
@@ -23,6 +28,15 @@ interface IRawProperty {
 	occupied: number;
 	monthlyRent: number;
 	image?: string;
+}
+
+function formatDate(iso: string): string {
+	if (!iso) return "";
+	return new Date(iso).toLocaleDateString("en-GB");
+}
+
+function formatNaira(amount: number): string {
+	return `₦${amount.toLocaleString("en-NG")}`;
 }
 
 export default function useDashboardData() {
@@ -109,89 +123,49 @@ export default function useDashboardData() {
 	}, [rawProperties]);
 
 	const dueToday = useMemo<ITenantAction[]>(() => {
-		return [
-			{
-				id: "tenant-001",
-				name: "Chioma Okoro",
-				property: "Lagos Estate, Unit 12A",
-				amount: "₦450,000",
-				avatar: "/images/tenants/chioma.webp",
-			},
-			{
-				id: "tenant-002",
-				name: "Emeka Nwosu",
-				property: "Victoria Garden, Unit 5B",
-				amount: "₦320,000",
-				avatar: "/images/tenants/emeka.webp",
-			},
-		];
-	}, []);
+		const raw: IRawDashboardUrgentAction[] =
+			dashboardStats?.urgentActions?.dueToday ?? [];
+		return raw.map((a) => ({
+			id: a.tenantId,
+			tenantId: a.tenantId,
+			name: a.name,
+			property: `${a.propertyName}, ${a.unitName}`,
+			amount: formatNaira(a.amount),
+			avatar: a.avatar ?? "",
+			phone: a.phone,
+		}));
+	}, [dashboardStats]);
 
 	const overdue = useMemo<ITenantAction[]>(() => {
-		return [
-			{
-				id: "tenant-003",
-				name: "Funmi Adebayo",
-				property: "Ikoyi Heights, Unit 8C",
-				amount: "₦380,000",
-				avatar: "/images/tenants/funmi.webp",
-				overdueDays: 5,
-			},
-			{
-				id: "tenant-004",
-				name: "Tunde Balogun",
-				property: "Lekki Phase 2, Unit 4B",
-				amount: "₦380,000",
-				avatar: "/images/tenants/tunde.webp",
-				overdueDays: 5,
-			},
-		];
-	}, []);
+		const raw: IRawDashboardUrgentAction[] =
+			dashboardStats?.urgentActions?.overdue ?? [];
+		return raw.map((a) => ({
+			id: a.tenantId,
+			tenantId: a.tenantId,
+			name: a.name,
+			property: `${a.propertyName}, ${a.unitName}`,
+			amount: formatNaira(a.amount),
+			avatar: a.avatar ?? "",
+			phone: a.phone,
+			overdueDays: a.overdueDays ?? 0,
+		}));
+	}, [dashboardStats]);
+
+	const urgentActionCount = dueToday.length + overdue.length;
 
 	const transactions = useMemo<ITransaction[]>(() => {
-		return [
-			{
-				id: "tx-001",
-				name: "Kemi Ajayi",
-				date: "15/12/2024",
-				unit: "Unit 3A",
-				amount: "₦450,000",
-				type: "credit",
-			},
-			{
-				id: "tx-002",
-				name: "David Okonkwo",
-				date: "14/12/2024",
-				unit: "Unit 7B",
-				amount: "₦320,000",
-				type: "credit",
-			},
-			{
-				id: "tx-003",
-				name: "Maintenance Fee",
-				date: "13/12/2024",
-				unit: "General",
-				amount: "₦75,000",
-				type: "debit",
-			},
-			{
-				id: "tx-004",
-				name: "Sarah Ibrahim",
-				date: "12/12/2024",
-				unit: "Unit 15C",
-				amount: "₦380,000",
-				type: "credit",
-			},
-			{
-				id: "tx-005",
-				name: "Michael Eze",
-				date: "11/12/2024",
-				unit: "Unit 9A",
-				amount: "₦500,000",
-				type: "credit",
-			},
-		];
-	}, []);
+		const raw: IRawDashboardTransaction[] =
+			dashboardStats?.recentTransactions ?? [];
+		return raw.map((t) => ({
+			id: t._id,
+			tenantId: t.tenantId,
+			name: t.tenantName,
+			date: formatDate(t.date),
+			unit: t.unitName,
+			amount: formatNaira(t.amount),
+			type: t.type,
+		}));
+	}, [dashboardStats]);
 
 	const quickActions = useMemo(() => {
 		return [
@@ -206,6 +180,7 @@ export default function useDashboardData() {
 		stats,
 		dueToday,
 		overdue,
+		urgentActionCount,
 		transactions,
 		listedProperties,
 		quickActions,
