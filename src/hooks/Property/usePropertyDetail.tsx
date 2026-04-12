@@ -1,10 +1,9 @@
 "use client";
-import { useContext, useMemo } from "react";
+import { useMemo } from "react";
 import { FiAlertCircle, FiHome, FiLayers, FiUsers } from "react-icons/fi";
 import useSWR from "swr";
-import { api } from "@/constants";
+import { fetcher } from "@/constants";
 import type { IPropertyDetail, IPropertyUnit, ITopTenant } from "@/types";
-import { AppContextProvider } from "../Context";
 
 interface IRawUnit {
 	_id: string;
@@ -36,18 +35,16 @@ function formatDate(iso: string): string {
 }
 
 export default function usePropertyDetail(propertyId: string | null) {
-	const { env } = useContext(AppContextProvider);
-
-	const { data, isLoading, mutate } = useSWR<IRawPropertyDetail>(
-		propertyId
-			? `${env.MAIN_SERVICE_URL}/api/properties/${propertyId}`
-			: null,
-		(u: string) =>
-			api()
-				.get(u)
-				.then((r) => r.data?.data),
-		{ revalidateOnMount: true },
-	);
+	const {
+		data: rawResponse,
+		isLoading,
+		mutate,
+	} = useSWR<{
+		data: IRawPropertyDetail;
+	}>(propertyId ? `/api/properties/${propertyId}` : null, fetcher, {
+		revalidateOnMount: true,
+	});
+	const data = rawResponse?.data ?? null;
 
 	const propertyDetail = useMemo<IPropertyDetail | null>(() => {
 		if (!data) return null;
