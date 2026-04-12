@@ -1,11 +1,10 @@
 "use client";
-import { useContext, useMemo } from "react";
+import { useMemo } from "react";
 import { BsCurrencyDollar } from "react-icons/bs";
 import { FiHome, FiLayers, FiTrendingUp } from "react-icons/fi";
 import useSWR from "swr";
-import { api } from "@/constants";
+import { fetcher } from "@/constants";
 import type { IPropertyList, IPropertyStatItem } from "@/types";
-import { AppContextProvider } from "../Context";
 
 interface IRawProperty {
 	_id: string;
@@ -17,6 +16,17 @@ interface IRawProperty {
 	monthlyRent: number;
 	image?: string;
 	createdAt: string;
+}
+
+interface IRawPropertiesResponse {
+	data?: IRawProperty[];
+	stats?: {
+		totalProperties?: number;
+		totalUnits?: number;
+		totalOccupied?: number;
+		totalMonthlyRent?: number;
+	};
+	total?: number;
 }
 
 function computeOccupancyStatus(
@@ -45,22 +55,15 @@ function computeTypeBadgeColor(type: string): string {
 }
 
 export default function usePropertiesData(limit = 20, offset = 0) {
-	const { env } = useContext(AppContextProvider);
-
-	const url = `${env.MAIN_SERVICE_URL}/api/properties?limit=${limit}&offset=${offset}`;
+	const url = `/api/properties?limit=${limit}&offset=${offset}`;
 
 	const {
 		data: rawResponse,
 		isLoading,
 		mutate,
-	} = useSWR(
-		url,
-		(u: string) =>
-			api()
-				.get(u)
-				.then((r) => r.data),
-		{ revalidateOnMount: true },
-	);
+	} = useSWR<IRawPropertiesResponse>(url, fetcher, {
+		revalidateOnMount: true,
+	});
 
 	const rawProperties: IRawProperty[] = rawResponse?.data ?? [];
 	const rawStats = rawResponse?.stats ?? null;
