@@ -1,20 +1,13 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-	type ReactNode,
-	useContext,
-	useMemo,
-	useReducer,
-	useState,
-} from "react";
+import { type ReactNode, useMemo, useReducer, useState } from "react";
 import { FaLock, FaUser } from "react-icons/fa";
 import { FaRegCircleUser } from "react-icons/fa6";
 import { HiOutlineMail } from "react-icons/hi";
 import { toast } from "react-toastify";
 import { Box, Button, Input, Text } from "@/components";
-import { api } from "@/constants";
-import { AppContextProvider } from "@/hooks";
+import { api, getErrorMessage } from "@/constants";
 import { AlternativeSeparator } from "@/layouts";
 import Header from "../Header";
 import { SignupStyled } from "./styled";
@@ -68,7 +61,6 @@ export default function Signup() {
 	const [state, dispatch] = useReducer(signupReducer, initialState);
 	const [isLoading, setIsLoading] = useState(false);
 
-	const { env } = useContext(AppContextProvider);
 	const router = useRouter();
 
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -91,18 +83,12 @@ export default function Signup() {
 			formData.append("email", state.email);
 			formData.append("password", state.createPassword);
 
-			await api().post(
-				`${env.MAIN_SERVICE_URL}/api/auth/signup`,
-				formData,
-			);
+			await api().post("/api/auth/signup", formData);
 
 			toast.success("Account created! Please sign in.");
 			router.push("/login");
 		} catch (err: unknown) {
-			const message =
-				(err as { response?: { data?: { message?: string } } })
-					?.response?.data?.message ?? "Failed to create account";
-			toast.error(message);
+			toast.error(getErrorMessage(err, "Failed to create account"));
 		} finally {
 			setIsLoading(false);
 		}
