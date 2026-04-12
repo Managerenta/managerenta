@@ -1,17 +1,9 @@
 "use client";
-import {
-	memo,
-	useCallback,
-	useContext,
-	useEffect,
-	useMemo,
-	useState,
-} from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import useSWR from "swr";
 import { Box, Button, Text } from "@/components";
-import { api } from "@/constants";
-import { AppContextProvider } from "@/hooks";
+import { api, fetcher, getErrorMessage } from "@/constants";
 import type { ITenantDetail } from "@/types";
 import ModalWrapper from "../ModalWrapper";
 import { TenantModalStyled } from "./styled";
@@ -60,7 +52,6 @@ const EMPTY_FORM = {
 };
 
 function TenantModal({ open, close, mode, onSuccess }: IProps) {
-	const { env } = useContext(AppContextProvider);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [form, setForm] = useState(EMPTY_FORM);
 	const [selectedRent, setSelectedRent] = useState<number | null>(null);
@@ -70,14 +61,13 @@ function TenantModal({ open, close, mode, onSuccess }: IProps) {
 		mode.type === "add-tenant" && !!mode.preselectedUnit;
 
 	// Only fetch vacant units when add modal is open AND no unit is pre-selected
-	const { data: unitsResponse, isLoading: unitsLoading } = useSWR(
+	const { data: unitsResponse, isLoading: unitsLoading } = useSWR<{
+		data: IRawUnit[];
+	}>(
 		open && mode.type === "add-tenant" && !hasPreselectedUnit
-			? `${env.MAIN_SERVICE_URL}/api/units?status=Vacant`
+			? "/api/units?status=Vacant"
 			: null,
-		(u: string) =>
-			api()
-				.get(u)
-				.then((r) => r.data),
+		fetcher,
 		{ revalidateOnMount: true, revalidateOnFocus: true },
 	);
 
@@ -198,10 +188,7 @@ function TenantModal({ open, close, mode, onSuccess }: IProps) {
 				if (form.leaseExpiry)
 					formData.append("leaseExpiry", form.leaseExpiry);
 				if (avatarFile) formData.append("avatar", avatarFile);
-				await api().post(
-					`${env.MAIN_SERVICE_URL}/api/tenants`,
-					formData,
-				);
+				await api().post("/api/tenants", formData);
 				toast.success("Tenant added successfully");
 				setAvatarFile(null);
 			} else {
@@ -215,10 +202,7 @@ function TenantModal({ open, close, mode, onSuccess }: IProps) {
 				if (form.leaseExpiry)
 					formData.append("leaseExpiry", form.leaseExpiry);
 				if (avatarFile) formData.append("avatar", avatarFile);
-				await api().patch(
-					`${env.MAIN_SERVICE_URL}/api/tenants/${mode.tenant.id}`,
-					formData,
-				);
+				await api().patch(`/api/tenants/${mode.tenant.id}`, formData);
 				toast.success("Tenant updated successfully");
 				setAvatarFile(null);
 			}
@@ -226,14 +210,11 @@ function TenantModal({ open, close, mode, onSuccess }: IProps) {
 			onSuccess?.();
 			close();
 		} catch (err: unknown) {
-			const message =
-				(err as { response?: { data?: { message?: string } } })
-					?.response?.data?.message ?? "Something went wrong";
-			toast.error(message);
+			toast.error(getErrorMessage(err));
 		} finally {
 			setIsSubmitting(false);
 		}
-	}, [env.MAIN_SERVICE_URL, form, avatarFile, mode, close, onSuccess]);
+	}, [form, avatarFile, mode, close, onSuccess]);
 
 	const isAddMode = mode.type === "add-tenant";
 
