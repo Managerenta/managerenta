@@ -1,15 +1,14 @@
 "use client";
-import { useContext, useMemo } from "react";
+import { useMemo } from "react";
 import { FiAlertCircle, FiUserCheck, FiUsers, FiUserX } from "react-icons/fi";
 import useSWR from "swr";
-import { api } from "@/constants";
+import { fetcher } from "@/constants";
 import type {
 	IRawTenant,
 	IRawTenantStats,
 	ITenantListItem,
 	ITenantStatItem,
 } from "@/types";
-import { AppContextProvider } from "../Context";
 
 function formatDate(iso: string): string {
 	if (!iso) return "";
@@ -23,8 +22,6 @@ export default function useTenantsData(
 	search = "",
 	sort = "name",
 ) {
-	const { env } = useContext(AppContextProvider);
-
 	const params = new URLSearchParams({
 		limit: String(limit),
 		offset: String(offset),
@@ -33,20 +30,20 @@ export default function useTenantsData(
 		...(sort && { sort }),
 	});
 
-	const url = `${env.MAIN_SERVICE_URL}/api/tenants?${params.toString()}`;
+	const url = `/api/tenants?${params.toString()}`;
 
 	const {
 		data: rawResponse,
 		isLoading,
 		mutate,
-	} = useSWR(
-		url,
-		(u: string) =>
-			api()
-				.get(u)
-				.then((r) => r.data),
-		{ revalidateOnMount: true, revalidateOnFocus: true },
-	);
+	} = useSWR<{
+		data?: IRawTenant[];
+		stats?: IRawTenantStats;
+		total?: number;
+	}>(url, fetcher, {
+		revalidateOnMount: true,
+		revalidateOnFocus: true,
+	});
 
 	const rawTenants: IRawTenant[] = rawResponse?.data ?? [];
 	const rawStats: IRawTenantStats | null = rawResponse?.stats ?? null;
