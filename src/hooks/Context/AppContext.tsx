@@ -57,14 +57,12 @@ export default function AppContext({
 	}, []);
 
 	const reAuthenticateUserSession = useCallback(async () => {
-		const url = `${env.MAIN_SERVICE_URL}/api/auth/verify`;
-
 		const result = await verifyUserLogin({
-			url,
+			url: "/api/auth/verify",
 		});
 
 		_setIsUserLoggedIn(result);
-	}, [env.MAIN_SERVICE_URL]);
+	}, []);
 
 	useEffect(() => {
 		if (!isBrowser) return;
