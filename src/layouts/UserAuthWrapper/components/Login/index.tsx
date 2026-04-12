@@ -13,7 +13,7 @@ import { FaLock, FaUser } from "react-icons/fa";
 import { GrSecure } from "react-icons/gr";
 import { toast } from "react-toastify";
 import { Box, Button, Input, Text } from "@/components";
-import { api } from "@/constants";
+import { api, getErrorMessage } from "@/constants";
 import { AppContextProvider } from "@/hooks";
 import AlternativeSeparator from "@/layouts/AlternativeSeparator";
 import Header from "../Header";
@@ -48,7 +48,7 @@ function Login() {
 	const [state, dispatch] = useReducer(loginReducer, initialState);
 	const [isLoading, setIsLoading] = useState(false);
 
-	const { env, reAuthenticateUserSession } = useContext(AppContextProvider);
+	const { reAuthenticateUserSession } = useContext(AppContextProvider);
 	const router = useRouter();
 
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -62,7 +62,7 @@ function Login() {
 		setIsLoading(true);
 
 		try {
-			await api().post(`${env.MAIN_SERVICE_URL}/api/auth/login`, {
+			await api().post("/api/auth/login", {
 				email: state.email,
 				password: state.password,
 			});
@@ -71,10 +71,7 @@ function Login() {
 			router.push("/dashboard");
 			router.refresh();
 		} catch (err: unknown) {
-			const message =
-				(err as { response?: { data?: { message?: string } } })
-					?.response?.data?.message ?? "Invalid username or password";
-			toast.error(message);
+			toast.error(getErrorMessage(err, "Invalid username or password"));
 		} finally {
 			setIsLoading(false);
 		}
