@@ -1,19 +1,19 @@
 "use client";
 import { useRouter } from "next/navigation";
-import {
-	memo,
-	useCallback,
-	useContext,
-	useEffect,
-	useReducer,
-	useState,
-} from "react";
+import { memo, useCallback, useEffect, useReducer, useState } from "react";
 import { toast } from "react-toastify";
 import useSWR from "swr";
 import { Box, Button, Input, Text } from "@/components";
-import { api } from "@/constants";
-import { AppContextProvider } from "@/hooks";
+import { api, fetcher, getErrorMessage } from "@/constants";
 import { ProfileInformationStyled } from "./styled";
+
+interface IUserProfileResponse {
+	data?: {
+		name?: string;
+		email?: string;
+		phone?: string;
+	};
+}
 
 interface ProfileState {
 	name: string;
@@ -39,19 +39,18 @@ function reducer(state: ProfileState, action: ProfileAction): ProfileState {
 const EMPTY: ProfileState = { name: "", email: "", phone: "" };
 
 function ProfileInformation() {
-	const { env } = useContext(AppContextProvider);
 	const [isSaving, setIsSaving] = useState(false);
 	const [state, dispatch] = useReducer(reducer, EMPTY);
 	const router = useRouter();
 
-	const { data, isLoading, mutate } = useSWR(
-		`${env.MAIN_SERVICE_URL}/api/users/user-profile`,
-		(url: string) =>
-			api()
-				.get(url)
-				.then((r) => r.data?.data),
-		{ revalidateOnMount: true },
-	);
+	const {
+		data: rawResponse,
+		isLoading,
+		mutate,
+	} = useSWR<IUserProfileResponse>("/api/users/user-profile", fetcher, {
+		revalidateOnMount: true,
+	});
+	const data = rawResponse?.data;
 
 	useEffect(() => {
 		if (data) {
@@ -80,19 +79,16 @@ function ProfileInformation() {
 				formData.append("phone", state.phone.trim());
 			}
 
-			await api().patch(`${env.MAIN_SERVICE_URL}/api/users`, formData);
+			await api().patch("/api/users", formData);
 			toast.success("Profile updated successfully");
 			mutate();
 			router.refresh();
 		} catch (err: unknown) {
-			const message =
-				(err as { response?: { data?: { message?: string } } })
-					?.response?.data?.message ?? "Failed to update profile";
-			toast.error(message);
+			toast.error(getErrorMessage(err, "Failed to update profile"));
 		} finally {
 			setIsSaving(false);
 		}
-	}, [env.MAIN_SERVICE_URL, state, mutate, router.refresh]);
+	}, [state, mutate, router.refresh]);
 
 	const handleCancel = useCallback(() => {
 		if (data) {
