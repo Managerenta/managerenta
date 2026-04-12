@@ -1,9 +1,8 @@
 "use client";
-import { memo, useCallback, useContext, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Box, Button, Text } from "@/components";
-import { api } from "@/constants";
-import { AppContextProvider } from "@/hooks";
+import { api, getErrorMessage } from "@/constants";
 import type { IPropertyDetail } from "@/types";
 import ModalWrapper from "../ModalWrapper";
 import { PropertyModalStyled } from "./styled";
@@ -41,7 +40,6 @@ const EMPTY_PROPERTY_FORM = {
 };
 
 function PropertyModal({ open, close, mode, onSuccess }: IProps) {
-	const { env } = useContext(AppContextProvider);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [propertyForm, setPropertyForm] = useState(EMPTY_PROPERTY_FORM);
 	const [unitForm, setUnitForm] = useState({ name: "", rent: "" });
@@ -117,10 +115,7 @@ function PropertyModal({ open, close, mode, onSuccess }: IProps) {
 						propertyForm.description.trim(),
 					);
 				if (imageFile) formData.append("image", imageFile);
-				await api().post(
-					`${env.MAIN_SERVICE_URL}/api/properties`,
-					formData,
-				);
+				await api().post("/api/properties", formData);
 				toast.success("Property added successfully");
 				setPropertyForm(EMPTY_PROPERTY_FORM);
 				setImageFile(null);
@@ -148,7 +143,7 @@ function PropertyModal({ open, close, mode, onSuccess }: IProps) {
 					);
 				if (imageFile) formData.append("image", imageFile);
 				await api().patch(
-					`${env.MAIN_SERVICE_URL}/api/properties/${mode.property.id}`,
+					`/api/properties/${mode.property.id}`,
 					formData,
 				);
 				toast.success("Property updated successfully");
@@ -162,10 +157,10 @@ function PropertyModal({ open, close, mode, onSuccess }: IProps) {
 					toast.error("Please enter a valid rent amount");
 					return;
 				}
-				await api().post(
-					`${env.MAIN_SERVICE_URL}/api/properties/${mode.propertyId}/units`,
-					{ name: unitForm.name.trim(), rent: Number(unitForm.rent) },
-				);
+				await api().post(`/api/properties/${mode.propertyId}/units`, {
+					name: unitForm.name.trim(),
+					rent: Number(unitForm.rent),
+				});
 				toast.success("Unit added successfully");
 				setUnitForm({ name: "", rent: "" });
 			}
@@ -173,22 +168,11 @@ function PropertyModal({ open, close, mode, onSuccess }: IProps) {
 			onSuccess?.();
 			close();
 		} catch (err: unknown) {
-			const message =
-				(err as { response?: { data?: { message?: string } } })
-					?.response?.data?.message ?? "Something went wrong";
-			toast.error(message);
+			toast.error(getErrorMessage(err));
 		} finally {
 			setIsSubmitting(false);
 		}
-	}, [
-		mode,
-		propertyForm,
-		unitForm,
-		imageFile,
-		env.MAIN_SERVICE_URL,
-		close,
-		onSuccess,
-	]);
+	}, [mode, propertyForm, unitForm, imageFile, close, onSuccess]);
 
 	const title =
 		mode.type === "add-property"
