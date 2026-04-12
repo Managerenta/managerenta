@@ -1,17 +1,10 @@
 "use client";
-import {
-	memo,
-	useCallback,
-	useContext,
-	useEffect,
-	useMemo,
-	useState,
-} from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { FiHome, FiPlus, FiTool, FiZap } from "react-icons/fi";
 import { toast } from "react-toastify";
 import { Box, Button, Input, Text } from "@/components";
-import { api } from "@/constants";
-import { AppContextProvider, useAddTransactionNavigation } from "@/hooks";
+import { api, getErrorMessage } from "@/constants";
+import { useAddTransactionNavigation } from "@/hooks";
 import { TransactionFormStyled } from "./styled";
 
 interface IProps {
@@ -63,7 +56,6 @@ const PERIODS = [
 ];
 
 function TransactionForm({ tenantId, monthlyRent }: IProps) {
-	const { env } = useContext(AppContextProvider);
 	const { closeAddTransaction } = useAddTransactionNavigation();
 	const [selectedType, setSelectedType] = useState("rent");
 	const [period, setPeriod] = useState(1);
@@ -139,26 +131,18 @@ function TransactionForm({ tenantId, monthlyRent }: IProps) {
 		}
 		setIsSubmitting(true);
 		try {
-			await api().post(
-				`${env.MAIN_SERVICE_URL}/api/tenants/${tenantId}/transactions`,
-				{
-					type: selectedType,
-					amount: parsedAmount,
-					description: notes.trim() || undefined,
-					date: new Date(transactionDate).toISOString(),
-					paymentMethod,
-					...(selectedType === "rent" && period > 1
-						? { period }
-						: {}),
-				},
-			);
+			await api().post(`/api/tenants/${tenantId}/transactions`, {
+				type: selectedType,
+				amount: parsedAmount,
+				description: notes.trim() || undefined,
+				date: new Date(transactionDate).toISOString(),
+				paymentMethod,
+				...(selectedType === "rent" && period > 1 ? { period } : {}),
+			});
 			toast.success("Transaction recorded successfully");
 			closeAddTransaction();
 		} catch (err: unknown) {
-			const message =
-				(err as { response?: { data?: { message?: string } } })
-					?.response?.data?.message ?? "Failed to record transaction";
-			toast.error(message);
+			toast.error(getErrorMessage(err, "Failed to record transaction"));
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -170,7 +154,6 @@ function TransactionForm({ tenantId, monthlyRent }: IProps) {
 		notes,
 		transactionDate,
 		paymentMethod,
-		env.MAIN_SERVICE_URL,
 		closeAddTransaction,
 	]);
 
