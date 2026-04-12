@@ -1,5 +1,5 @@
 "use client";
-import { useContext, useMemo } from "react";
+import { useMemo } from "react";
 import {
 	FiAlertCircle,
 	FiBell,
@@ -11,8 +11,7 @@ import {
 	FiUsers,
 } from "react-icons/fi";
 import useSWR from "swr";
-import { api } from "@/constants";
-import { AppContextProvider } from "@/hooks";
+import { fetcher } from "@/constants";
 import type {
 	IRawDashboardTransaction,
 	IRawDashboardUrgentAction,
@@ -30,6 +29,22 @@ interface IRawProperty {
 	image?: string;
 }
 
+interface IRawDashboardStats {
+	totalProperties?: number;
+	totalUnits?: number;
+	occupiedUnits?: number;
+	vacantUnits?: number;
+	urgentActions?: {
+		dueToday?: IRawDashboardUrgentAction[];
+		overdue?: IRawDashboardUrgentAction[];
+	};
+	recentTransactions?: IRawDashboardTransaction[];
+}
+
+interface IRawPropertiesResponse {
+	data?: IRawProperty[];
+}
+
 function formatDate(iso: string): string {
 	if (!iso) return "";
 	return new Date(iso).toLocaleDateString("en-GB");
@@ -40,23 +55,15 @@ function formatNaira(amount: number): string {
 }
 
 export default function useDashboardData() {
-	const { env } = useContext(AppContextProvider);
+	const { data: dashboardStatsResponse } = useSWR<{
+		data?: IRawDashboardStats;
+	}>("/api/dashboard/stats", fetcher, { revalidateOnMount: true });
+	const dashboardStats: IRawDashboardStats =
+		dashboardStatsResponse?.data ?? {};
 
-	const { data: dashboardStats } = useSWR(
-		`${env.MAIN_SERVICE_URL}/api/dashboard/stats`,
-		(u: string) =>
-			api()
-				.get(u)
-				.then((r) => r.data?.data ?? r.data),
-		{ revalidateOnMount: true },
-	);
-
-	const { data: propertiesData } = useSWR(
-		`${env.MAIN_SERVICE_URL}/api/properties?limit=2`,
-		(u: string) =>
-			api()
-				.get(u)
-				.then((r) => r.data),
+	const { data: propertiesData } = useSWR<IRawPropertiesResponse>(
+		"/api/properties?limit=2",
+		fetcher,
 		{ revalidateOnMount: true },
 	);
 
