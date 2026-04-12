@@ -1,9 +1,8 @@
 "use client";
-import { memo, useCallback, useContext, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { Box, Button, Input, Text } from "@/components";
-import { api } from "@/constants";
-import { AppContextProvider } from "@/hooks";
+import { api, getErrorMessage } from "@/constants";
 import { SecurityStyled } from "./styled";
 
 function getStrengthInfo(password: string): {
@@ -34,7 +33,6 @@ function getStrengthInfo(password: string): {
 }
 
 function Security() {
-	const { env } = useContext(AppContextProvider);
 	const [currentPassword, setCurrentPassword] = useState<string>("");
 	const [newPassword, setNewPassword] = useState<string>("");
 	const [confirmPassword, setConfirmPassword] = useState<string>("");
@@ -77,26 +75,20 @@ function Security() {
 
 		setIsUpdating(true);
 		try {
-			await api().post(
-				`${env.MAIN_SERVICE_URL}/api/users/change-password`,
-				{
-					currentPassword,
-					newPassword,
-				},
-			);
+			await api().post("/api/users/change-password", {
+				currentPassword,
+				newPassword,
+			});
 			toast.success("Password updated successfully");
 			setCurrentPassword("");
 			setNewPassword("");
 			setConfirmPassword("");
 		} catch (err: unknown) {
-			const message =
-				(err as { response?: { data?: { message?: string } } })
-					?.response?.data?.message ?? "Failed to update password";
-			toast.error(message);
+			toast.error(getErrorMessage(err, "Failed to update password"));
 		} finally {
 			setIsUpdating(false);
 		}
-	}, [env.MAIN_SERVICE_URL, currentPassword, newPassword, confirmPassword]);
+	}, [currentPassword, newPassword, confirmPassword]);
 
 	return (
 		<SecurityStyled>
