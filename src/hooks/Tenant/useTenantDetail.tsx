@@ -1,7 +1,7 @@
 "use client";
-import { useContext, useMemo } from "react";
+import { useMemo } from "react";
 import useSWR from "swr";
-import { api } from "@/constants";
+import { fetcher } from "@/constants";
 import type {
 	IPaymentHistoryBlock,
 	IRawTenantDetail,
@@ -9,7 +9,6 @@ import type {
 	ITenantDetail,
 	ITenantTransaction,
 } from "@/types";
-import { AppContextProvider } from "../Context";
 
 function formatDate(iso: string): string {
 	if (!iso) return "";
@@ -19,22 +18,6 @@ function formatDate(iso: string): string {
 function formatCurrency(amount: number): string {
 	if (amount < 0) return `-₦${Math.abs(amount).toLocaleString("en-NG")}`;
 	return `₦${amount.toLocaleString("en-NG")}`;
-}
-
-function computeTenancyDuration(moveInDate: string): string {
-	if (!moveInDate) return "";
-	const start = new Date(moveInDate);
-	const now = new Date();
-	const months =
-		(now.getFullYear() - start.getFullYear()) * 12 +
-		(now.getMonth() - start.getMonth());
-	if (months <= 0) return "Less than a month";
-	const years = Math.floor(months / 12);
-	const remainingMonths = months % 12;
-	if (years === 0)
-		return `${remainingMonths} month${remainingMonths !== 1 ? "s" : ""}`;
-	if (remainingMonths === 0) return `${years} year${years !== 1 ? "s" : ""}`;
-	return `${years} year${years !== 1 ? "s" : ""}, ${remainingMonths} month${remainingMonths !== 1 ? "s" : ""}`;
 }
 
 function ordinalSuffix(day: number): string {
@@ -52,18 +35,13 @@ function ordinalSuffix(day: number): string {
 }
 
 export default function useTenantDetailData(tenantId: string | null) {
-	const { env } = useContext(AppContextProvider);
-
 	const {
 		data: rawResponse,
 		isLoading,
 		mutate,
 	} = useSWR<{ data: IRawTenantDetail }>(
-		tenantId ? `${env.MAIN_SERVICE_URL}/api/tenants/${tenantId}` : null,
-		(u: string) =>
-			api()
-				.get(u)
-				.then((r) => r.data),
+		tenantId ? `/api/tenants/${tenantId}` : null,
+		fetcher,
 		{ revalidateOnMount: true, revalidateOnFocus: true },
 	);
 
@@ -80,7 +58,7 @@ export default function useTenantDetailData(tenantId: string | null) {
 			phone: data.phone,
 			email: data.email,
 			moveInDate: formatDate(data.moveInDate),
-			tenancyDuration: computeTenancyDuration(data.moveInDate),
+			tenancyDuration: data.tenancyDuration ?? "",
 			monthlyRent: `₦${data.monthlyRent.toLocaleString("en-NG")}/month`,
 			rentDueDay: `${data.rentDueDay}${ordinalSuffix(data.rentDueDay)}`,
 			nextDueDate: data.nextDueDate ? formatDate(data.nextDueDate) : "",
