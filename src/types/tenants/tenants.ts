@@ -28,6 +28,8 @@ export interface IRawTenantDetail {
 	phone: string;
 	email: string;
 	moveInDate: string;
+	leaseExpiry?: string;
+	tenancyDuration?: string;
 	monthlyRent: number;
 	rentDueDay: number;
 	nextDueDate?: string;
