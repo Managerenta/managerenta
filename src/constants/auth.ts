@@ -24,5 +24,5 @@ export async function signupUser(payload: {
 }
 
 export async function logoutUser() {
-	return await api().post("/api/logout");
+	return await api().post("/api/auth/logout");
 }
