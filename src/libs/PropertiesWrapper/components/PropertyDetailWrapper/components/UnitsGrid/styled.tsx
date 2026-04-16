@@ -45,7 +45,7 @@ export const UnitsGridStyled = styled(Box)`
 
 			.filter-tabs {
 				display: flex;
-				border: 1px solid #e2e8f0;
+				border: 1px solid var(--Border-Subtle);
 				border-radius: 8px;
 				overflow: hidden;
 
@@ -53,7 +53,7 @@ export const UnitsGridStyled = styled(Box)`
 					button {
 						padding: 8px 16px;
 						border: none;
-						background: white;
+						background: var(--Surface-Card);
 						color: #64748b;
 						font-size: 13px;
 						font-weight: 500;
@@ -69,18 +69,18 @@ export const UnitsGridStyled = styled(Box)`
 					}
 
 					&:not(:last-child) {
-						border-right: 1px solid #e2e8f0;
+						border-right: 1px solid var(--Border-Subtle);
 					}
 				}
 			}
 
 			.sort-dropdown {
 				padding: 8px 14px;
-				border: 1px solid #e2e8f0;
+				border: 1px solid var(--Border-Subtle);
 				border-radius: 8px;
 				font-size: 13px;
 				color: var(--Black);
-				background: white;
+				background: var(--Surface-Card);
 				cursor: pointer;
 			}
 		}
@@ -92,10 +92,10 @@ export const UnitsGridStyled = styled(Box)`
 		gap: 15px;
 
 		.unit-card {
-			background: white;
+			background: var(--Surface-Card);
 			border-radius: 12px;
 			padding: 15px 20px;
-			border: 1px solid #f1f5f9;
+			border: 1px solid var(--Border-Subtle);
 			display: flex;
 			flex-direction: column;
 			gap: 10px;
@@ -130,7 +130,7 @@ export const UnitsGridStyled = styled(Box)`
 				.tenant-name {
 					font-size: 15px;
 					font-weight: 600;
-					color: var(--Secondary-700);
+					color: var(--Black);
 				}
 			}
 
