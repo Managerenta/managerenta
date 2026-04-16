@@ -23,7 +23,7 @@ export const SignupStyled = styled(Box)`
 				display: block;
 				font-size: 14px;
 				font-weight: 400;
-				color: var(--Secondary-500);
+				color: var(--Text-Secondary);
 			}
 
 			section {
@@ -34,18 +34,19 @@ export const SignupStyled = styled(Box)`
 					left: 10px;
 					top: 50%;
 					transform: translateY(-50%);
-					color: var(--Secondary-500);
+					color: var(--Text-Secondary);
 					font-size: 17px;
 				}
 
 				input {
 					width: 100%;
 					padding: 10px 10px 10px 30px;
-					border: 0.5px solid grey;
+					border: 0.5px solid var(--Border-Subtle);
 					border-radius: 4px;
 					font-size: 14px;
 					transition: border-color 0.3s;
-					color: var(--Secondary-500);
+					color: var(--Text-Primary);
+					background: var(--Surface-Card);
 
 					/* &:focus {
 				border-color: var(--Primary-600);
@@ -73,7 +74,7 @@ export const SignupStyled = styled(Box)`
 
 			label {
 				font-size: 14px;
-				color: var(--Secondary-500);
+				color: var(--Text-Secondary);
 				font-weight: 400;
 				cursor: pointer;
 			}
@@ -108,7 +109,7 @@ export const SignupStyled = styled(Box)`
 		font-size: 16px;
 
 		p {
-			color: var(--Secondary-500);
+			color: var(--Text-Secondary);
 			font-weight: 400;
 		}
 
