@@ -3,10 +3,10 @@ import styled from "styled-components";
 import { Box } from "@/components";
 
 export const SecurityStyled = styled(Box)`
-	background: white;
+	background: var(--Surface-Card);
 	border-radius: 12px;
 	padding: 20px;
-	border: 1px solid #f1f5f9;
+	border: 1px solid var(--Border-Subtle);
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
@@ -48,16 +48,16 @@ export const SecurityStyled = styled(Box)`
 
 			input {
 				padding: 10px 14px;
-				border: 1px solid #e2e8f0;
+				border: 1px solid var(--Border-Subtle);
 				border-radius: 8px;
 				font-size: 14px;
 				color: var(--Black);
-				background: #f8fafc;
+				background: var(--Surface-Page);
 
 				&:focus {
 					outline: none;
 					border-color: var(--Main-Blue);
-					background: white;
+					background: var(--Surface-Card);
 				}
 			}
 
@@ -100,7 +100,7 @@ export const SecurityStyled = styled(Box)`
 			align-items: center;
 			justify-content: space-between;
 			padding: 14px;
-			background: #f8fafc;
+			background: var(--Surface-Page);
 			border-radius: 10px;
 
 			.toggle-info {
@@ -133,7 +133,7 @@ export const SecurityStyled = styled(Box)`
 					width: 20px;
 					height: 20px;
 					border-radius: 50%;
-					background: white;
+					background: var(--Surface-Card);
 					position: absolute;
 					top: 2px;
 					left: 2px;
@@ -155,7 +155,7 @@ export const SecurityStyled = styled(Box)`
 			padding: 8px 20px;
 			font-size: 13px;
 			font-weight: 500;
-			border: 1px solid #e2e8f0;
+			border: 1px solid var(--Border-Subtle);
 		}
 	}
 
