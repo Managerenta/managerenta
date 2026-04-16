@@ -12,7 +12,7 @@ export const ModalWrapperStyled = styled(Box)<{
 
 	.wrapper {
 		position: relative;
-		width: 500px;
+		width: 650px;
 		min-height: 550px;
 		max-height: 650px;
 		height: auto;
