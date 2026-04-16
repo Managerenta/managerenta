@@ -12,8 +12,8 @@ export const ReviewsStyled = styled(Box)`
 	.review {
 		width: 100%;
 		height: auto;
-		background: #2d5a8c;
-		color: var(--White);
+		background: rgba(255, 255, 255, 0.12);
+		color: #ffffff;
 		padding: 15px;
 		border-radius: 4px;
 		display: flex;
