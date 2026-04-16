@@ -5,7 +5,7 @@ import { Box } from "@/components";
 export const PropertyModalStyled = styled(Box)`
 	display: flex;
 	flex-direction: column;
-	background: var(--Secondary-200);
+	background: var(--Surface-Card);
 	gap: 24px;
 	padding: 20px;
 	border-radius: 12px;
@@ -63,11 +63,11 @@ export const PropertyModalStyled = styled(Box)`
 			textarea {
 				width: 100%;
 				padding: 10px 12px;
-				border: 1px solid #e2e8f0;
+				border: 1px solid var(--Border-Subtle);
 				border-radius: 8px;
 				font-size: 14px;
 				color: var(--Black);
-				background: white;
+				background: var(--Surface-Card);
 				outline: none;
 				transition: border-color 0.15s ease;
 				font-family: inherit;
