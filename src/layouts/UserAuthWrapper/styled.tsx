@@ -13,7 +13,7 @@ export const UserAuthWrapperStyled = styled(Box)`
 		min-height: 100vh;
 		display: grid;
 		grid-template-columns: repeat(2, 1fr);
-		background: var(--Main-Blue);
+		background: var(--Auth-Panel-Bg);
 
 		.details,
 		.main {
