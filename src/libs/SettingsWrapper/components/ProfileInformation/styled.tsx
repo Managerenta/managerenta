@@ -3,10 +3,10 @@ import styled from "styled-components";
 import { Box } from "@/components";
 
 export const ProfileInformationStyled = styled(Box)`
-	background: white;
+	background: var(--Surface-Card);
 	border-radius: 12px;
 	padding: 20px;
-	border: 1px solid #f1f5f9;
+	border: 1px solid var(--Border-Subtle);
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
@@ -29,12 +29,47 @@ export const ProfileInformationStyled = styled(Box)`
 			align-items: center;
 			gap: 12px;
 
-			.avatar-placeholder {
+			.avatar-wrapper {
+				position: relative;
 				width: 120px;
 				height: 120px;
 				border-radius: 50%;
-				background: linear-gradient(135deg, #94a3b8, #cbd5e1);
+				cursor: pointer;
+				overflow: hidden;
 				border: 4px solid #e2e8f0;
+				background: linear-gradient(135deg, #94a3b8, #cbd5e1);
+
+				img {
+					width: 100% !important;
+					height: 100% !important;
+					object-fit: cover;
+				}
+
+				.avatar-placeholder {
+					width: 100%;
+					height: 100%;
+					background: linear-gradient(135deg, #94a3b8, #cbd5e1);
+				}
+
+				.avatar-overlay {
+					position: absolute;
+					inset: 0;
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					justify-content: center;
+					gap: 4px;
+					background: rgba(0, 0, 0, 0.5);
+					color: white;
+					font-size: 12px;
+					font-weight: 600;
+					opacity: 0;
+					transition: opacity 0.2s ease;
+				}
+
+				&:hover .avatar-overlay {
+					opacity: 1;
+				}
 			}
 		}
 
@@ -56,16 +91,61 @@ export const ProfileInformationStyled = styled(Box)`
 
 				input {
 					padding: 10px 14px;
-					border: 1px solid #e2e8f0;
+					border: 1px solid var(--Border-Subtle);
 					border-radius: 8px;
 					font-size: 14px;
 					color: var(--Black);
-					background: #f8fafc;
+					background: var(--Surface-Page);
 
 					&:focus {
 						outline: none;
 						border-color: var(--Main-Blue);
-						background: white;
+						background: var(--Surface-Card);
+					}
+				}
+
+				.phone-input-wrap {
+					.PhoneInput {
+						display: flex;
+						align-items: center;
+						gap: 8px;
+						padding: 4px 14px;
+						border: 1px solid var(--Border-Subtle);
+						border-radius: 8px;
+						background: var(--Surface-Page);
+
+						&--focus {
+							border-color: var(--Main-Blue);
+							background: var(--Surface-Card);
+						}
+
+						.PhoneInputCountry {
+							display: flex;
+							align-items: center;
+							gap: 6px;
+						}
+
+						.PhoneInputCountryIcon {
+							width: 24px;
+							height: 18px;
+							box-shadow: none;
+							background: transparent;
+						}
+
+						.PhoneInputCountrySelectArrow {
+							color: #64748b;
+							opacity: 1;
+						}
+
+						.PhoneInputInput {
+							flex: 1;
+							padding: 8px 0;
+							border: none;
+							background: transparent;
+							font-size: 14px;
+							color: var(--Black);
+							outline: none;
+						}
 					}
 				}
 
@@ -131,7 +211,7 @@ export const ProfileInformationStyled = styled(Box)`
 			gap: 20px;
 
 			.avatar-section {
-				.avatar-placeholder {
+				.avatar-wrapper {
 					width: 90px;
 					height: 90px;
 				}
