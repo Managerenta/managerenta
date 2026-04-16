@@ -10,8 +10,8 @@ import {
 	useState,
 } from "react";
 import { BsCalculator } from "react-icons/bs";
-import { FiBell, FiChevronDown, FiLogOut, FiSearch } from "react-icons/fi";
-import { Box, Input, Text } from "@/components";
+import { FiBell, FiChevronDown, FiLogOut } from "react-icons/fi";
+import { Box, Text } from "@/components";
 import { AppContextProvider } from "@/hooks";
 import { NavbarStyled } from "./styled";
 
@@ -63,14 +63,6 @@ function Navbar({ background, navHeight }: IProps) {
 			<Box className="mobile-brand">
 				<BsCalculator />
 				<Text className="brand-name">PropertyTrack</Text>
-			</Box>
-
-			<Box className="search-bar">
-				<FiSearch size={20} />
-				<Input
-					type="text"
-					placeholder="Search properties by name or address..."
-				/>
 			</Box>
 
 			<Box className="nav-actions">
