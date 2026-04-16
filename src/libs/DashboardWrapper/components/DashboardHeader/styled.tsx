@@ -56,13 +56,13 @@ export const DashboardHeaderStyled = styled(Box)`
 		gap: 16px;
 
 		.stat-card {
-			background: white;
+			background: var(--Surface-Card);
 			border-radius: 12px;
 			padding: 20px;
 			display: flex;
 			flex-direction: column;
 			gap: 8px;
-			border: 1px solid #f1f5f9;
+			border: 1px solid var(--Border-Subtle);
 
 			.stat-top {
 				display: flex;
