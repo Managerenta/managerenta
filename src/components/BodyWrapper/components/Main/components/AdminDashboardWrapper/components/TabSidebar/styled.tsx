@@ -8,7 +8,7 @@ export const TabSidebarStyled = styled(Box)`
 	width: 240px;
 	height: 100%;
 	background: var(--Main-White, #fff);
-	border-right: 1px solid #e2e8f0;
+	border-right: 1px solid var(--Border-Subtle);
 	padding: 24px 16px;
 
 	.brand-section {
