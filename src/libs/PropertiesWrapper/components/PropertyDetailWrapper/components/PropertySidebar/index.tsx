@@ -94,12 +94,12 @@ function PropertySidebar({ topTenants }: IProps) {
 			<Box className="statistics-card">
 				<Text className="card-title">Property Statistics</Text>
 
-				<Box className="stat-section">
+				{/* <Box className="stat-section">
 					<Text className="stat-subtitle">
 						Occupancy Trend (Last 6 Months)
 					</Text>
 					<Box className="chart-placeholder" />
-				</Box>
+				</Box> */}
 
 				<Box className="stat-row">
 					<Text className="stat-label">Average Vacancy Duration</Text>
