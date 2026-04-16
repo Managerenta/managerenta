@@ -7,6 +7,7 @@ export const KeyHighlightsStyled = styled(Box)`
 	display: flex;
 	flex-direction: column;
 	gap: 15px;
+	color: #ffffff;
 
 	header {
 		display: flex;
@@ -15,12 +16,14 @@ export const KeyHighlightsStyled = styled(Box)`
 
 		svg {
 			font-size: 30px;
+			color: #ffffff;
 		}
 
 		p {
 			font-size: 24px;
 			font-weight: 700;
 			line-height: 1.5;
+			color: #ffffff;
 		}
 	}
 
@@ -28,6 +31,7 @@ export const KeyHighlightsStyled = styled(Box)`
 		font-size: 36px;
 		font-weight: 700;
 		line-height: 1.5;
+		color: #ffffff;
 	}
 
 	ul {
@@ -43,12 +47,12 @@ export const KeyHighlightsStyled = styled(Box)`
 
 			svg {
 				font-size: 24px;
-				color: green;
+				color: #4ade80;
 			}
 
 			p {
-				/* font-size: 18px; */
 				font-size: 16px;
+				color: rgba(255, 255, 255, 0.9);
 			}
 		}
 	}
