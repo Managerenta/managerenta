@@ -13,7 +13,7 @@ export const MobileTabBarStyled = styled(Box)`
 		width: 100%;
 		height: 70px;
 		background: var(--Main-White, #fff);
-		border-top: 1px solid #e2e8f0;
+		border-top: 1px solid var(--Border-Subtle);
 		align-items: center;
 		justify-content: space-around;
 		z-index: 100;
