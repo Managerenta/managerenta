@@ -7,7 +7,7 @@ export const SettingsFooterStyled = styled(Box)`
 	justify-content: space-between;
 	align-items: center;
 	padding-top: 20px;
-	border-top: 1px solid #e2e8f0;
+	border-top: 1px solid var(--Border-Subtle);
 
 	.footer-left,
 	.footer-right {
