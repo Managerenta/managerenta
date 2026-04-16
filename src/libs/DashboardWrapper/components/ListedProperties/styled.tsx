@@ -39,9 +39,9 @@ export const ListedPropertiesStyled = styled(Box)`
 	}
 
 	.property-card {
-		background: white;
+		background: var(--Surface-Card);
 		border-radius: 12px;
-		border: 1px solid #f1f5f9;
+		border: 1px solid var(--Border-Subtle);
 		overflow: hidden;
 
 		.property-image {
