@@ -8,7 +8,7 @@ export const PropertiesWrapperStyled = styled(Box)`
 	gap: 20px;
 	width: 100%;
 	padding: 10px 5px;
-	background: #f8fafc;
+	background: var(--Surface-Page);
 
 	.pagination-footer {
 		display: flex;
@@ -27,11 +27,11 @@ export const PropertiesWrapperStyled = styled(Box)`
 
 			select {
 				padding: 6px 10px;
-				border: 1px solid #e2e8f0;
+				border: 1px solid var(--Border-Subtle);
 				border-radius: 6px;
 				font-size: 14px;
 				color: var(--Black);
-				background: white;
+				background: var(--Surface-Card);
 				cursor: pointer;
 			}
 		}
