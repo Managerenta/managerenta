@@ -26,7 +26,7 @@ export const DashboardWrapperStyled = styled(Box)<{
 		.main-content {
 			flex: 1;
 			padding: 20px;
-			background: #f8fafc;
+			background: var(--Surface-Page);
 			overflow-y: auto;
 		}
 	}
