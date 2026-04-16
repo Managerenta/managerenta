@@ -46,7 +46,7 @@ export default function AppContext({
 
 	const deleteAllCookies = useCallback(async (): Promise<boolean> => {
 		try {
-			const url = "/api/logout";
+			const url = "/api/auth/logout";
 			const { status } = await api().post(url);
 			if (status !== 200) return false;
 			_setIsUserLoggedIn(false);
