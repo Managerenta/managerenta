@@ -4,7 +4,7 @@ import NextTopLoader from "nextjs-toploader";
 import type React from "react";
 import { SWRConfig } from "swr";
 import type { IEnv } from "@/constants";
-import { AppContext } from "@/hooks";
+import { AppContext, ThemeContext } from "@/hooks";
 import { GlobalStyle } from "@/styles";
 import { Main } from "./components";
 
@@ -45,7 +45,9 @@ export default function BodyWrapper({
 					isUserSessionActive={isUserSessionActive}
 					userName={userName}
 				>
-					<Main>{children}</Main>
+					<ThemeContext>
+						<Main>{children}</Main>
+					</ThemeContext>
 				</AppContext>
 			</SWRConfig>
 		</motion.div>
