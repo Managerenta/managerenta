@@ -398,10 +398,10 @@ function TenantModal({ open, close, mode, onSuccess }: IProps) {
 						title="Cancel"
 						handleClick={handleClose}
 						disabled={isSubmitting}
-						background="white"
+						background="var(--Surface-Card)"
 						color="var(--Black)"
 						borderRadius="8px"
-						border="1px solid #e2e8f0"
+						border="1px solid var(--Border-Subtle)"
 					/>
 					<Button
 						type="button"
