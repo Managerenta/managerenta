@@ -28,7 +28,7 @@ export const SettingsHeaderStyled = styled(Box)`
 	.tabs-row {
 		display: flex;
 		gap: 4px;
-		border-bottom: 1px solid #e2e8f0;
+		border-bottom: 1px solid var(--Border-Subtle);
 
 		.tab-item {
 			button {
