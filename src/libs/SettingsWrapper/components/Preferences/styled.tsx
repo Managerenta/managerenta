@@ -3,10 +3,10 @@ import styled from "styled-components";
 import { Box } from "@/components";
 
 export const PreferencesStyled = styled(Box)`
-	background: white;
+	background: var(--Surface-Card);
 	border-radius: 12px;
 	padding: 20px;
-	border: 1px solid #f1f5f9;
+	border: 1px solid var(--Border-Subtle);
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
@@ -42,11 +42,11 @@ export const PreferencesStyled = styled(Box)`
 
 			.pref-select {
 				padding: 10px 14px;
-				border: 1px solid #e2e8f0;
+				border: 1px solid var(--Border-Subtle);
 				border-radius: 8px;
 				font-size: 14px;
 				color: var(--Black);
-				background: #f8fafc;
+				background: var(--Surface-Page);
 				cursor: pointer;
 
 				&:focus {
