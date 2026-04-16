@@ -15,10 +15,10 @@ export const PropertySidebarStyled = styled(Box)`
 	}
 
 	.quick-actions-card {
-		background: white;
+		background: var(--Surface-Card);
 		border-radius: 12px;
 		padding: 24px;
-		border: 1px solid #f1f5f9;
+		border: 1px solid var(--Border-Subtle);
 
 		.actions-list {
 			display: flex;
@@ -43,18 +43,18 @@ export const PropertySidebarStyled = styled(Box)`
 				transition: background 0.2s;
 
 				&:hover {
-					background: #f8fafc;
+					background: var(--Surface-Page);
 				}
 
 				.action-icon {
 					width: 32px;
 					height: 32px;
 					border-radius: 8px;
-					background: #f1f5f9;
+					background: var(--Surface-Muted);
 					display: flex;
 					align-items: center;
 					justify-content: center;
-					color: #64748b;
+					color: var(--Text-Secondary);
 					flex-shrink: 0;
 				}
 
@@ -68,10 +68,10 @@ export const PropertySidebarStyled = styled(Box)`
 	}
 
 	.statistics-card {
-		background: white;
+		background: var(--Surface-Card);
 		border-radius: 12px;
 		padding: 24px;
-		border: 1px solid #f1f5f9;
+		border: 1px solid var(--Border-Subtle);
 		display: flex;
 		flex-direction: column;
 		gap: 16px;
@@ -84,7 +84,7 @@ export const PropertySidebarStyled = styled(Box)`
 			.chart-placeholder {
 				width: 100%;
 				height: 120px;
-				background: #f8fafc;
+				background: var(--Surface-Page);
 				border-radius: 8px;
 				border: 1px dashed #e2e8f0;
 			}
@@ -93,7 +93,7 @@ export const PropertySidebarStyled = styled(Box)`
 		.stat-subtitle {
 			font-size: 14px;
 			font-weight: 600;
-			color: #64748b;
+			color: var(--Text-Secondary);
 		}
 
 		.stat-row {
@@ -103,7 +103,7 @@ export const PropertySidebarStyled = styled(Box)`
 
 			.stat-label {
 				font-size: 13px;
-				color: #64748b;
+				color: var(--Text-Secondary);
 			}
 
 			.stat-value-text {
