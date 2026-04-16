@@ -11,40 +11,12 @@ export const NavbarStyled = styled(Box)<{
 	background: ${({ $background }) => $background};
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
+	justify-content: flex-end;
 	padding: 0 24px;
-	border-bottom: 1px solid #e2e8f0;
+	border-bottom: 1px solid var(--Border-Subtle);
 
 	.mobile-brand {
 		display: none;
-	}
-
-	.search-bar {
-		flex: 1;
-		max-width: 500px;
-		position: relative;
-
-		svg {
-			position: absolute;
-			left: 12px;
-			top: 50%;
-			transform: translateY(-50%);
-			color: #94a3b8;
-		}
-
-		input {
-			width: 100%;
-			padding: 10px 16px 10px 40px;
-			border: 1px solid #e2e8f0;
-			border-radius: 8px;
-			font-size: 14px;
-			background: #f8fafc;
-			color: var(--Black);
-
-			&::placeholder {
-				color: #94a3b8;
-			}
-		}
 	}
 
 	.nav-actions {
@@ -118,8 +90,8 @@ export const NavbarStyled = styled(Box)<{
 				top: calc(100% + 3px);
 				right: 0;
 				min-width: 140px;
-				background: #fff;
-				border: 1px solid #e2e8f0;
+				background: var(--Surface-Card);
+				border: 1px solid var(--Border-Subtle);
 				border-radius: 8px;
 				box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 				overflow: hidden;
@@ -165,10 +137,6 @@ export const NavbarStyled = styled(Box)<{
 				font-weight: 700;
 				color: var(--Black);
 			}
-		}
-
-		.search-bar {
-			display: none;
 		}
 
 		.nav-actions {
