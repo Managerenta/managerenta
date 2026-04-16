@@ -8,7 +8,7 @@ export const DashboardWrapperStyled = styled(Box)`
 	gap: 24px;
 	width: 100%;
 	padding: 10px 5px;
-	background: #f8fafc;
+	background: var(--Surface-Page);
 
 	.bottom-grid {
 		display: grid;
