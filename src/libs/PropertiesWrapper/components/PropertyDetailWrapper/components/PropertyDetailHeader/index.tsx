@@ -101,9 +101,9 @@ function PropertyDetailHeader({
 								</Box>
 							}
 							handleClick={onEditProperty}
-							background="white"
+							background="var(--Surface-Card)"
 							color="var(--Black)"
-							border="1px solid #e2e8f0"
+							border="1px solid var(--Border-Subtle)"
 							borderRadius="8px"
 						/>
 					</Box>
