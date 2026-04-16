@@ -3,10 +3,10 @@ import styled from "styled-components";
 import { Box } from "@/components";
 
 export const QuickActionsStyled = styled(Box)`
-	background: white;
+	background: var(--Surface-Card);
 	border-radius: 12px;
 	padding: 15px 10px;
-	border: 1px solid #f1f5f9;
+	border: 1px solid var(--Border-Subtle);
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
@@ -33,18 +33,18 @@ export const QuickActionsStyled = styled(Box)`
 			transition: background 0.2s;
 
 			&:hover {
-				background: #f8fafc;
+				background: var(--Surface-Page);
 			}
 
 			.action-icon {
 				width: 40px;
 				height: 40px;
 				border-radius: 10px;
-				background: #f1f5f9;
+				background: var(--Surface-Page);
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				color: #64748b;
+				color: var(--Text-Secondary);
 				flex-shrink: 0;
 			}
 
@@ -52,7 +52,7 @@ export const QuickActionsStyled = styled(Box)`
 				width: 100%;
 				font-size: 17px;
 				font-weight: 500;
-				color: var(--Secondary-700);
+				color: var(--Black);
 			}
 		}
 	}
