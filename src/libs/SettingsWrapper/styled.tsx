@@ -8,7 +8,7 @@ export const SettingsWrapperStyled = styled(Box)`
 	gap: 20px;
 	width: 100%;
 	padding: 20px;
-	background: #f8fafc;
+	background: var(--Surface-Page);
 	min-height: 100%;
 
 	@media (max-width: 767px) {
