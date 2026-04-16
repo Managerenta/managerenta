@@ -1,14 +1,14 @@
 "use client";
-import { memo, useMemo, useState } from "react";
+import { memo, useContext, useMemo, useState } from "react";
 import { Box, Text } from "@/components";
-import { useSettingsData } from "@/hooks";
+import { type Theme, ThemeContextProvider, useSettingsData } from "@/hooks";
 import { PreferencesStyled } from "./styled";
 
 function Preferences() {
 	const [currency, setCurrency] = useState<string>("NGN");
 	const [dateFormat, setDateFormat] = useState<string>("DD/MM/YYYY");
 	const [language, setLanguage] = useState<string>("en");
-	const [theme, setTheme] = useState<string>("light");
+	const { theme, setTheme } = useContext(ThemeContextProvider);
 	const [timezone, setTimezone] = useState<string>("WAT");
 
 	const {
@@ -48,7 +48,7 @@ function Preferences() {
 			<Box
 				key={id}
 				className="radio-item"
-				onClick={() => setTheme(value)}
+				onClick={() => setTheme(value as Theme)}
 			>
 				<Box
 					className={`radio-circle ${theme === value ? "active" : ""}`}
@@ -58,7 +58,7 @@ function Preferences() {
 				<Text className="radio-label">{label}</Text>
 			</Box>
 		));
-	}, [themeOptions, theme]);
+	}, [themeOptions, theme, setTheme]);
 
 	const renderedTimezoneOptions = useMemo(() => {
 		return timezoneOptions.map(({ id, label, value }) => (
