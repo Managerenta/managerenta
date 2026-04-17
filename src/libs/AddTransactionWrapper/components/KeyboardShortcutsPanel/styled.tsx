@@ -3,10 +3,10 @@ import styled from "styled-components";
 import { Box } from "@/components";
 
 export const KeyboardShortcutsPanelStyled = styled(Box)`
-	background: white;
+	background: var(--Surface-Card);
 	border-radius: 12px;
 	padding: 20px;
-	border: 1px solid #f1f5f9;
+	border: 1px solid var(--Border-Subtle);
 	display: flex;
 	flex-direction: column;
 	gap: 14px;
@@ -36,7 +36,7 @@ export const KeyboardShortcutsPanelStyled = styled(Box)`
 		.shortcut-key {
 			padding: 4px 10px;
 			background: #f1f5f9;
-			border: 1px solid #e2e8f0;
+			border: 1px solid var(--Border-Subtle);
 			border-radius: 6px;
 			font-size: 12px;
 			font-weight: 600;
