@@ -119,7 +119,7 @@ export const TenantDetailHeaderStyled = styled(Box)`
 			}
 
 			.edit-btn button {
-				border: 1px solid #e2e8f0;
+				border: 1px solid var(--Border-Subtle);
 			}
 		}
 	}
@@ -135,10 +135,10 @@ export const TenantDetailHeaderStyled = styled(Box)`
 			flex-direction: column;
 			align-items: center;
 			text-align: center;
-			background: white;
+			background: var(--Surface-Card);
 			border-radius: 12px;
 			padding: 20px;
-			border: 1px solid #f1f5f9;
+			border: 1px solid var(--Border-Subtle);
 
 			.tenant-info {
 				flex-direction: column;
