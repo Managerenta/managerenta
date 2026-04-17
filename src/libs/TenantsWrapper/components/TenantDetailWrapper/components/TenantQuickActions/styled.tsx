@@ -3,10 +3,10 @@ import styled from "styled-components";
 import { Box } from "@/components";
 
 export const TenantQuickActionsStyled = styled(Box)`
-	background: white;
+	background: var(--Surface-Card);
 	border-radius: 12px;
 	padding: 20px;
-	border: 1px solid #f1f5f9;
+	border: 1px solid var(--Border-Subtle);
 
 	.card-title {
 		font-size: 18px;
@@ -40,18 +40,18 @@ export const TenantQuickActionsStyled = styled(Box)`
 			transition: background 0.2s;
 
 			&:hover {
-				background: #f8fafc;
+				background: var(--Surface-Page);
 			}
 
 			.action-icon {
 				width: 32px;
 				height: 32px;
 				border-radius: 8px;
-				background: #f1f5f9;
+				background: var(--Surface-Muted);
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				color: #64748b;
+				color: var(--Text-Secondary);
 				flex-shrink: 0;
 			}
 
