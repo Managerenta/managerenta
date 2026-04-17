@@ -3,10 +3,10 @@ import styled from "styled-components";
 import { Box } from "@/components";
 
 export const TransactionFormStyled = styled(Box)`
-	background: white;
+	background: var(--Surface-Card);
 	border-radius: 12px;
 	padding: 20px;
-	border: 1px solid #f1f5f9;
+	border: 1px solid var(--Border-Subtle);
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
@@ -97,17 +97,17 @@ export const TransactionFormStyled = styled(Box)`
 			.amount-input {
 				display: flex;
 				align-items: center;
-				border: 1px solid #e2e8f0;
+				border: 1px solid var(--Border-Subtle);
 				border-radius: 8px;
 				overflow: hidden;
 
 				.currency-prefix {
 					padding: 10px 14px;
-					background: #f8fafc;
+					background: var(--Surface-Page);
 					font-size: 14px;
 					font-weight: 600;
 					color: var(--Black);
-					border-right: 1px solid #e2e8f0;
+					border-right: 1px solid var(--Border-Subtle);
 				}
 
 				input {
@@ -127,7 +127,7 @@ export const TransactionFormStyled = styled(Box)`
 			input[type="date"],
 			input[type="text"] {
 				padding: 10px 14px;
-				border: 1px solid #e2e8f0;
+				border: 1px solid var(--Border-Subtle);
 				border-radius: 8px;
 				font-size: 14px;
 				color: var(--Black);
@@ -139,7 +139,7 @@ export const TransactionFormStyled = styled(Box)`
 
 			.notes-textarea {
 				padding: 10px 14px;
-				border: 1px solid #e2e8f0;
+				border: 1px solid var(--Border-Subtle);
 				border-radius: 8px;
 				font-size: 14px;
 				color: var(--Black);
@@ -154,11 +154,11 @@ export const TransactionFormStyled = styled(Box)`
 
 			.method-select {
 				padding: 10px 14px;
-				border: 1px solid #e2e8f0;
+				border: 1px solid var(--Border-Subtle);
 				border-radius: 8px;
 				font-size: 14px;
 				color: var(--Black);
-				background: white;
+				background: var(--Surface-Card);
 				cursor: pointer;
 			}
 
@@ -211,7 +211,7 @@ export const TransactionFormStyled = styled(Box)`
 		justify-content: flex-end;
 		gap: 12px;
 		padding-top: 16px;
-		border-top: 1px solid #f1f5f9;
+		border-top: 1px solid var(--Border-Subtle);
 
 		.cancel-btn,
 		.save-btn {
@@ -225,7 +225,7 @@ export const TransactionFormStyled = styled(Box)`
 		}
 
 		.cancel-btn button {
-			border: 1px solid #e2e8f0;
+			border: 1px solid var(--Border-Subtle);
 		}
 	}
 
