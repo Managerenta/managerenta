@@ -3,10 +3,10 @@ import styled from "styled-components";
 import { Box } from "@/components";
 
 export const TenantSummaryStyled = styled(Box)`
-	background: white;
+	background: var(--Surface-Card);
 	border-radius: 12px;
 	padding: 20px;
-	border: 1px solid #f1f5f9;
+	border: 1px solid var(--Border-Subtle);
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -80,7 +80,7 @@ export const TenantSummaryStyled = styled(Box)`
 			align-items: flex-start;
 			width: 100%;
 			padding-top: 12px;
-			border-top: 1px solid #f1f5f9;
+			border-top: 1px solid var(--Border-Subtle);
 
 			.balance-value {
 				font-size: 20px;
