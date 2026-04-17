@@ -10,9 +10,9 @@ export const TenantsGridStyled = styled(Box)`
 	}
 
 	.tenant-card {
-		background: white;
+		background: var(--Surface-Card);
 		border-radius: 12px;
-		border: 1px solid #f1f5f9;
+		border: 1px solid var(--Border-Subtle);
 		padding: 20px;
 		display: flex;
 		flex-direction: column;
@@ -73,8 +73,8 @@ export const TenantsGridStyled = styled(Box)`
 			flex-direction: column;
 			gap: 5px;
 			padding: 12px 0;
-			border-top: 1px solid #f1f5f9;
-			border-bottom: 1px solid #f1f5f9;
+			border-top: 1px solid var(--Border-Subtle);
+			border-bottom: 1px solid var(--Border-Subtle);
 
 			.detail-row {
 				display: flex;
@@ -125,7 +125,7 @@ export const TenantsGridStyled = styled(Box)`
 		}
 
 		.card-action {
-			border-top: 1px solid #f1f5f9;
+			border-top: 1px solid var(--Border-Subtle);
 
 			button {
 				width: 100%;
