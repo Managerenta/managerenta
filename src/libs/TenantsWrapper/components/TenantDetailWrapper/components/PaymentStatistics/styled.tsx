@@ -3,10 +3,10 @@ import styled from "styled-components";
 import { Box } from "@/components";
 
 export const PaymentStatisticsStyled = styled(Box)`
-	background: white;
+	background: var(--Surface-Card);
 	border-radius: 12px;
 	padding: 24px;
-	border: 1px solid #f1f5f9;
+	border: 1px solid var(--Border-Subtle);
 	display: flex;
 	flex-direction: column;
 	gap: 16px;
@@ -77,7 +77,7 @@ export const PaymentStatisticsStyled = styled(Box)`
 		.chart-placeholder {
 			width: 100%;
 			height: 120px;
-			background: #f8fafc;
+			background: var(--Surface-Page);
 			border-radius: 8px;
 			border: 1px dashed #e2e8f0;
 		}
