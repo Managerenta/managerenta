@@ -17,11 +17,11 @@ export const TenantsFilterStyled = styled(Box)`
 
 		.filter-dropdown {
 			padding: 10px 14px;
-			border: 1px solid #e2e8f0;
+			border: 1px solid var(--Border-Subtle);
 			border-radius: 8px;
 			font-size: 14px;
 			color: var(--Black);
-			background: white;
+			background: var(--Surface-Card);
 			cursor: pointer;
 			min-width: 160px;
 		}
@@ -42,7 +42,7 @@ export const TenantsFilterStyled = styled(Box)`
 			input {
 				width: 100%;
 				padding: 10px 14px 10px 36px;
-				border: 1px solid #e2e8f0;
+				border: 1px solid var(--Border-Subtle);
 				border-radius: 8px;
 				font-size: 14px;
 				color: var(--Black);
@@ -61,17 +61,17 @@ export const TenantsFilterStyled = styled(Box)`
 
 		.sort-dropdown {
 			padding: 10px 14px;
-			border: 1px solid #e2e8f0;
+			border: 1px solid var(--Border-Subtle);
 			border-radius: 8px;
 			font-size: 14px;
 			color: var(--Black);
-			background: white;
+			background: var(--Surface-Card);
 			cursor: pointer;
 		}
 
 		.view-toggle {
 			display: flex;
-			border: 1px solid #e2e8f0;
+			border: 1px solid var(--Border-Subtle);
 			border-radius: 8px;
 			overflow: hidden;
 
@@ -80,7 +80,7 @@ export const TenantsFilterStyled = styled(Box)`
 					width: 40px;
 					height: 40px;
 					border: none;
-					background: white;
+					background: var(--Surface-Card);
 					color: #94a3b8;
 					cursor: pointer;
 					display: flex;
@@ -95,7 +95,7 @@ export const TenantsFilterStyled = styled(Box)`
 				}
 
 				&:first-child {
-					border-right: 1px solid #e2e8f0;
+					border-right: 1px solid var(--Border-Subtle);
 				}
 			}
 		}
