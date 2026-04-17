@@ -49,13 +49,12 @@ function PaymentStatistics({ stats }: IProps) {
 				<Text className="stat-value red">{outstandingBalance}</Text>
 			</Box>
 
-			<Box className="chart-section">
+			{/* <Box className="chart-section">
 				<Text className="chart-title">
 					Payment Pattern (Last 6 Months)
 				</Text>
-				{/* TODO: Replace with actual chart component */}
 				<Box className="chart-placeholder" />
-			</Box>
+			</Box> */}
 		</PaymentStatisticsStyled>
 	);
 }
