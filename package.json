@@ -13,6 +13,7 @@
 	},
 	"dependencies": {
 		"@next/third-parties": "^16.1.6",
+		"@react-pdf/renderer": "^4.4.1",
 		"@types/three": "^0.182.0",
 		"@types/uuid": "10.0.0",
 		"axios": "^1.13.4",
@@ -29,6 +30,7 @@
 		"react-froala-wysiwyg": "^5.0.0",
 		"react-icons": "^5.5.0",
 		"react-medium-image-zoom": "^5.4.0",
+		"react-phone-number-input": "^3.4.16",
 		"react-photo-album": "^3.4.0",
 		"react-player": "^3.4.0",
 		"react-spinners": "^0.17.0",
