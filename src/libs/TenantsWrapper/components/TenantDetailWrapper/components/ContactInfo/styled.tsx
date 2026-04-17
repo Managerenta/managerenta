@@ -3,10 +3,10 @@ import styled from "styled-components";
 import { Box } from "@/components";
 
 export const ContactInfoStyled = styled(Box)`
-	background: white;
+	background: var(--Surface-Card);
 	border-radius: 12px;
 	padding: 24px;
-	border: 1px solid #f1f5f9;
+	border: 1px solid var(--Border-Subtle);
 	display: flex;
 	flex-direction: column;
 	gap: 16px;
@@ -92,7 +92,7 @@ export const ContactInfoStyled = styled(Box)`
 				align-items: center;
 				justify-content: space-between;
 				padding: 12px 14px;
-				background: #f8fafc;
+				background: var(--Surface-Page);
 				border-radius: 10px;
 
 				.contact-action-btn {
