@@ -3,10 +3,10 @@ import styled from "styled-components";
 import { Box } from "@/components";
 
 export const RecentActivityStyled = styled(Box)`
-	background: white;
+	background: var(--Surface-Card);
 	border-radius: 12px;
 	padding: 24px;
-	border: 1px solid #f1f5f9;
+	border: 1px solid var(--Border-Subtle);
 
 	.card-title {
 		font-size: 18px;
