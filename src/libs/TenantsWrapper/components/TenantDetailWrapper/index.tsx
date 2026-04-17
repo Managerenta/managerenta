@@ -81,6 +81,13 @@ function TenantDetailWrapper({ tenantId: selectedTenantId }: IProps) {
 					<TransactionHistory
 						transactions={transactions}
 						totals={transactionTotals}
+						tenantInfo={{
+							name: tenantDetail.name,
+							property: tenantDetail.property,
+							unit: tenantDetail.unit,
+							email: tenantDetail.email,
+							phone: tenantDetail.phone,
+						}}
 					/>
 				</Box>
 				<Box className="right-grid">
