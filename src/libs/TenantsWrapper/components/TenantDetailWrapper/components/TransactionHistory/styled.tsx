@@ -3,10 +3,10 @@ import styled from "styled-components";
 import { Box } from "@/components";
 
 export const TransactionHistoryStyled = styled(Box)`
-	background: white;
+	background: var(--Surface-Card);
 	border-radius: 12px;
-	padding: 10px 5px;
-	border: 1px solid #f1f5f9;
+	padding: 24px;
+	border: 1px solid var(--Border-Subtle);
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
@@ -25,11 +25,11 @@ export const TransactionHistoryStyled = styled(Box)`
 
 		.filter-select {
 			padding: 8px 14px;
-			border: 1px solid #e2e8f0;
+			border: 1px solid var(--Border-Subtle);
 			border-radius: 8px;
 			font-size: 13px;
 			color: var(--Black);
-			background: white;
+			background: var(--Surface-Card);
 			cursor: pointer;
 		}
 
@@ -40,7 +40,7 @@ export const TransactionHistoryStyled = styled(Box)`
 			input {
 				width: 100%;
 				padding: 8px 14px;
-				border: 1px solid #e2e8f0;
+				border: 1px solid var(--Border-Subtle);
 				border-radius: 8px;
 				font-size: 13px;
 				color: var(--Black);
@@ -81,7 +81,7 @@ export const TransactionHistoryStyled = styled(Box)`
 			th {
 				color: #64748b;
 				font-weight: 600;
-				border-bottom: 1px solid #e2e8f0;
+				border-bottom: 1px solid var(--Border-Subtle);
 			}
 
 			td {
@@ -115,12 +115,77 @@ export const TransactionHistoryStyled = styled(Box)`
 				font-weight: 500;
 			}
 
+			.cell-actions {
+				width: 80px;
+			}
+
+			.actions-row {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+
 			.action-icon {
 				color: #94a3b8;
 				cursor: pointer;
+				flex-shrink: 0;
 
 				&:hover {
 					color: var(--Main-Blue);
+				}
+
+				&.download-icon {
+					&:hover {
+						color: #16a34a;
+					}
+
+					&.loading {
+						opacity: 0.5;
+						cursor: not-allowed;
+						pointer-events: none;
+					}
+				}
+			}
+
+			.share-menu-wrapper {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+
+			.share-trigger-wrapper {
+				position: relative;
+			}
+
+			.share-dropdown {
+				position: absolute;
+				right: 0;
+				top: calc(100% + 6px);
+				background: var(--Surface-Card);
+				border: 1px solid var(--Border-Subtle);
+				border-radius: 8px;
+				box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+				min-width: 180px;
+				z-index: 50;
+				overflow: hidden;
+
+				.share-option {
+					display: flex;
+					align-items: center;
+					gap: 10px;
+					padding: 10px 14px;
+					font-size: 13px;
+					color: var(--Black);
+					cursor: pointer;
+					transition: background 0.15s;
+
+					&:hover {
+						background: var(--Surface-Muted);
+					}
+
+					svg {
+						color: var(--Text-Secondary);
+					}
 				}
 			}
 		}
@@ -134,7 +199,7 @@ export const TransactionHistoryStyled = styled(Box)`
 		display: flex;
 		gap: 40px;
 		padding-top: 16px;
-		border-top: 1px solid #e2e8f0;
+		border-top: 1px solid var(--Border-Subtle);
 
 		.total-item {
 			display: flex;
@@ -210,7 +275,7 @@ export const TransactionHistoryStyled = styled(Box)`
 				align-items: center;
 				gap: 12px;
 				padding: 14px;
-				background: #f8fafc;
+				background: var(--Surface-Page);
 				border-radius: 12px;
 
 				.txn-icon {
@@ -249,6 +314,12 @@ export const TransactionHistoryStyled = styled(Box)`
 						font-size: 12px;
 						color: #94a3b8;
 					}
+				}
+
+				.txn-card-actions {
+					display: flex;
+					align-items: center;
+					flex-shrink: 0;
 				}
 
 				.txn-amounts {
