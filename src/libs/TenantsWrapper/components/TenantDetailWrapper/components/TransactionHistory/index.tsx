@@ -1,9 +1,28 @@
 "use client";
-import { memo, useMemo } from "react";
-import { FiDownload, FiEye, FiHome, FiTool, FiZap } from "react-icons/fi";
+import { memo, useCallback, useMemo, useState } from "react";
+import {
+	FiDownload,
+	FiEye,
+	FiHome,
+	FiMail,
+	FiMessageSquare,
+	FiShare2,
+	FiTool,
+	FiZap,
+} from "react-icons/fi";
+import { toast } from "react-toastify";
 import { Box, Button, Input, Text } from "@/components";
 import type { ITenantTransaction } from "@/types";
+import { downloadReceipt } from "./downloadReceipt";
 import { TransactionHistoryStyled } from "./styled";
+
+interface ITenantInfo {
+	name: string;
+	property: string;
+	unit: string;
+	email: string;
+	phone: string;
+}
 
 interface IProps {
 	transactions: ITenantTransaction[];
@@ -12,6 +31,7 @@ interface IProps {
 		totalExpenses: string;
 		netBalance: string;
 	};
+	tenantInfo: ITenantInfo;
 }
 
 function getTypeIcon(type: string) {
@@ -25,12 +45,82 @@ function getTypeIcon(type: string) {
 	}
 }
 
-function TransactionHistory({ transactions, totals }: IProps) {
+function ShareMenu({
+	transaction,
+	tenantInfo,
+}: {
+	transaction: ITenantTransaction;
+	tenantInfo: ITenantInfo;
+}) {
+	const [open, setOpen] = useState(false);
+	const [isDownloading, setIsDownloading] = useState(false);
+
+	const handleDownload = useCallback(async () => {
+		setIsDownloading(true);
+		setOpen(false);
+		try {
+			await downloadReceipt(transaction, tenantInfo);
+		} catch {
+			toast.error("Failed to generate receipt");
+		} finally {
+			setIsDownloading(false);
+		}
+	}, [transaction, tenantInfo]);
+
+	const handleEmailShare = useCallback(() => {
+		setOpen(false);
+		toast.info("Email sharing coming soon");
+	}, []);
+
+	const handleWhatsAppShare = useCallback(() => {
+		setOpen(false);
+		toast.info("WhatsApp sharing coming soon");
+	}, []);
+
+	return (
+		<Box className="share-menu-wrapper">
+			<FiDownload
+				size={16}
+				className={`action-icon download-icon ${isDownloading ? "loading" : ""}`}
+				title="Download receipt"
+				onClick={handleDownload}
+			/>
+			<Box className="share-trigger-wrapper">
+				<FiShare2
+					size={16}
+					className="action-icon"
+					title="Share receipt"
+					onClick={() => setOpen((p) => !p)}
+				/>
+				{open && (
+					<Box className="share-dropdown">
+						<Box
+							className="share-option"
+							onClick={handleEmailShare}
+						>
+							<FiMail size={14} />
+							<span>Send via Email</span>
+						</Box>
+						<Box
+							className="share-option"
+							onClick={handleWhatsAppShare}
+						>
+							<FiMessageSquare size={14} />
+							<span>Send via WhatsApp</span>
+						</Box>
+					</Box>
+				)}
+			</Box>
+		</Box>
+	);
+}
+
+function TransactionHistory({ transactions, totals, tenantInfo }: IProps) {
 	const { totalReceived, totalExpenses, netBalance } = totals;
 
 	const renderedRows = useMemo(() => {
-		return transactions.map(
-			({
+		return transactions.map((txn) => {
+			const {
 				id,
 				date,
 				type,
@@ -39,7 +129,8 @@ function TransactionHistory({ transactions, totals }: IProps) {
 				amount,
 				amountType,
 				runningBalance,
-			}) => (
+			} = txn;
+			return (
 				<tr key={id}>
 					<td className="cell-date">{date}</td>
 					<td className="cell-type">
@@ -56,16 +147,26 @@ function TransactionHistory({ transactions, totals }: IProps) {
 					</td>
 					<td className="cell-balance">{runningBalance}</td>
 					<td className="cell-actions">
-						<FiEye size={16} className="action-icon" />
+						<Box className="actions-row">
+							<FiEye
+								size={16}
+								className="action-icon"
+								title="View"
+							/>
+							<ShareMenu
+								transaction={txn}
+								tenantInfo={tenantInfo}
+							/>
+						</Box>
 					</td>
 				</tr>
-			),
-		);
-	}, [transactions]);
+			);
+		});
+	}, [transactions, tenantInfo]);
 
 	const renderedMobileCards = useMemo(() => {
-		return transactions.map(
-			({
+		return transactions.map((txn) => {
+			const {
 				id,
 				date,
 				type,
@@ -74,7 +175,8 @@ function TransactionHistory({ transactions, totals }: IProps) {
 				amount,
 				amountType,
 				runningBalance,
-			}) => (
+			} = txn;
+			return (
 				<Box key={id} className="transaction-card">
 					<Box className={`txn-icon ${amountType}`}>
 						{getTypeIcon(type)}
@@ -94,10 +196,13 @@ function TransactionHistory({ transactions, totals }: IProps) {
 							Balance: {runningBalance}
 						</Text>
 					</Box>
+					<Box className="txn-card-actions">
+						<ShareMenu transaction={txn} tenantInfo={tenantInfo} />
+					</Box>
 				</Box>
-			),
-		);
-	}, [transactions]);
+			);
+		});
+	}, [transactions, tenantInfo]);
 
 	return (
 		<TransactionHistoryStyled>
@@ -132,12 +237,12 @@ function TransactionHistory({ transactions, totals }: IProps) {
 								}}
 							>
 								<FiDownload size={14} />
-								<span>Export</span>
+								<span>Export All</span>
 							</Box>
 						}
-						background="white"
+						background="var(--Surface-Card)"
 						color="var(--Main-Blue)"
-						border="1px solid #e2e8f0"
+						border="1px solid var(--Border-Subtle)"
 						borderRadius="8px"
 					/>
 				</Box>
