@@ -7,12 +7,12 @@ function SettingsFooter() {
 	return (
 		<SettingsFooterStyled>
 			<Box className="footer-left">
-				<Text className="version">PropertyTrack v2.4.1</Text>
+				<Text className="version">manageRenta v2.4.1</Text>
 				<Text className="footer-link">Help Center</Text>
 				<Text className="footer-link">Contact Support</Text>
 			</Box>
 			<Box className="footer-right">
-				<Text className="footer-link">Rate PropertyTrack</Text>
+				<Text className="footer-link">Rate manageRenta</Text>
 				<Text className="footer-link">What&apos;s New</Text>
 			</Box>
 		</SettingsFooterStyled>
