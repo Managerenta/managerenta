@@ -60,7 +60,7 @@ const FbxPreview = ({ url, height, width }: Props) => {
 					scene.add(obj);
 				})
 				.catch((err) => {
-					console.log("Error loading model: ", err);
+					void err;
 				});
 
 			const resizeRendererToCanvasSize = () => {

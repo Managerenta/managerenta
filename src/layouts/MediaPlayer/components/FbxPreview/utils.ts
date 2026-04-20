@@ -12,7 +12,7 @@ const loadObject = async (objectLink: string): Promise<any> => {
 			},
 			undefined,
 			(err: unknown) => {
-				console.log("error occurred: ", err);
+				void err;
 				reject(err);
 			},
 		);

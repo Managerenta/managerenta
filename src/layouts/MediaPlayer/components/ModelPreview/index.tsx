@@ -69,7 +69,7 @@ const ModelPreview = ({ url, height, width }: Props) => {
 					scene.add(obj.scene);
 				})
 				.catch((err) => {
-					console.log("Error loading model: ", err);
+					void err;
 				});
 
 			const resizeRendererToCanvasSize = () => {

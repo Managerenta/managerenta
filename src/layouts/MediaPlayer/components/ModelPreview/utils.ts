@@ -11,7 +11,7 @@ const loadObject = async (objectLink: string): Promise<GLTF> => {
 			},
 			undefined,
 			(err: unknown) => {
-				console.log("error occurred: ", err);
+				void err;
 				reject(err);
 			},
 		);
