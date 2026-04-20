@@ -48,7 +48,7 @@ export const PaymentSummaryStyled = styled(Box)`
 
 			.detail-label {
 				font-size: 13px;
-				color: #64748b;
+				color: var(--Text-Secondary);
 			}
 
 			.detail-value {
@@ -76,7 +76,7 @@ export const PaymentSummaryStyled = styled(Box)`
 		.history-title {
 			font-size: 13px;
 			font-weight: 600;
-			color: #64748b;
+			color: var(--Text-Secondary);
 		}
 
 		.history-blocks {
@@ -98,8 +98,8 @@ export const PaymentSummaryStyled = styled(Box)`
 					border-radius: 3px;
 
 					&.upcoming {
-						border: 1px dashed #cbd5e1;
-						background: #f8fafc !important;
+						border: 1px dashed var(--Border-Subtle);
+						background: var(--Surface-Muted) !important;
 					}
 				}
 
@@ -128,7 +128,7 @@ export const PaymentSummaryStyled = styled(Box)`
 
 				p {
 					font-size: 12px;
-					color: #64748b;
+					color: var(--Text-Secondary);
 				}
 			}
 		}
