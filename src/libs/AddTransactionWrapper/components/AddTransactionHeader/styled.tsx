@@ -57,7 +57,7 @@ export const AddTransactionHeaderStyled = styled(Box)`
 
 			.page-subtitle {
 				font-size: 14px;
-				color: #64748b;
+				color: var(--Text-Secondary);
 			}
 		}
 
@@ -70,7 +70,7 @@ export const AddTransactionHeaderStyled = styled(Box)`
 			border: none;
 
 			&:hover {
-				background: #f1f5f9;
+				background: var(--Surface-Muted);
 			}
 		}
 	}
