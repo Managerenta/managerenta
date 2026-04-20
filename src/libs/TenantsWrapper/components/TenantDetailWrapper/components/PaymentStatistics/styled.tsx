@@ -24,7 +24,7 @@ export const PaymentStatisticsStyled = styled(Box)`
 
 		.stat-label {
 			font-size: 13px;
-			color: #64748b;
+			color: var(--Text-Secondary);
 		}
 
 		.score-row {
@@ -45,6 +45,10 @@ export const PaymentStatisticsStyled = styled(Box)`
 				font-weight: 600;
 				background: #fef3c7;
 				color: #ca8a04;
+
+				[data-theme="dark"] & {
+					background: rgba(202, 138, 4, 0.15);
+				}
 			}
 		}
 
@@ -91,7 +95,7 @@ export const PaymentStatisticsStyled = styled(Box)`
 			justify-content: space-between;
 			align-items: center;
 			padding: 8px 0;
-			border-bottom: 1px solid #f8fafc;
+			border-bottom: 1px solid var(--Border-Subtle);
 
 			.score-row {
 				.score-value {
