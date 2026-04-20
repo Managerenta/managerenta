@@ -51,7 +51,7 @@ function TabSidebar() {
 		<TabSidebarStyled>
 			<Box className="brand-section">
 				<BsCalculator />
-				<Text className="brand-name">PropertyTrack</Text>
+				<Text className="brand-name">manageRenta</Text>
 			</Box>
 			<Box className="navigation-section">{navigationItems}</Box>
 		</TabSidebarStyled>
