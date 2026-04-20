@@ -30,17 +30,17 @@ export const KeyboardShortcutsPanelStyled = styled(Box)`
 
 		.shortcut-label {
 			font-size: 14px;
-			color: #64748b;
+			color: var(--Text-Secondary);
 		}
 
 		.shortcut-key {
 			padding: 4px 10px;
-			background: #f1f5f9;
+			background: var(--Surface-Muted);
 			border: 1px solid var(--Border-Subtle);
 			border-radius: 6px;
 			font-size: 12px;
 			font-weight: 600;
-			color: #64748b;
+			color: var(--Text-Secondary);
 			font-family: monospace;
 		}
 	}
