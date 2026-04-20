@@ -16,7 +16,7 @@ export default function useReviews() {
 				label: "Lagos Property Owner",
 				photo: "/images/landlords/landlord-1.png",
 				comment:
-					"PropertyTrack helped me organize my 15 properties and increased my rent collection by 40%",
+					"manageRenta helped me organize my 15 properties and increased my rent collection by 40%",
 			},
 		];
 
