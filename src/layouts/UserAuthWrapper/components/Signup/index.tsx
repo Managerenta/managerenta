@@ -244,7 +244,7 @@ export default function Signup() {
 				<Box className="privacy-terms">
 					<Input type="checkbox" id="check-me" />
 					<label htmlFor="check-me">
-						I agree to PropertyTrack's{" "}
+						I agree to manageRenta's{" "}
 						<Link href="/terms-of-service">Terms of Service</Link>{" "}
 						and <Link href="/privacy-policy">Privacy Policy</Link>
 					</label>
