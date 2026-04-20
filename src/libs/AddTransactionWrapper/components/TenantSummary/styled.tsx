@@ -38,7 +38,7 @@ export const TenantSummaryStyled = styled(Box)`
 
 			.tenant-property {
 				font-size: 13px;
-				color: #64748b;
+				color: var(--Text-Secondary);
 			}
 		}
 	}
@@ -51,7 +51,7 @@ export const TenantSummaryStyled = styled(Box)`
 
 		.balance-label {
 			font-size: 12px;
-			color: #64748b;
+			color: var(--Text-Secondary);
 		}
 
 		.balance-value {
@@ -67,6 +67,10 @@ export const TenantSummaryStyled = styled(Box)`
 			font-weight: 600;
 			background: #fee2e2;
 			color: #ef4444;
+
+			[data-theme="dark"] & {
+				background: rgba(239, 68, 68, 0.15);
+			}
 		}
 	}
 
