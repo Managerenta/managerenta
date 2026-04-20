@@ -238,14 +238,13 @@ export default function ReceiptDocument({
 	return (
 		<Document
 			title={`Receipt ${formatReceiptId(transaction.id)}`}
-			author="PropertyTrack"
+			author="manageRenta"
 			subject="Payment Receipt"
 		>
 			<Page size="A4" style={styles.page}>
-				{/* Header */}
 				<View style={styles.header}>
 					<View style={styles.headerLeft}>
-						<Text style={styles.appName}>PropertyTrack</Text>
+						<Text style={styles.appName}>manageRenta</Text>
 						<Text style={styles.appTagline}>
 							Property Management System
 						</Text>
@@ -261,7 +260,6 @@ export default function ReceiptDocument({
 					</View>
 				</View>
 
-				{/* Tenant / Property info */}
 				<View style={styles.infoCard}>
 					<View style={styles.infoSection}>
 						<Text style={styles.infoLabel}>Tenant</Text>
@@ -283,7 +281,6 @@ export default function ReceiptDocument({
 					</View>
 				</View>
 
-				{/* Amount highlight */}
 				<View style={styles.amountCard}>
 					<Text style={styles.amountLabel}>
 						{amountType === "credit"
@@ -303,7 +300,6 @@ export default function ReceiptDocument({
 					</Text>
 				</View>
 
-				{/* Transaction detail table */}
 				<View style={styles.tableContainer}>
 					<View style={styles.tableHeader}>
 						<Text style={[styles.tableHeaderCell, styles.colDate]}>
@@ -360,7 +356,6 @@ export default function ReceiptDocument({
 					</View>
 				</View>
 
-				{/* Running balance */}
 				<View style={styles.balanceRow}>
 					<Text style={styles.balanceLabel}>
 						Running Balance After Transaction
@@ -370,13 +365,12 @@ export default function ReceiptDocument({
 					</Text>
 				</View>
 
-				{/* Footer */}
 				<View style={styles.footer} fixed>
 					<Text style={styles.footerText}>
 						This is an electronically generated receipt and does not
 						require a signature.
 					</Text>
-					<Text style={styles.footerBrand}>PropertyTrack</Text>
+					<Text style={styles.footerBrand}>manageRenta</Text>
 				</View>
 			</Page>
 		</Document>

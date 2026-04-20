@@ -55,7 +55,9 @@ export interface IPropertyDetail {
 export interface ITopTenant {
 	id: string;
 	name: string;
-	amount: string;
+	unit: string;
+	monthlyRent: string;
+	avatar?: string;
 }
 
 export interface ITransaction {

@@ -11,7 +11,9 @@ import {
 } from "react";
 import { BsCalculator } from "react-icons/bs";
 import { FiBell, FiChevronDown, FiLogOut } from "react-icons/fi";
-import { Box, Text } from "@/components";
+import useSWR from "swr";
+import { Box, Button, Image, Text } from "@/components";
+import { fetcher } from "@/constants";
 import { AppContextProvider } from "@/hooks";
 import { NavbarStyled } from "./styled";
 
@@ -25,6 +27,15 @@ function Navbar({ background, navHeight }: IProps) {
 	const router = useRouter();
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 	const dropdownRef = useRef<HTMLDivElement>(null);
+
+	const { data: profileData } = useSWR<{ data: { avatar?: string } }>(
+		"/api/users/user-profile",
+		fetcher,
+	);
+	const userAvatar = useMemo(
+		() => profileData?.data?.avatar ?? "",
+		[profileData],
+	);
 
 	const initials = useMemo(() => {
 		if (!userName) return "?";
@@ -62,7 +73,7 @@ function Navbar({ background, navHeight }: IProps) {
 		<NavbarStyled $navHeight={navHeight} $background={background}>
 			<Box className="mobile-brand">
 				<BsCalculator />
-				<Text className="brand-name">PropertyTrack</Text>
+				<Text className="brand-name">manageRenta</Text>
 			</Box>
 
 			<Box className="nav-actions">
@@ -76,7 +87,19 @@ function Navbar({ background, navHeight }: IProps) {
 					ref={dropdownRef}
 					onClick={() => setDropdownOpen((prev) => !prev)}
 				>
-					<Box className="avatar">{initials}</Box>
+					<Box className="avatar">
+						{userAvatar ? (
+							<Image
+								url={userAvatar}
+								alt={userName}
+								width="100%"
+								height="100%"
+								style={{ objectFit: "cover" }}
+							/>
+						) : (
+							initials
+						)}
+					</Box>
 					<Text className="user-name">{userName || "User"}</Text>
 					<FiChevronDown
 						size={14}
@@ -85,14 +108,17 @@ function Navbar({ background, navHeight }: IProps) {
 
 					{dropdownOpen && (
 						<Box className="user-dropdown">
-							<button
+							<Button
 								type="button"
-								className="logout-btn"
-								onClick={handleLogout}
-							>
-								<FiLogOut size={15} />
-								<span>Logout</span>
-							</button>
+								title={
+									<>
+										<FiLogOut size={15} />
+										<span>Logout</span>
+									</>
+								}
+								handleClick={handleLogout}
+								style={{ width: "100%" }}
+							/>
 						</Box>
 					)}
 				</Box>

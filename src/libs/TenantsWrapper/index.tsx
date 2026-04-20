@@ -14,6 +14,11 @@ function TenantsWrapper() {
 	const [sortBy, setSortBy] = useState("name");
 	const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 	const [mounted, setMounted] = useState(false);
+	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+	const handleViewModeChange = useCallback((mode: "grid" | "list") => {
+		setViewMode(mode);
+	}, []);
 
 	useEffect(() => setMounted(true), []);
 
@@ -65,8 +70,14 @@ function TenantsWrapper() {
 				onSortChange={setSortBy}
 				filterOptions={filterOptions}
 				sortOptions={sortOptions}
+				viewMode={viewMode}
+				onViewModeChange={handleViewModeChange}
 			/>
-			<TenantsGrid tenants={tenants} isLoading={isLoading} />
+			<TenantsGrid
+				tenants={tenants}
+				isLoading={isLoading}
+				viewMode={viewMode}
+			/>
 
 			<Box className="pagination-footer">
 				<Box className="items-per-page">

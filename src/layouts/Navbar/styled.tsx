@@ -58,8 +58,8 @@ export const NavbarStyled = styled(Box)<{
 			user-select: none;
 
 			.avatar {
-				width: 36px;
-				height: 36px;
+				width: 40px;
+				height: 40px;
 				border-radius: 50%;
 				background: var(--Main-Blue);
 				color: white;
@@ -69,6 +69,13 @@ export const NavbarStyled = styled(Box)<{
 				font-size: 13px;
 				font-weight: 600;
 				flex-shrink: 0;
+				overflow: hidden;
+
+				img {
+					width: 100%;
+					height: 100%;
+					object-fit: cover;
+				}
 			}
 
 			.user-name {
@@ -97,7 +104,7 @@ export const NavbarStyled = styled(Box)<{
 				overflow: hidden;
 				z-index: 100;
 
-				.logout-btn {
+				button {
 					width: 100%;
 					display: flex;
 					align-items: center;
@@ -112,7 +119,7 @@ export const NavbarStyled = styled(Box)<{
 					transition: background 0.15s ease;
 
 					&:hover {
-						background: #fef2f2;
+						background: rgba(239, 68, 68, 0.08);
 					}
 				}
 			}

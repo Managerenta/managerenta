@@ -69,16 +69,26 @@ export const UrgentActionsStyled = styled(Box)`
 			background: #fefce8;
 			border: 1px solid #fef08a;
 
+			[data-theme="dark"] & {
+				background: rgba(234, 179, 8, 0.1);
+				border-color: rgba(234, 179, 8, 0.25);
+			}
+
 			&.overdue-row {
 				background: #fef2f2;
 				border-color: #fecaca;
+
+				[data-theme="dark"] & {
+					background: rgba(239, 68, 68, 0.1);
+					border-color: rgba(239, 68, 68, 0.25);
+				}
 			}
 
 			.avatar-placeholder {
 				width: 40px;
 				height: 40px;
 				border-radius: 50%;
-				background: #e2e8f0;
+				background: var(--Surface-Muted);
 				flex-shrink: 0;
 			}
 
@@ -110,7 +120,7 @@ export const UrgentActionsStyled = styled(Box)`
 
 				.tenant-property {
 					font-size: 12px;
-					color: #64748b;
+					color: var(--Text-Secondary);
 				}
 			}
 
@@ -129,6 +139,10 @@ export const UrgentActionsStyled = styled(Box)`
 				padding: 4px 8px;
 				border-radius: 6px;
 				white-space: nowrap;
+
+				[data-theme="dark"] & {
+					background: rgba(239, 68, 68, 0.15);
+				}
 			}
 
 			.action-buttons {

@@ -290,11 +290,19 @@ export const TransactionHistoryStyled = styled(Box)`
 					&.credit {
 						background: #d1fae5;
 						color: #16a34a;
+
+						[data-theme="dark"] & {
+							background: rgba(22, 163, 74, 0.15);
+						}
 					}
 
 					&.debit {
 						background: #fee2e2;
 						color: #ef4444;
+
+						[data-theme="dark"] & {
+							background: rgba(239, 68, 68, 0.15);
+						}
 					}
 				}
 

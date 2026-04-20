@@ -33,19 +33,19 @@ export const TransactionFormStyled = styled(Box)`
 				align-items: center;
 				gap: 8px;
 				padding: 16px 12px;
-				border: 1.5px solid #e2e8f0;
+				border: 1.5px solid var(--Border-Subtle);
 				border-radius: 10px;
 				cursor: pointer;
 				transition: all 0.2s;
 
 				.type-icon {
-					color: #64748b;
+					color: var(--Text-Secondary);
 				}
 
 				.type-label {
 					font-size: 13px;
 					font-weight: 500;
-					color: #64748b;
+					color: var(--Text-Secondary);
 					text-align: center;
 				}
 
@@ -55,7 +55,7 @@ export const TransactionFormStyled = styled(Box)`
 
 				&.active {
 					border-color: var(--Main-Blue);
-					background: #f0f6ff;
+					background: rgba(47, 128, 237, 0.08);
 
 					.type-icon {
 						color: var(--Main-Blue);
@@ -91,7 +91,7 @@ export const TransactionFormStyled = styled(Box)`
 			.field-label {
 				font-size: 13px;
 				font-weight: 600;
-				color: #64748b;
+				color: var(--Text-Secondary);
 			}
 
 			.amount-input {
@@ -168,9 +168,9 @@ export const TransactionFormStyled = styled(Box)`
 				align-items: center;
 				gap: 8px;
 				padding: 24px;
-				border: 2px dashed #e2e8f0;
+				border: 2px dashed var(--Border-Subtle);
 				border-radius: 10px;
-				background: #fefce8;
+				background: var(--Surface-Muted);
 				cursor: pointer;
 				transition: border-color 0.2s;
 

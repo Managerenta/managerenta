@@ -2,11 +2,16 @@
 import styled from "styled-components";
 import { Box } from "@/components";
 
-export const PropertiesGridStyled = styled(Box)`
+export const PropertiesGridStyled = styled(Box)<{ $viewMode: "grid" | "list" }>`
 	.grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
 		gap: 15px;
+
+		&.list {
+			grid-template-columns: 1fr;
+			gap: 10px;
+		}
 	}
 
 	.property-card {
@@ -20,6 +25,7 @@ export const PropertiesGridStyled = styled(Box)`
 			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 		}
 
+		/* ── Grid card layout ── */
 		.card-image {
 			width: 100%;
 			height: 200px;
@@ -52,7 +58,7 @@ export const PropertiesGridStyled = styled(Box)`
 
 			.card-address {
 				font-size: 14px;
-				color: #64748b;
+				color: var(--Text-Secondary);
 				line-height: 1;
 			}
 
@@ -65,20 +71,18 @@ export const PropertiesGridStyled = styled(Box)`
 				font-weight: 600;
 			}
 
-			.units-row {
-				.units-text {
-					font-size: 13px;
-					color: #64748b;
+			.units-row .units-text {
+				font-size: 13px;
+				color: var(--Text-Secondary);
 
-					.occupied {
-						color: #16a34a;
-						font-weight: 500;
-					}
+				.occupied {
+					color: #16a34a;
+					font-weight: 500;
+				}
 
-					.vacant {
-						color: #ef4444;
-						font-weight: 500;
-					}
+				.vacant {
+					color: #ef4444;
+					font-weight: 500;
 				}
 			}
 
@@ -94,7 +98,7 @@ export const PropertiesGridStyled = styled(Box)`
 
 					.occupancy-label {
 						font-size: 13px;
-						color: #64748b;
+						color: var(--Text-Secondary);
 					}
 
 					.occupancy-value {
@@ -107,7 +111,7 @@ export const PropertiesGridStyled = styled(Box)`
 				.occupancy-bar {
 					width: 100%;
 					height: 6px;
-					background: #e2e8f0;
+					background: var(--Border-Subtle);
 					border-radius: 6px;
 					overflow: hidden;
 
@@ -142,7 +146,7 @@ export const PropertiesGridStyled = styled(Box)`
 					text-align: center;
 					background: none;
 					border: none;
-					color: #64748b;
+					color: var(--Text-Secondary);
 					font-size: 14px;
 					font-weight: 600;
 					cursor: pointer;
@@ -155,15 +159,111 @@ export const PropertiesGridStyled = styled(Box)`
 		}
 	}
 
+	/* ── List mode overrides ── */
+	.grid.list .property-card {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		border-radius: 10px;
+
+		.card-image {
+			width: 80px;
+			height: 80px;
+			flex-shrink: 0;
+			border-radius: 0;
+		}
+
+		.card-body {
+			flex: 1;
+			flex-direction: row;
+			align-items: center;
+			gap: 16px;
+			padding: 12px 16px;
+			flex-wrap: wrap;
+
+			.card-name {
+				min-width: 140px;
+				font-size: 15px;
+			}
+
+			.card-address {
+				flex: 1;
+				min-width: 120px;
+			}
+
+			.type-badge {
+				white-space: nowrap;
+			}
+
+			.units-row {
+				white-space: nowrap;
+			}
+
+			.occupancy-section {
+				min-width: 120px;
+				flex-direction: row;
+				align-items: center;
+				gap: 8px;
+
+				.occupancy-bar {
+					width: 80px;
+				}
+			}
+
+			.status-badge {
+				white-space: nowrap;
+			}
+
+			.card-revenue {
+				font-size: 15px;
+				white-space: nowrap;
+			}
+
+			.card-footer {
+				border-top: none;
+				border-left: 1px solid var(--Border-Subtle);
+				padding-left: 16px;
+				flex-shrink: 0;
+
+				button {
+					width: auto;
+					white-space: nowrap;
+					padding: 6px 14px;
+				}
+			}
+		}
+	}
+
 	@media (max-width: 1024px) {
-		.grid {
+		.grid:not(.list) {
 			grid-template-columns: repeat(2, 1fr);
 		}
 	}
 
 	@media (max-width: 767px) {
-		.grid {
+		.grid:not(.list) {
 			grid-template-columns: 1fr;
+		}
+
+		.grid.list .property-card {
+			flex-direction: column;
+
+			.card-image {
+				width: 100%;
+				height: 140px;
+			}
+
+			.card-body {
+				flex-direction: column;
+				align-items: flex-start;
+
+				.card-footer {
+					border-left: none;
+					border-top: 1px solid var(--Border-Subtle);
+					padding-left: 0;
+					width: 100%;
+				}
+			}
 		}
 	}
 `;

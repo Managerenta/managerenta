@@ -20,8 +20,15 @@ interface IProps {
 
 function PropertyDetailWrapper({ propertyId }: IProps) {
 	const router = useRouter();
-	const { propertyDetail, units, detailStats, topTenants, mutate } =
-		usePropertyDetail(propertyId);
+	const {
+		propertyDetail,
+		units,
+		detailStats,
+		topTenants,
+		averageVacancyDays,
+		rentCollectedThisYear,
+		mutate,
+	} = usePropertyDetail(propertyId);
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 	const [isAddUnitModalOpen, setIsAddUnitModalOpen] = useState(false);
 	const [tenantModalMode, setTenantModalMode] =
@@ -116,7 +123,11 @@ function PropertyDetailWrapper({ propertyId }: IProps) {
 					/>
 				</Box>
 				<Box className="right-grid">
-					<PropertySidebar topTenants={topTenants} />
+					<PropertySidebar
+						topTenants={topTenants}
+						averageVacancyDays={averageVacancyDays}
+						rentCollectedThisYear={rentCollectedThisYear}
+					/>
 				</Box>
 			</Box>
 		</PropertyDetailWrapperStyled>

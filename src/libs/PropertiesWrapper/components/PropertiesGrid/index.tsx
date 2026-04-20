@@ -8,6 +8,7 @@ import { PropertiesGridStyled } from "./styled";
 interface IProps {
 	properties: IPropertyList[];
 	isLoading: boolean;
+	viewMode: "grid" | "list";
 }
 
 function getStatusColor(status: string): { bg: string; text: string } {
@@ -37,7 +38,7 @@ function getTypeBadgeColors(type: string): { bg: string; text: string } {
 	return map[type] ?? { bg: "#f1f5f9", text: "#64748b" };
 }
 
-function PropertiesGrid({ properties, isLoading }: IProps) {
+function PropertiesGrid({ properties, isLoading, viewMode }: IProps) {
 	const { openPropertyDetail } = usePropertiesNavigation();
 
 	const handleViewDetails = useCallback(
@@ -188,8 +189,10 @@ function PropertiesGrid({ properties, isLoading }: IProps) {
 	}, [properties, isLoading, handleViewDetails]);
 
 	return (
-		<PropertiesGridStyled>
-			<Box className="grid">{renderedProperties}</Box>
+		<PropertiesGridStyled $viewMode={viewMode}>
+			<Box className={`grid ${viewMode === "list" ? "list" : ""}`}>
+				{renderedProperties}
+			</Box>
 		</PropertiesGridStyled>
 	);
 }

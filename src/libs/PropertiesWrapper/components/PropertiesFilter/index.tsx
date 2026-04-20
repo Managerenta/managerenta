@@ -1,5 +1,5 @@
 "use client";
-import { memo, useMemo, useState } from "react";
+import { memo, useMemo } from "react";
 import { FiGrid, FiList, FiSearch } from "react-icons/fi";
 import { Box, Button, Input } from "@/components";
 import { usePropertiesData } from "@/hooks";
@@ -12,6 +12,8 @@ interface IProps {
 	onFilterChange: (value: string) => void;
 	sortBy: string;
 	onSortChange: (value: string) => void;
+	viewMode: "grid" | "list";
+	onViewModeChange: (mode: "grid" | "list") => void;
 }
 
 function PropertiesFilter({
@@ -21,8 +23,9 @@ function PropertiesFilter({
 	onFilterChange,
 	sortBy,
 	onSortChange,
+	viewMode,
+	onViewModeChange,
 }: IProps) {
-	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 	const { filterOptions, sortOptions } = usePropertiesData();
 
 	const renderedFilterOptions = useMemo(() => {
@@ -79,7 +82,7 @@ function PropertiesFilter({
 						<Button
 							type="button"
 							title={<FiGrid size={18} />}
-							handleClick={() => setViewMode("grid")}
+							handleClick={() => onViewModeChange("grid")}
 						/>
 					</Box>
 					<Box
@@ -88,7 +91,7 @@ function PropertiesFilter({
 						<Button
 							type="button"
 							title={<FiList size={18} />}
-							handleClick={() => setViewMode("list")}
+							handleClick={() => onViewModeChange("list")}
 						/>
 					</Box>
 				</Box>

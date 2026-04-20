@@ -1,5 +1,5 @@
 "use client";
-import { memo, useMemo, useState } from "react";
+import { memo, useMemo } from "react";
 import { FiGrid, FiList, FiSearch } from "react-icons/fi";
 import { Box, Button, Input } from "@/components";
 import { TenantsFilterStyled } from "./styled";
@@ -19,6 +19,8 @@ interface IProps {
 	onSortChange: (value: string) => void;
 	filterOptions: IFilterOption[];
 	sortOptions: IFilterOption[];
+	viewMode: "grid" | "list";
+	onViewModeChange: (mode: "grid" | "list") => void;
 }
 
 function TenantsFilter({
@@ -30,9 +32,9 @@ function TenantsFilter({
 	onSortChange,
 	filterOptions,
 	sortOptions,
+	viewMode,
+	onViewModeChange,
 }: IProps) {
-	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-
 	const renderedFilterOptions = useMemo(() => {
 		return filterOptions.map(({ id, label, value }) => (
 			<option key={id} value={value}>
@@ -85,7 +87,7 @@ function TenantsFilter({
 						<Button
 							type="button"
 							title={<FiGrid size={18} />}
-							handleClick={() => setViewMode("grid")}
+							handleClick={() => onViewModeChange("grid")}
 						/>
 					</Box>
 					<Box
@@ -94,7 +96,7 @@ function TenantsFilter({
 						<Button
 							type="button"
 							title={<FiList size={18} />}
-							handleClick={() => setViewMode("list")}
+							handleClick={() => onViewModeChange("list")}
 						/>
 					</Box>
 				</Box>

@@ -127,20 +127,55 @@ export const PropertySidebarStyled = styled(Box)`
 				gap: 8px;
 			}
 
+			.no-tenants {
+				font-size: 13px;
+				color: var(--Text-Secondary);
+			}
+
 			.tenant-row {
 				display: flex;
-				justify-content: space-between;
 				align-items: center;
+				gap: 10px;
 
-				.tenant-name {
-					font-size: 14px;
-					color: var(--Black);
+				.tenant-avatar {
+					flex-shrink: 0;
+
+					.avatar-placeholder {
+						width: 32px;
+						height: 32px;
+						border-radius: 50%;
+						background: linear-gradient(135deg, #94a3b8, #cbd5e1);
+					}
+				}
+
+				.tenant-info {
+					flex: 1;
+					display: flex;
+					flex-direction: column;
+					gap: 1px;
+					min-width: 0;
+
+					.tenant-name {
+						font-size: 14px;
+						font-weight: 600;
+						color: var(--Black);
+						white-space: nowrap;
+						overflow: hidden;
+						text-overflow: ellipsis;
+					}
+
+					.tenant-unit {
+						font-size: 12px;
+						color: var(--Text-Secondary);
+					}
 				}
 
 				.tenant-amount {
-					font-size: 14px;
+					font-size: 13px;
 					font-weight: 700;
 					color: var(--Black);
+					white-space: nowrap;
+					flex-shrink: 0;
 				}
 			}
 		}

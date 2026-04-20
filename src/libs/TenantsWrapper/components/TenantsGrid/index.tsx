@@ -9,6 +9,7 @@ import { TenantsGridStyled } from "./styled";
 interface IProps {
 	tenants: ITenantListItem[];
 	isLoading: boolean;
+	viewMode: "grid" | "list";
 }
 
 function getPaymentStatusStyle(status: string): { bg: string; text: string } {
@@ -24,7 +25,7 @@ function getPaymentStatusStyle(status: string): { bg: string; text: string } {
 	}
 }
 
-function TenantsGrid({ tenants, isLoading }: IProps) {
+function TenantsGrid({ tenants, isLoading, viewMode }: IProps) {
 	const { openTenantDetail } = useTenantNavigation();
 
 	const handleViewTenant = useCallback(
@@ -155,8 +156,10 @@ function TenantsGrid({ tenants, isLoading }: IProps) {
 	}, [tenants, isLoading, handleViewTenant]);
 
 	return (
-		<TenantsGridStyled>
-			<Box className="grid">{renderedTenants}</Box>
+		<TenantsGridStyled $viewMode={viewMode}>
+			<Box className={`grid ${viewMode === "list" ? "list" : ""}`}>
+				{renderedTenants}
+			</Box>
 		</TenantsGridStyled>
 	);
 }

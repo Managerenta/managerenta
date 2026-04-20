@@ -21,6 +21,11 @@ function PropertiesWrapper() {
 	const [search, setSearch] = useState("");
 	const [filterType, setFilterType] = useState("all");
 	const [sortBy, setSortBy] = useState("name");
+	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+	const handleViewModeChange = useCallback((mode: "grid" | "list") => {
+		setViewMode(mode);
+	}, []);
 
 	useEffect(() => setMounted(true), []);
 
@@ -115,10 +120,13 @@ function PropertiesWrapper() {
 				onFilterChange={handleFilterChange}
 				sortBy={sortBy}
 				onSortChange={handleSortChange}
+				viewMode={viewMode}
+				onViewModeChange={handleViewModeChange}
 			/>
 			<PropertiesGrid
 				properties={filteredProperties}
 				isLoading={isLoading}
+				viewMode={viewMode}
 			/>
 
 			<Box className="pagination-footer">

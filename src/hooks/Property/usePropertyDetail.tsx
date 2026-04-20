@@ -27,7 +27,15 @@ interface IRawPropertyDetail {
 	image?: string;
 	createdAt: string;
 	units?: IRawUnit[];
-	topTenants?: { _id: string; name: string; totalPaid: number }[];
+	averageVacancyDays?: number;
+	rentCollectedThisYear?: number;
+	topPayingTenants?: {
+		_id: string;
+		name: string;
+		avatar?: string;
+		monthlyRent: number;
+		unit: string;
+	}[];
 }
 
 function formatDate(iso: string): string {
@@ -140,12 +148,29 @@ export default function usePropertyDetail(propertyId: string | null) {
 	}, [propertyDetail]);
 
 	const topTenants = useMemo<ITopTenant[]>(() => {
-		if (!data?.topTenants) return [];
-		return data.topTenants.map((t) => ({
+		if (!data?.topPayingTenants) return [];
+		return data.topPayingTenants.map((t) => ({
 			id: t._id,
 			name: t.name,
-			amount: `₦${t.totalPaid.toLocaleString("en-NG")}`,
+			unit: t.unit,
+			monthlyRent: `₦${t.monthlyRent.toLocaleString("en-NG")}/mo`,
+			avatar: t.avatar,
 		}));
+	}, [data]);
+
+	const averageVacancyDays = useMemo<string>(() => {
+		if (!data?.averageVacancyDays && data?.averageVacancyDays !== 0)
+			return "—";
+		const days = data.averageVacancyDays;
+		return days === 0
+			? "No data yet"
+			: `${days} day${days !== 1 ? "s" : ""}`;
+	}, [data]);
+
+	const rentCollectedThisYear = useMemo<string>(() => {
+		if (!data?.rentCollectedThisYear && data?.rentCollectedThisYear !== 0)
+			return "—";
+		return `₦${data.rentCollectedThisYear.toLocaleString("en-NG")}`;
 	}, [data]);
 
 	return {
@@ -153,6 +178,8 @@ export default function usePropertyDetail(propertyId: string | null) {
 		units,
 		detailStats,
 		topTenants,
+		averageVacancyDays,
+		rentCollectedThisYear,
 		isLoading,
 		mutate,
 	};

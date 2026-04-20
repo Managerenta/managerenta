@@ -1,12 +1,14 @@
 "use client";
 import { memo, useMemo } from "react";
 import { FiBell, FiDownload, FiFileText, FiPlus } from "react-icons/fi";
-import { Box, Button, Text } from "@/components";
+import { Box, Button, Image, Text } from "@/components";
 import type { ITopTenant } from "@/types";
 import { PropertySidebarStyled } from "./styled";
 
 interface IProps {
 	topTenants: ITopTenant[];
+	averageVacancyDays: string;
+	rentCollectedThisYear: string;
 }
 
 interface QuickActionItem {
@@ -15,7 +17,11 @@ interface QuickActionItem {
 	icon: React.ReactNode;
 }
 
-function PropertySidebar({ topTenants }: IProps) {
+function PropertySidebar({
+	topTenants,
+	averageVacancyDays,
+	rentCollectedThisYear,
+}: IProps) {
 	const quickActions = useMemo((): QuickActionItem[] => {
 		return [
 			{ id: "qa-001", label: "Add New Unit", icon: <FiPlus size={16} /> },
@@ -76,12 +82,33 @@ function PropertySidebar({ topTenants }: IProps) {
 	}, [quickActions]);
 
 	const renderedTopTenants = useMemo(() => {
-		return topTenants.map(({ id, name, amount }) => (
-			<Box key={id} className="tenant-row">
-				<Text className="tenant-name">{name}</Text>
-				<Text className="tenant-amount">{amount}</Text>
-			</Box>
-		));
+		if (topTenants.length === 0)
+			return <Text className="no-tenants">No data yet</Text>;
+		return topTenants.map(
+			({ id, name, unit, monthlyRent, avatar }, index) => (
+				<Box key={id ?? index} className="tenant-row">
+					<Box className="tenant-avatar">
+						{avatar ? (
+							<Image
+								url={avatar}
+								alt={name}
+								width="32px"
+								height="32px"
+								borderRadius="50%"
+								style={{ objectFit: "cover" }}
+							/>
+						) : (
+							<Box className="avatar-placeholder" />
+						)}
+					</Box>
+					<Box className="tenant-info">
+						<Text className="tenant-name">{name}</Text>
+						<Text className="tenant-unit">{unit}</Text>
+					</Box>
+					<Text className="tenant-amount">{monthlyRent}</Text>
+				</Box>
+			),
+		);
 	}, [topTenants]);
 
 	return (
@@ -103,12 +130,16 @@ function PropertySidebar({ topTenants }: IProps) {
 
 				<Box className="stat-row">
 					<Text className="stat-label">Average Vacancy Duration</Text>
-					<Text className="stat-value-text">12 days</Text>
+					<Text className="stat-value-text">
+						{averageVacancyDays}
+					</Text>
 				</Box>
 
 				<Box className="stat-row">
 					<Text className="stat-label">Rent Collected This Year</Text>
-					<Text className="stat-value-text bold">₦185,760,000</Text>
+					<Text className="stat-value-text bold">
+						{rentCollectedThisYear}
+					</Text>
 				</Box>
 
 				<Box className="top-tenants">

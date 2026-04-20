@@ -2,7 +2,7 @@
 import styled from "styled-components";
 import { Box } from "@/components";
 
-export const TenantsGridStyled = styled(Box)`
+export const TenantsGridStyled = styled(Box)<{ $viewMode: "grid" | "list" }>`
 	.grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
@@ -53,7 +53,7 @@ export const TenantsGridStyled = styled(Box)`
 
 					.tenant-property {
 						font-size: 14px;
-						color: #64748b;
+						color: var(--Text-Secondary);
 					}
 				}
 			}
@@ -82,13 +82,13 @@ export const TenantsGridStyled = styled(Box)`
 				gap: 8px;
 
 				svg {
-					color: #94a3b8;
+					color: var(--Text-Secondary);
 					flex-shrink: 0;
 				}
 
 				.detail-value {
 					font-size: 14px;
-					color: #64748b;
+					color: var(--Text-Secondary);
 					letter-spacing: 0.5px;
 				}
 			}
@@ -107,7 +107,7 @@ export const TenantsGridStyled = styled(Box)`
 				.rent-label,
 				.lease-label {
 					font-size: 14px;
-					color: #94a3b8;
+					color: var(--Text-Secondary);
 				}
 
 				.rent-value {
@@ -132,7 +132,7 @@ export const TenantsGridStyled = styled(Box)`
 				text-align: center;
 				background: none;
 				border: none;
-				color: #64748b;
+				color: var(--Text-Secondary);
 				font-size: 16px;
 				font-weight: 600;
 				cursor: pointer;
@@ -144,15 +144,121 @@ export const TenantsGridStyled = styled(Box)`
 		}
 	}
 
+	.grid.list {
+		grid-template-columns: 1fr;
+		gap: 10px;
+	}
+
+	/* ── List mode overrides ── */
+	.grid.list .tenant-card {
+		flex-direction: row;
+		align-items: center;
+		gap: 16px;
+		padding: 12px 16px;
+		border-radius: 10px;
+
+		.card-top {
+			flex-shrink: 0;
+			flex-direction: row;
+			align-items: center;
+			gap: 12px;
+
+			.tenant-info {
+				.avatar-placeholder {
+					width: 44px;
+					height: 44px;
+				}
+
+				.info-text .tenant-name {
+					font-size: 15px;
+				}
+			}
+
+			.payment-badge {
+				display: none;
+			}
+		}
+
+		.card-details {
+			flex: 1;
+			flex-direction: row;
+			flex-wrap: wrap;
+			gap: 8px 20px;
+			border-top: none;
+			border-bottom: none;
+			border-left: 1px solid var(--Border-Subtle);
+			border-right: 1px solid var(--Border-Subtle);
+			padding: 0 16px;
+
+			.detail-row {
+				white-space: nowrap;
+			}
+		}
+
+		.card-footer {
+			flex-direction: column;
+			gap: 4px;
+			flex-shrink: 0;
+
+			.rent-info {
+				.rent-value {
+					font-size: 15px;
+				}
+			}
+
+			.lease-info {
+				display: none;
+			}
+		}
+
+		.card-action {
+			border-top: none;
+			border-left: 1px solid var(--Border-Subtle);
+			padding-left: 16px;
+			flex-shrink: 0;
+
+			button {
+				width: auto;
+				white-space: nowrap;
+				padding: 6px 14px;
+			}
+		}
+	}
+
 	@media (max-width: 1024px) {
-		.grid {
+		.grid:not(.list) {
 			grid-template-columns: repeat(2, 1fr);
 		}
 	}
 
 	@media (max-width: 767px) {
-		.grid {
+		.grid:not(.list) {
 			grid-template-columns: 1fr;
+		}
+
+		.grid.list .tenant-card {
+			flex-direction: column;
+			align-items: flex-start;
+
+			.card-top .payment-badge {
+				display: flex;
+			}
+
+			.card-details {
+				border-left: none;
+				border-right: none;
+				border-top: 1px solid var(--Border-Subtle);
+				border-bottom: 1px solid var(--Border-Subtle);
+				padding: 8px 0;
+				width: 100%;
+			}
+
+			.card-action {
+				border-left: none;
+				border-top: 1px solid var(--Border-Subtle);
+				padding-left: 0;
+				width: 100%;
+			}
 		}
 	}
 `;
