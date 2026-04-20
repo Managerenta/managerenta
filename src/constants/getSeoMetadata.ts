@@ -42,7 +42,7 @@ async function getSeoMetadata({
 		openGraph: {
 			type: "website",
 			url: urlPath,
-			siteName: "PropertyTrack",
+			siteName: "manageRenta",
 			images: [
 				{
 					url: image || "/opengraph-image.png",
@@ -54,11 +54,11 @@ async function getSeoMetadata({
 			images: [
 				{
 					url: image || "/opengraph-image.png",
-					alt: "PropertyTrack - Project Management Tool",
+					alt: "manageRenta - Project Management Tool",
 				},
 			],
 		},
-		authors: [{ name: "PropertyTrack Team", url: APP_HOSTNAME }],
+		authors: [{ name: "manageRenta Team", url: APP_HOSTNAME }],
 		keywords: [...defaultKeywords, ...(keywords || [])],
 		alternates: { canonical: urlPath },
 	};
