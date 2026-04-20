@@ -30,7 +30,7 @@ function KeyHighlights() {
 		<KeyHighlightsStyled>
 			<header>
 				<BsCalculator />
-				<Text>PropertyTrack</Text>
+				<Text>manageRenta</Text>
 			</header>
 
 			<Text className="title">Start Managing Smarter Today</Text>
