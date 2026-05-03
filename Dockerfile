@@ -8,7 +8,7 @@ WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
-COPY patches ./patches
+# COPY patches ./patches
 
 RUN \
   if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
@@ -53,7 +53,7 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-RUN mkdir -p /app/public/sitemaps/ && chown -R nextjs:nodejs /app/public/sitemaps/ && chmod 755 /app/public/sitemaps/
+# RUN mkdir -p /app/public/sitemaps/ && chown -R nextjs:nodejs /app/public/sitemaps/ && chmod 755 /app/public/sitemaps/
 
 USER nextjs
 
