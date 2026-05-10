@@ -39,7 +39,7 @@
 		"styled-components": "^6.4.1",
 		"swr": "^2.4.1",
 		"three": "^0.184.0",
-		"uuid": "11.0.3"
+		"uuid": "14.0.0"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.15",
