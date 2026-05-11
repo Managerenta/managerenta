@@ -153,6 +153,9 @@ export async function GET(req: Request) {
 		}
 
 		const cookieOptions = getAuthCookieOptions();
+		const domainAttr = cookieOptions.domain
+			? `; Domain=${cookieOptions.domain}`
+			: "";
 
 		if (accessToken !== existingAccessToken) {
 			headers.append(
@@ -160,7 +163,7 @@ export async function GET(req: Request) {
 				`accessToken=${accessToken}; Path=/; HttpOnly; SameSite=${cookieOptions.sameSite}; Secure=${cookieOptions.secure}; Max-Age=${Math.floor(
 					(new Date(accessTokenExpiresIn).getTime() - Date.now()) /
 						1000,
-				)}; Domain=${cookieOptions.domain};`,
+				)}${domainAttr}`,
 			);
 		}
 
@@ -170,7 +173,7 @@ export async function GET(req: Request) {
 				`refreshToken=${refreshToken}; Path=/; HttpOnly; SameSite=${cookieOptions.sameSite}; Secure=${cookieOptions.secure}; Max-Age=${Math.floor(
 					(new Date(refreshTokenExpiresIn).getTime() - Date.now()) /
 						1000,
-				)}; Domain=${cookieOptions.domain};`,
+				)}${domainAttr}`,
 			);
 		}
 
