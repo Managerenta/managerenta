@@ -3,7 +3,6 @@ import {
 	createContext,
 	useCallback,
 	useEffect,
-	useMemo,
 	useState,
 } from "react";
 import { api, type IEnv, verifyUserLogin } from "../../constants";
@@ -20,36 +19,29 @@ interface IProps {
 
 export const AppContextProvider = createContext<IProps>({} as IProps);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function AppContext({
 	children,
-	env: _env,
+	env,
 	isUserSessionActive,
-	userName: _userName,
+	userName,
 }: {
 	children: React.ReactNode;
 	env: IEnv;
 	isUserSessionActive: boolean;
 	userName: string;
 }) {
-	const [_isUserLoggedIn, _setIsUserLoggedIn] =
+	const [isUserLoggedIn, setIsUserLoggedIn] =
 		useState<boolean>(isUserSessionActive);
-	const userName = useMemo(() => _userName, [_userName]);
 
 	const [navHeight] = useState<string>("70px");
 
-	const isUserLoggedIn = useMemo(() => _isUserLoggedIn, [_isUserLoggedIn]);
-
-	const env = useMemo(() => _env, [_env]);
-
-	const isBrowser = useMemo(() => typeof window !== "undefined", []); //The approach recommended by Next.js
+	const isBrowser = typeof window !== "undefined";
 
 	const deleteAllCookies = useCallback(async (): Promise<boolean> => {
 		try {
-			const url = "/api/auth/logout";
-			const { status } = await api().post(url);
+			const { status } = await api().delete("/api/logout");
 			if (status !== 200) return false;
-			_setIsUserLoggedIn(false);
+			setIsUserLoggedIn(false);
 			return true;
 		} catch {
 			return false;
@@ -61,7 +53,7 @@ export default function AppContext({
 			url: "/api/auth/verify",
 		});
 
-		_setIsUserLoggedIn(result);
+		setIsUserLoggedIn(result);
 	}, []);
 
 	useEffect(() => {
