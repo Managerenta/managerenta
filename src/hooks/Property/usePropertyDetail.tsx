@@ -52,7 +52,7 @@ export default function usePropertyDetail(propertyId: string | null) {
 	}>(propertyId ? `/api/properties/${propertyId}` : null, fetcher, {
 		revalidateOnMount: true,
 	});
-	const data = rawResponse?.data ?? null;
+	const data = useMemo(() => rawResponse?.data ?? null, [rawResponse]);
 
 	const propertyDetail = useMemo<IPropertyDetail | null>(() => {
 		if (!data) return null;
