@@ -3,6 +3,7 @@ export interface IEnv {
 	MAIN_SERVICE_URL: string;
 	CDN_BASE_URL: string;
 	CDN_ASSETS_VERSION: string;
+	GOOGLE_ANALYTIC_TRACKING_ID: string;
 }
 
 export default function defaultEnvOptions(): IEnv {
@@ -12,6 +13,7 @@ export default function defaultEnvOptions(): IEnv {
 			MAIN_SERVICE_URL: "",
 			CDN_BASE_URL: "",
 			CDN_ASSETS_VERSION: "",
+			GOOGLE_ANALYTIC_TRACKING_ID: "",
 		};
 
 	const result: IEnv = {
@@ -19,6 +21,8 @@ export default function defaultEnvOptions(): IEnv {
 		MAIN_SERVICE_URL: process.env?.NEXT_PUBLIC_MAIN_SERVICE_URL || "",
 		CDN_BASE_URL: process.env?.NEXT_PUBLIC_CDN_BASE_URL || "",
 		CDN_ASSETS_VERSION: process.env?.NEXT_PUBLIC_CDN_ASSETS_VERSION || "",
+		GOOGLE_ANALYTIC_TRACKING_ID:
+			process.env?.NEXT_PUBLIC_GOOGLE_ANALYTIC_TRACKING_ID || "",
 	};
 
 	return result;
