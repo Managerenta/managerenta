@@ -1,21 +1,20 @@
-import api from "./api";
-
 export default async function verifyUserLogin({
-	url,
 	cookieHeader,
 }: {
-	url: string;
-	cookieHeader?: string;
+	cookieHeader: string;
 }): Promise<boolean> {
 	try {
-		const { status }: { status: number } = await api().get(url, {
+		const url = `/api/verify`;
+
+		const response = await fetch(url, {
 			headers: {
-				Cookie: cookieHeader ?? "",
+				Cookie: cookieHeader,
 			},
 		});
 
-		if (status !== 200) return false;
-
+		if (response.status !== 200) {
+			return false;
+		}
 		return true;
 	} catch {
 		return false;

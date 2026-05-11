@@ -25,16 +25,14 @@ export default function AppContext({
 	children,
 	env: _env,
 	isUserSessionActive,
-	userName: _userName,
 }: {
 	children: React.ReactNode;
 	env: IEnv;
 	isUserSessionActive: boolean;
-	userName: string;
 }) {
 	const [_isUserLoggedIn, _setIsUserLoggedIn] =
 		useState<boolean>(isUserSessionActive);
-	const userName = useMemo(() => _userName, [_userName]);
+	const userName = useMemo(() => "", []);
 
 	const [navHeight] = useState<string>("70px");
 
@@ -58,11 +56,11 @@ export default function AppContext({
 
 	const reAuthenticateUserSession = useCallback(async () => {
 		const result = await verifyUserLogin({
-			url: "/api/auth/verify",
+			cookieHeader: isBrowser ? document.cookie : "",
 		});
 
 		_setIsUserLoggedIn(result);
-	}, []);
+	}, [isBrowser]);
 
 	useEffect(() => {
 		if (!isBrowser) return;
@@ -72,6 +70,10 @@ export default function AppContext({
 			behavior: "smooth",
 		});
 	}, [isBrowser]);
+
+	useEffect(() => {
+		_setIsUserLoggedIn(isUserSessionActive);
+	}, [isUserSessionActive]);
 
 	return (
 		<AppContextProvider.Provider
@@ -83,8 +85,7 @@ export default function AppContext({
 				isUserLoggedIn,
 				userName,
 				reAuthenticateUserSession,
-			}}
-		>
+			}}>
 			{children}
 		</AppContextProvider.Provider>
 	);

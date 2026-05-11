@@ -12,7 +12,7 @@ import { cookies } from "next/headers";
 import { BodyWrapper } from "@/components";
 import { defaultEnvOptions } from "@/constants";
 
-const dm_sans = DM_Sans({
+export const dm_sans = DM_Sans({
 	subsets: ["latin"],
 	weight: [
 		"100",
@@ -28,7 +28,7 @@ const dm_sans = DM_Sans({
 	],
 });
 
-const roboto = Roboto({
+export const roboto = Roboto({
 	subsets: ["latin"],
 	weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
 });
@@ -59,31 +59,9 @@ export default async function RootLayout({
 	children: React.ReactNode;
 }>) {
 	const cookieStore = await cookies();
+	const cookieHeader = cookieStore.toString();
 
 	const env = defaultEnvOptions();
-
-	const accessToken = cookieStore.get("accessToken")?.value;
-	let isUserSessionActive = false;
-	let userName = "";
-
-	if (accessToken) {
-		try {
-			decodeJwt(accessToken);
-			isUserSessionActive = true;
-
-			const cookieHeader = cookieStore.toString();
-			const profileRes = await fetch(
-				`${env.MAIN_SERVICE_URL}/api/users/user-profile`,
-				{ headers: { Cookie: cookieHeader } },
-			);
-			if (profileRes.ok) {
-				const body = await profileRes.json();
-				userName = body?.data?.name ?? body?.name ?? "";
-			}
-		} catch {
-			isUserSessionActive = false;
-		}
-	}
 
 	// useReportWebVitals((metric) => {
 	// 	// console.log(metric);
@@ -93,11 +71,7 @@ export default async function RootLayout({
 		<html lang="en">
 			<body className={`${dm_sans.className} ${roboto.className}`}>
 				<div id="modal-popup"></div>
-				<BodyWrapper
-					env={env}
-					isUserSessionActive={isUserSessionActive}
-					userName={userName}
-				>
+				<BodyWrapper env={env} cookieHeader={cookieHeader}>
 					{children}
 				</BodyWrapper>
 			</body>

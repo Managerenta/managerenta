@@ -11,3 +11,4 @@ export { default as getErrorMessage } from "./getErrorMessage";
 export { default as getSeoMetadata } from "./getSeoMetadata";
 export { default as supportedImageMimeTypes } from "./supportedImageMimeTypes";
 export { default as verifyUserLogin } from "./verifyUserLogin";
+export { default as getAuthCookieOptions } from "./getAuthCookieOptions";

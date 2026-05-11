@@ -1,25 +1,25 @@
 import axios, { type AxiosRequestConfig } from "axios";
 
 const axiosClient = axios.create({
-	baseURL: process.env.NEXT_PUBLIC_MAIN_SERVICE_URL || "",
+	// baseURL: process.env.NEXT_PUBLIC_MAIN_SERVICE_URL || "",
 	withCredentials: true,
 });
 
-// Normalize auth errors: on 401 from protected routes, bounce to /login.
-// Auth endpoints themselves should handle their own 401 (wrong credentials).
-axiosClient.interceptors.response.use(
-	(response) => response,
-	(error) => {
-		if (typeof window !== "undefined" && error?.response?.status === 401) {
-			const requestUrl: string = error?.config?.url ?? "";
-			const isAuthRoute = requestUrl.includes("/api/auth/");
-			if (!isAuthRoute && window.location.pathname !== "/login") {
-				window.location.href = "/login";
-			}
-		}
-		return Promise.reject(error);
-	},
-);
+// // Normalize auth errors: on 401 from protected routes, bounce to /login.
+// // Auth endpoints themselves should handle their own 401 (wrong credentials).
+// axiosClient.interceptors.response.use(
+// 	(response) => response,
+// 	(error) => {
+// 		if (typeof window !== "undefined" && error?.response?.status === 401) {
+// 			const requestUrl: string = error?.config?.url ?? "";
+// 			const isAuthRoute = requestUrl.includes("/api/auth/");
+// 			if (!isAuthRoute && window.location.pathname !== "/login") {
+// 				window.location.href = "/login";
+// 			}
+// 		}
+// 		return Promise.reject(error);
+// 	},
+// );
 
 const api = () => {
 	return {
