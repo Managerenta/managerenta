@@ -91,6 +91,9 @@ export default async function RootLayout({
 
 	return (
 		<html lang="en">
+			<head>
+				<style>{`html,body{background:#ffffff}[data-theme="dark"]{background:#0f172a}`}</style>
+			</head>
 			<body className={`${dm_sans.className} ${roboto.className}`}>
 				<div id="modal-popup"></div>
 				<BodyWrapper
@@ -102,9 +105,7 @@ export default async function RootLayout({
 				</BodyWrapper>
 			</body>
 
-			<GoogleAnalytics
-				gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTIC_TRACKING_ID || ""}
-			/>
+			<GoogleAnalytics gaId={env.GOOGLE_ANALYTIC_TRACKING_ID} />
 		</html>
 	);
 }
