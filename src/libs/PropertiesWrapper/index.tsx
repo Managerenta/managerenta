@@ -15,7 +15,7 @@ import { PropertiesWrapperStyled } from "./styled";
 function PropertiesWrapper() {
 	const router = useRouter();
 	const [offset, setOffset] = useState<number>(0);
-	const [pageSize] = useState<number>(12);
+	const [pageSize, setPageSize] = useState<number>(12);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [mounted, setMounted] = useState(false);
 	const [search, setSearch] = useState("");
@@ -132,7 +132,13 @@ function PropertiesWrapper() {
 			<Box className="pagination-footer">
 				<Box className="items-per-page">
 					<span>Items per page:</span>
-					<select defaultValue={pageSize}>
+					<select
+						value={pageSize}
+						onChange={(e) => {
+							setPageSize(Number(e.target.value));
+							setOffset(0);
+						}}
+					>
 						<option value={6}>6</option>
 						<option value={12}>12</option>
 						<option value={24}>24</option>

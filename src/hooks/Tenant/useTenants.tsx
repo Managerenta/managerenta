@@ -45,9 +45,15 @@ export default function useTenantsData(
 		revalidateOnFocus: true,
 	});
 
-	const rawTenants: IRawTenant[] = rawResponse?.data ?? [];
-	const rawStats: IRawTenantStats | null = rawResponse?.stats ?? null;
-	const total: number = rawResponse?.total ?? 0;
+	const rawTenants = useMemo<IRawTenant[]>(
+		() => rawResponse?.data ?? [],
+		[rawResponse],
+	);
+	const rawStats = useMemo<IRawTenantStats | null>(
+		() => rawResponse?.stats ?? null,
+		[rawResponse],
+	);
+	const total = useMemo<number>(() => rawResponse?.total ?? 0, [rawResponse]);
 
 	const tenants = useMemo<ITenantListItem[]>(() => {
 		return rawTenants.map((p) => ({

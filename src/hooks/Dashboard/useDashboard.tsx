@@ -58,8 +58,6 @@ export default function useDashboardData() {
 	const { data: dashboardStatsResponse } = useSWR<{
 		data?: IRawDashboardStats;
 	}>("/api/dashboard/stats", fetcher, { revalidateOnMount: true });
-	const dashboardStats: IRawDashboardStats =
-		dashboardStatsResponse?.data ?? {};
 
 	const { data: propertiesData } = useSWR<IRawPropertiesResponse>(
 		"/api/properties?limit=2",
@@ -67,7 +65,15 @@ export default function useDashboardData() {
 		{ revalidateOnMount: true },
 	);
 
-	const rawProperties: IRawProperty[] = propertiesData?.data ?? [];
+	const dashboardStats = useMemo<IRawDashboardStats>(
+		() => dashboardStatsResponse?.data ?? {},
+		[dashboardStatsResponse],
+	);
+
+	const rawProperties = useMemo<IRawProperty[]>(
+		() => propertiesData?.data ?? [],
+		[propertiesData],
+	);
 
 	const stats = useMemo(() => {
 		const totalProperties = dashboardStats?.totalProperties ?? 0;
@@ -158,7 +164,10 @@ export default function useDashboardData() {
 		}));
 	}, [dashboardStats]);
 
-	const urgentActionCount = dueToday.length + overdue.length;
+	const urgentActionCount = useMemo(
+		() => dueToday.length + overdue.length,
+		[dueToday, overdue],
+	);
 
 	const transactions = useMemo<ITransaction[]>(() => {
 		const raw: IRawDashboardTransaction[] =
