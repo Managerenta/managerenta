@@ -2,6 +2,7 @@
 import { motion } from "motion/react";
 import NextTopLoader from "nextjs-toploader";
 import type React from "react";
+import { Fragment } from "react";
 import { SWRConfig } from "swr";
 import type { IEnv } from "@/constants";
 import { AppContext, ThemeContext } from "@/hooks";
@@ -22,14 +23,15 @@ export default function BodyWrapper({
 	userName,
 }: IProps) {
 	return (
-		<motion.div
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1 }}
-			exit={{ opacity: 0 }}
-			transition={{ duration: 0 }}
-		>
+		<Fragment>
 			<GlobalStyle />
 			<NextTopLoader />
+			<motion.div
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				exit={{ opacity: 0 }}
+				transition={{ duration: 0 }}
+			>
 			<SWRConfig
 				value={{
 					shouldRetryOnError: false,
@@ -50,6 +52,7 @@ export default function BodyWrapper({
 					</ThemeContext>
 				</AppContext>
 			</SWRConfig>
-		</motion.div>
+			</motion.div>
+		</Fragment>
 	);
 }
