@@ -1,7 +1,7 @@
 import axios, { type AxiosRequestConfig } from "axios";
 
 const axiosClient = axios.create({
-	baseURL: process.env.NEXT_PUBLIC_MAIN_SERVICE_URL || "",
+	baseURL: process.env.NEXT_PUBLIC_MAIN_SERVICE_URL || undefined,
 	withCredentials: true,
 });
 
