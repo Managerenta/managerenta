@@ -45,7 +45,7 @@ export default function useTenantDetailData(tenantId: string | null) {
 		{ revalidateOnMount: true, revalidateOnFocus: true },
 	);
 
-	const data = rawResponse?.data ?? null;
+	const data = useMemo(() => rawResponse?.data ?? null, [rawResponse]);
 
 	const tenantDetail = useMemo<ITenantDetail | null>(() => {
 		if (!data) return null;
