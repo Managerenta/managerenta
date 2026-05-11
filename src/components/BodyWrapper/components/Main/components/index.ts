@@ -1,1 +1,1 @@
-export { default as AdminDashboardWrapper } from "./AdminDashboardWrapper";
+export { default as DashboardWrapper } from "./DashboardWrapper";

@@ -3,6 +3,7 @@ import {
 	createContext,
 	useCallback,
 	useEffect,
+	useMemo,
 	useState,
 } from "react";
 import { api, type IEnv, verifyUserLogin } from "../../constants";
@@ -28,12 +29,11 @@ export default function AppContext({
 	env: IEnv;
 	isUserSessionActive: boolean;
 }) {
-	const [isUserLoggedIn, setIsUserLoggedIn] =
+	// const [isUserLoggedIn, setIsUserLoggedIn] =
+	// 	useState<boolean>(isUserSessionActive);
+	const [_isUserLoggedIn, _setIsUserLoggedIn] =
 		useState<boolean>(isUserSessionActive);
-<<<<<<< HEAD
 	const userName = useMemo(() => "", []);
-=======
->>>>>>> 67d2f4cd098a3cd970f52c0a6f858ee8331ce6cd
 
 	const [navHeight] = useState<string>("70px");
 
@@ -43,7 +43,7 @@ export default function AppContext({
 		try {
 			const { status } = await api().delete("/api/logout");
 			if (status !== 200) return false;
-			setIsUserLoggedIn(false);
+			_setIsUserLoggedIn(false);
 			return true;
 		} catch {
 			return false;
@@ -55,13 +55,10 @@ export default function AppContext({
 			cookieHeader: isBrowser ? document.cookie : "",
 		});
 
-<<<<<<< HEAD
 		_setIsUserLoggedIn(result);
 	}, [isBrowser]);
-=======
-		setIsUserLoggedIn(result);
-	}, []);
->>>>>>> 67d2f4cd098a3cd970f52c0a6f858ee8331ce6cd
+
+	const isUserLoggedIn = useMemo(() => _isUserLoggedIn, [_isUserLoggedIn]);
 
 	useEffect(() => {
 		if (!isBrowser) return;
@@ -86,7 +83,8 @@ export default function AppContext({
 				isUserLoggedIn,
 				userName,
 				reAuthenticateUserSession,
-			}}>
+			}}
+		>
 			{children}
 		</AppContextProvider.Provider>
 	);

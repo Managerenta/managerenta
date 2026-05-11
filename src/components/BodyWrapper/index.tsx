@@ -2,15 +2,12 @@
 import { motion } from "motion/react";
 import NextTopLoader from "nextjs-toploader";
 import type React from "react";
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { SWRConfig } from "swr";
-import { verifyUserLogin, type IEnv } from "@/constants";
+import { type IEnv, verifyUserLogin } from "@/constants";
 import { AppContext, ThemeContext } from "@/hooks";
 import { GlobalStyle } from "@/styles";
 import { Main } from "./components";
-import { dm_sans, roboto } from "@/app/layout";
-import { GoogleAnalytics } from "@next/third-parties/google";
-import { useEffect, useState } from "react";
 
 interface IProps {
 	children: React.ReactNode;
@@ -58,7 +55,8 @@ export default function BodyWrapper({ children, env, cookieHeader }: IProps) {
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
 				exit={{ opacity: 0 }}
-				transition={{ duration: 0 }}>
+				transition={{ duration: 0 }}
+			>
 				<SWRConfig
 					value={{
 						shouldRetryOnError: false,
@@ -67,8 +65,12 @@ export default function BodyWrapper({ children, env, cookieHeader }: IProps) {
 						revalidateOnReconnect: true,
 						refreshWhenOffline: true,
 						refreshWhenHidden: false,
-					}}>
-					<AppContext env={env} isUserSessionActive={isUserSessionActive}>
+					}}
+				>
+					<AppContext
+						env={env}
+						isUserSessionActive={isUserSessionActive}
+					>
 						<ThemeContext>
 							<Main>{children}</Main>
 						</ThemeContext>

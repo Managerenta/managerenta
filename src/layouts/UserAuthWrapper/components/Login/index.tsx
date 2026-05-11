@@ -124,7 +124,9 @@ function Login() {
 		return inputs.map((item, index) => {
 			return (
 				<Box key={index} className="form-field">
-					<label htmlFor={item.label.toLowerCase()}>{item.label}</label>
+					<label htmlFor={item.label.toLowerCase()}>
+						{item.label}
+					</label>
 					{item.elem}
 				</Box>
 			);

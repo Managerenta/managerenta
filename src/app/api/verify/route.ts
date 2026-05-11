@@ -158,7 +158,8 @@ export async function GET(req: Request) {
 			headers.append(
 				"Set-Cookie",
 				`accessToken=${accessToken}; Path=/; HttpOnly; SameSite=${cookieOptions.sameSite}; Secure=${cookieOptions.secure}; Max-Age=${Math.floor(
-					(new Date(accessTokenExpiresIn).getTime() - Date.now()) / 1000,
+					(new Date(accessTokenExpiresIn).getTime() - Date.now()) /
+						1000,
 				)}; Domain=${cookieOptions.domain};`,
 			);
 		}
@@ -167,7 +168,8 @@ export async function GET(req: Request) {
 			headers.append(
 				"Set-Cookie",
 				`refreshToken=${refreshToken}; Path=/; HttpOnly; SameSite=${cookieOptions.sameSite}; Secure=${cookieOptions.secure}; Max-Age=${Math.floor(
-					(new Date(refreshTokenExpiresIn).getTime() - Date.now()) / 1000,
+					(new Date(refreshTokenExpiresIn).getTime() - Date.now()) /
+						1000,
 				)}; Domain=${cookieOptions.domain};`,
 			);
 		}
@@ -178,7 +180,8 @@ export async function GET(req: Request) {
 			headers,
 		});
 	} catch (error) {
-		const message = error instanceof Error ? error.message : "Unknown error";
+		const message =
+			error instanceof Error ? error.message : "Unknown error";
 		const responseData: IResponseData<null> = {
 			message: `Internal server error: ${message}`,
 			code: 500,

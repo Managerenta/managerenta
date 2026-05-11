@@ -1,5 +1,4 @@
 import { GoogleAnalytics } from "@next/third-parties/google";
-import { decodeJwt } from "jose";
 import {
 	DM_Sans,
 	// Iceland,

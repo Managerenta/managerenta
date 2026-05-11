@@ -1,10 +1,17 @@
 "use client";
-import { usePathname } from "next/navigation";
-import { memo, type ReactNode, useContext, useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import {
+	memo,
+	type ReactNode,
+	useContext,
+	useEffect,
+	useMemo,
+	useState,
+} from "react";
 import Box from "@/components/Box";
 import { AppContextProvider } from "@/hooks";
 import { Toast } from "@/layouts";
-import { AdminDashboardWrapper } from "./components";
+import { DashboardWrapper } from "./components";
 import { MainStyled } from "./styled";
 
 interface IProps {
@@ -13,25 +20,37 @@ interface IProps {
 
 function Main({ children }: IProps) {
 	const [excludedRoutes] = useState(["/login", "/signup", "/"]);
-	const { navHeight } = useContext(AppContextProvider);
+
+	const { navHeight, isUserLoggedIn } = useContext(AppContextProvider);
 	const pathname = usePathname();
+	const router = useRouter();
 
 	const isAuthRoute = useMemo(
 		() => excludedRoutes.includes(pathname),
 		[pathname, excludedRoutes],
 	);
 
+	console.log("-".repeat(50));
+	console.log("isAuthRoute", isAuthRoute);
+	console.log("isUserLoggedIn", isUserLoggedIn);
+	console.log("-".repeat(50));
+
+	useEffect(() => {
+		if (isUserLoggedIn && isAuthRoute) {
+			console.log("Rerouting...");
+			router.push("/dashboard");
+		}
+	}, [isUserLoggedIn, router, isAuthRoute]);
+
 	return (
 		<MainStyled $navHeight={navHeight}>
 			<Box className="body-wrapper">
 				<Toast />
 				<Box className="body-container-max-width">
-					{isAuthRoute ? (
+					{isAuthRoute && !isUserLoggedIn ? (
 						children
 					) : (
-						<AdminDashboardWrapper>
-							{children}
-						</AdminDashboardWrapper>
+						<DashboardWrapper>{children}</DashboardWrapper>
 					)}
 				</Box>
 			</Box>
