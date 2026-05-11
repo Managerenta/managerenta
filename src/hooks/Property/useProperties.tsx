@@ -65,8 +65,11 @@ export default function usePropertiesData(limit = 20, offset = 0) {
 		revalidateOnMount: true,
 	});
 
-	const rawProperties: IRawProperty[] = rawResponse?.data ?? [];
-	const rawStats = rawResponse?.stats ?? null;
+	const rawProperties = useMemo<IRawProperty[]>(
+		() => rawResponse?.data ?? [],
+		[rawResponse],
+	);
+	const rawStats = useMemo(() => rawResponse?.stats ?? null, [rawResponse]);
 
 	const properties = useMemo<IPropertyList[]>(() => {
 		return rawProperties.map((p) => {
