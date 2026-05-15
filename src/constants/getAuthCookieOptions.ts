@@ -2,12 +2,12 @@ import defaultEnvOptions from "./defaultEnvOptions";
 
 export default function getAuthCookieOptions() {
 	const { ENVIRONMENT } = defaultEnvOptions();
-	const cookie_domain = process.env.COOKIE_DOMAIN || "gkoi.com";
+	const domain = process.env.COOKIE_DOMAIN || undefined;
 
 	return {
 		httpOnly: true,
 		secure: ENVIRONMENT === "production",
 		sameSite: "lax" as const,
-		domain: cookie_domain,
+		domain,
 	};
 }

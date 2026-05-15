@@ -13,7 +13,7 @@ import { FaLock, FaUser } from "react-icons/fa";
 import { GrSecure } from "react-icons/gr";
 import { toast } from "react-toastify";
 import { Box, Button, Input, Text } from "@/components";
-import { api, getErrorMessage } from "@/constants";
+import { getErrorMessage } from "@/constants";
 import { AppContextProvider } from "@/hooks";
 import AlternativeSeparator from "@/layouts/AlternativeSeparator";
 import Header from "../Header";
@@ -62,10 +62,21 @@ function Login() {
 		setIsLoading(true);
 
 		try {
-			await api().post("/api/login", {
-				email: state.email,
-				password: state.password,
+			const res = await fetch("/api/login", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					email: state.email,
+					password: state.password,
+				}),
+				credentials: "include",
 			});
+			if (!res.ok) {
+				const data = await res.json();
+				throw new Error(
+					data?.message || "Invalid username or password",
+				);
+			}
 
 			await reAuthenticateUserSession();
 			router.push("/dashboard");
