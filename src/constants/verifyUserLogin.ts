@@ -1,6 +1,8 @@
 export default async function verifyUserLogin({
 	cookieHeader = "",
-}: { cookieHeader?: string } = {}): Promise<boolean> {
+}: {
+	cookieHeader?: string;
+} = {}): Promise<boolean> {
 	try {
 		const url = `/api/verify`;
 
