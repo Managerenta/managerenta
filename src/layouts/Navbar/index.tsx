@@ -28,24 +28,27 @@ function Navbar({ background, navHeight }: IProps) {
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 	const dropdownRef = useRef<HTMLDivElement>(null);
 
-	const { data: profileData } = useSWR<{ data: { avatar?: string } }>(
-		"/api/users/user-profile",
-		fetcher,
-	);
+	const { data: profileData } = useSWR<{
+		data: { avatar?: string; name?: string };
+	}>("/api/users/user-profile", fetcher);
 	const userAvatar = useMemo(
 		() => profileData?.data?.avatar ?? "",
 		[profileData],
 	);
+	const displayName = useMemo(
+		() => profileData?.data?.name ?? userName ?? "",
+		[profileData, userName],
+	);
 
 	const initials = useMemo(() => {
-		if (!userName) return "?";
-		return userName
+		if (!displayName) return "?";
+		return displayName
 			.split(" ")
 			.filter(Boolean)
 			.slice(0, 2)
 			.map((w) => w[0].toUpperCase())
 			.join("");
-	}, [userName]);
+	}, [displayName]);
 
 	const handleLogout = useCallback(async () => {
 		setDropdownOpen(false);
@@ -65,8 +68,7 @@ function Navbar({ background, navHeight }: IProps) {
 		if (dropdownOpen) {
 			document.addEventListener("mousedown", handleClickOutside);
 		}
-		return () =>
-			document.removeEventListener("mousedown", handleClickOutside);
+		return () => document.removeEventListener("mousedown", handleClickOutside);
 	}, [dropdownOpen]);
 
 	return (
@@ -85,13 +87,12 @@ function Navbar({ background, navHeight }: IProps) {
 				<Box
 					className="user-profile"
 					ref={dropdownRef}
-					onClick={() => setDropdownOpen((prev) => !prev)}
-				>
+					onClick={() => setDropdownOpen((prev) => !prev)}>
 					<Box className="avatar">
 						{userAvatar ? (
 							<Image
 								url={userAvatar}
-								alt={userName}
+								alt={displayName}
 								width="100%"
 								height="100%"
 								style={{ objectFit: "cover" }}
@@ -100,7 +101,7 @@ function Navbar({ background, navHeight }: IProps) {
 							initials
 						)}
 					</Box>
-					<Text className="user-name">{userName || "User"}</Text>
+					<Text className="user-name">{displayName || "User"}</Text>
 					<FiChevronDown
 						size={14}
 						className={`chevron ${dropdownOpen ? "open" : ""}`}

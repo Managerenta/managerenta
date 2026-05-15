@@ -13,7 +13,7 @@ interface IRawProperty {
 	type: string;
 	totalUnits: number;
 	occupied?: number;
-	monthlyRent: number;
+	monthlyRent?: number;
 	image?: string;
 	createdAt: string;
 }
@@ -84,7 +84,7 @@ export default function usePropertiesData(limit = 20, offset = 0) {
 				totalUnits: p.totalUnits,
 				occupied,
 				vacant,
-				monthlyRevenue: `₦${p.monthlyRent.toLocaleString("en-NG")}/month`,
+				monthlyRevenue: `₦${(p.monthlyRent ?? 0).toLocaleString("en-NG")}/month`,
 				occupancyStatus: computeOccupancyStatus(occupied, p.totalUnits),
 				image: p.image ?? "",
 			};

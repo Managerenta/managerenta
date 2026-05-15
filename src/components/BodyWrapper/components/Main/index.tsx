@@ -30,11 +30,6 @@ function Main({ children }: IProps) {
 		[pathname, excludedRoutes],
 	);
 
-	console.log("-".repeat(50));
-	console.log("isAuthRoute", isAuthRoute);
-	console.log("isUserLoggedIn", isUserLoggedIn);
-	console.log("-".repeat(50));
-
 	useEffect(() => {
 		if (isUserLoggedIn && isAuthRoute) {
 			console.log("Rerouting...");
