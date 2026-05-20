@@ -57,7 +57,9 @@ tenantSchema.post("aggregate", async (documents: ITenant[]) => {
 	);
 });
 
-export const Tenant = mongoose.model<ITenant>(collectionName, tenantSchema);
+export const Tenant: mongoose.Model<ITenant> =
+	(mongoose.models[collectionName] as mongoose.Model<ITenant> | undefined) ??
+	mongoose.model<ITenant>(collectionName, tenantSchema);
 
 export async function createTenantDB({
 	payload,

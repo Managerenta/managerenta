@@ -33,10 +33,11 @@ const transactionSchema = new mongoose.Schema<ITransaction>(
 transactionSchema.index({ tenantId: 1, type: 1, amountType: 1, date: -1 });
 transactionSchema.index({ userId: 1, date: -1 });
 
-export const Transaction = mongoose.model<ITransaction>(
-	collectionName,
-	transactionSchema,
-);
+export const Transaction: mongoose.Model<ITransaction> =
+	(mongoose.models[collectionName] as
+		| mongoose.Model<ITransaction>
+		| undefined) ??
+	mongoose.model<ITransaction>(collectionName, transactionSchema);
 
 export async function createTransactionDB({
 	payload,
