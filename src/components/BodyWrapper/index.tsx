@@ -28,25 +28,6 @@ export default function BodyWrapper({ children, env, cookieHeader }: IProps) {
 		})();
 	}, [isUserSessionActive, cookieHeader]);
 
-	// if (accessToken) {
-	// 	try {
-	// 		decodeJwt(accessToken);
-	// 		isUserSessionActive = true;
-
-	// 		const cookieHeader = cookieStore.toString();
-	// 		const profileRes = await fetch(
-	// 			`${env.MAIN_SERVICE_URL}/api/users/user-profile`,
-	// 			{ headers: { Cookie: cookieHeader } },
-	// 		);
-	// 		if (profileRes.ok) {
-	// 			const body = await profileRes.json();
-	// 			userName = body?.data?.name ?? body?.name ?? "";
-	// 		}
-	// 	} catch {
-	// 		isUserSessionActive = false;
-	// 	}
-	// }
-
 	return (
 		<Fragment>
 			<GlobalStyle />
