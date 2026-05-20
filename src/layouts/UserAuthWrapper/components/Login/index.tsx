@@ -12,7 +12,7 @@ import {
 import { FaLock, FaUser } from "react-icons/fa";
 import { GrSecure } from "react-icons/gr";
 import { toast } from "react-toastify";
-import { Box, Button, Input, Text } from "@/components";
+import { Box, Button, Input, Loader, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
 import { AppContextProvider } from "@/hooks";
 import AlternativeSeparator from "@/layouts/AlternativeSeparator";
@@ -47,6 +47,7 @@ function loginReducer(state: LoginState, action: LoginAction): LoginState {
 function Login() {
 	const [state, dispatch] = useReducer(loginReducer, initialState);
 	const [isLoading, setIsLoading] = useState(false);
+	const [isRedirecting, setIsRedirecting] = useState(false);
 
 	const { reAuthenticateUserSession } = useContext(AppContextProvider);
 	const router = useRouter();
@@ -68,12 +69,12 @@ function Login() {
 				{ baseURL: "" },
 			);
 
+			setIsRedirecting(true);
 			await reAuthenticateUserSession();
-			router.push("/dashboard");
+			router.replace("/dashboard");
 			router.refresh();
 		} catch (err: unknown) {
 			toast.error(getErrorMessage(err, "Invalid username or password"));
-		} finally {
 			setIsLoading(false);
 		}
 	};
@@ -133,6 +134,17 @@ function Login() {
 			);
 		});
 	}, [state.email, state.password]);
+
+	if (isRedirecting) {
+		return (
+			<LoginStyled>
+				<Box $grid $centerH $centerV $w="100%" $h="100%" $minH="500px">
+					<Loader loader="moonLoader" color="var(--Brand-Primary)" />
+					<Text>Signing you in…</Text>
+				</Box>
+			</LoginStyled>
+		);
+	}
 
 	return (
 		<LoginStyled>

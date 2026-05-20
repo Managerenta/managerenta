@@ -51,7 +51,7 @@ function Main({ children }: IProps) {
 			<Box className="body-wrapper">
 				<Toast />
 				<Box className="body-container-max-width">
-					{isAuthRoute && !isUserLoggedIn ? (
+					{isAuthRoute ? (
 						children
 					) : (
 						<DashboardWrapper>{children}</DashboardWrapper>
