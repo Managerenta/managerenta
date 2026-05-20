@@ -1,6 +1,6 @@
 import "server-only";
 import type { NextRequest } from "next/server";
-import { ADMIN_API_KEY, DB_NAME, isOriginAllowed } from "../constants";
+import { DB_NAME, isOriginAllowed } from "../constants";
 import { Redis } from "../databases";
 import { getClientIp } from "./clientIp";
 
@@ -18,8 +18,7 @@ export interface RateLimitResult {
 }
 
 /**
- * Token-bucket-ish rate limiter backed by Redis. Mirrors the original
- * Express middleware: ADMIN_API_KEY bypasses; allowed origins get 2x quota.
+ * Token-bucket-ish rate limiter backed by Redis. Allowed origins get 2x quota.
  */
 export async function enforceRateLimit(
 	req: NextRequest | Request,
@@ -28,12 +27,8 @@ export async function enforceRateLimit(
 	const { windowMs, keyGenerator } = options;
 	let maxRequests = options.maxRequests;
 
-	const apiKey = req.headers.get("x-api-key");
 	const origin = req.headers.get("origin");
 
-	if (apiKey && apiKey === ADMIN_API_KEY) {
-		return { allowed: true, limit: maxRequests, remaining: maxRequests };
-	}
 	if (isOriginAllowed(origin || "")) {
 		maxRequests *= 2;
 	}
