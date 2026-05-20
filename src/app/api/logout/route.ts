@@ -3,35 +3,28 @@ import type { IResponseData } from "@/types";
 export async function DELETE() {
 	try {
 		const headers = new Headers();
-		const cookie_domain = process.env.COOKIE_DOMAIN || "gkoi.com";
-
 		headers.set("content-type", "application/json");
-		headers.set("Location", "/"); // Redirect to home page to trigger reload
 
-		// Clear accessToken cookie
+		const cookieDomain = process.env.COOKIE_DOMAIN || "";
+		const domainAttr = cookieDomain ? `; Domain=${cookieDomain}` : "";
+
 		headers.append(
 			"Set-Cookie",
-			`accessToken=; Path=/; HttpOnly; SameSite=Strict; Secure; Max-Age=0; Domain=${cookie_domain}`,
+			`accessToken=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${domainAttr}`,
 		);
-
-		// Clear refreshToken cookie
 		headers.append(
 			"Set-Cookie",
-			`refreshToken=; Path=/; HttpOnly; SameSite=Strict; Secure; Max-Age=0; Domain=${cookie_domain}`,
+			`refreshToken=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${domainAttr}`,
 		);
-
-		const origin = process.env.APP_HOSTNAME || "https://www.gkoi.com";
-		headers.set("Origin", origin);
 
 		const responseData: IResponseData<null> = {
 			data: null,
 			message: "Logout successful",
-			code: 302, // Changed to 302 for redirect
+			code: 200,
 		};
 
 		return new Response(JSON.stringify(responseData), {
-			status: responseData.code,
-			statusText: "Found",
+			status: 200,
 			headers,
 		});
 	} catch {
