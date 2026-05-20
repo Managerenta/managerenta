@@ -7,7 +7,7 @@ import {
 	Roboto,
 } from "next/font/google";
 import { cookies } from "next/headers";
-import { BodyWrapper } from "@/components";
+import { BodyWrapper, StyledComponentsRegistry } from "@/components";
 import { defaultEnvOptions } from "@/constants";
 
 export const dm_sans = DM_Sans({
@@ -72,9 +72,11 @@ export default async function RootLayout({
 			</head>
 			<body className={`${dm_sans.className} ${roboto.className}`}>
 				<div id="modal-popup"></div>
-				<BodyWrapper env={env} cookieHeader={cookieHeader}>
-					{children}
-				</BodyWrapper>
+				<StyledComponentsRegistry>
+					<BodyWrapper env={env} cookieHeader={cookieHeader}>
+						{children}
+					</BodyWrapper>
+				</StyledComponentsRegistry>
 			</body>
 		</html>
 	);
