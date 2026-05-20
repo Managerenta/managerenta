@@ -1,6 +1,6 @@
 import "server-only";
 import { NextResponse } from "next/server";
-import { ENVIRONMENT, getErrorResponse } from "../constants";
+import { getErrorResponse, NODE_ENV } from "../constants";
 
 export interface IResponseData<T> {
 	code: number;
@@ -45,7 +45,7 @@ export function handleError(error: unknown): NextResponse<IResponseData<null>> {
 	}
 
 	const message =
-		ENVIRONMENT === "production"
+		NODE_ENV === "production"
 			? "Internal Server Error"
 			: (err?.message ?? "Internal Server Error");
 

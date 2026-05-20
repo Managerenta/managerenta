@@ -1,14 +1,11 @@
-import { ENVIRONMENT } from "@/server/constants";
+import { NODE_ENV } from "@/server/constants";
 import { renderMetrics } from "@/server/metrics";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-	if (
-		ENVIRONMENT !== "production" &&
-		process.env.METRICS_ENABLED !== "true"
-	) {
+	if (NODE_ENV !== "production" && process.env.METRICS_ENABLED !== "true") {
 		return new Response("Metrics disabled", { status: 404 });
 	}
 

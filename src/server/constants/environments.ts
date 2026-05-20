@@ -1,4 +1,3 @@
-export const ENVIRONMENT = process.env.ENVIRONMENT ?? "development";
 export const PORT = process.env.PORT ?? "8080";
 export const MAX_LIMIT = 50;
 
@@ -9,8 +8,6 @@ export const MONGODB_URI = process.env.MONGODB_URI ?? "";
 export const DB_NAME = process.env.DB_NAME ?? "";
 export const REDIS_URI = process.env.REDIS_URI ?? "";
 export const CLOUDFRONT_CDN_URL = process.env.CLOUDFRONT_CDN_URL ?? "";
-
-export const ADMIN_API_KEY = process.env.ADMIN_API_KEY ?? "";
 
 export const S3_REGION = process.env.S3_REGION ?? "";
 export const S3_BUCKET = process.env.S3_BUCKET ?? "";
