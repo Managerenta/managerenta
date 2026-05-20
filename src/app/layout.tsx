@@ -1,4 +1,3 @@
-import { GoogleAnalytics } from "@next/third-parties/google";
 import {
 	DM_Sans,
 	// Iceland,
@@ -77,8 +76,6 @@ export default async function RootLayout({
 					{children}
 				</BodyWrapper>
 			</body>
-
-			<GoogleAnalytics gaId={env.GOOGLE_ANALYTIC_TRACKING_ID} />
 		</html>
 	);
 }

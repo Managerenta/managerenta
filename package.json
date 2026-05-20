@@ -16,7 +16,6 @@
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.1045.0",
 		"@aws-sdk/s3-request-presigner": "^3.1045.0",
-		"@next/third-parties": "^16.2.6",
 		"@react-pdf/renderer": "^4.5.1",
 		"@types/three": "^0.184.1",
 		"axios": "^1.16.0",
