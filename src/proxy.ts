@@ -1,4 +1,3 @@
-import { jwtVerify } from "jose";
 import { type NextRequest, NextResponse } from "next/server";
 
 const PROTECTED_ROUTES = [
@@ -17,28 +16,18 @@ function isProtectedRoute(pathname: string): boolean {
 	);
 }
 
-async function checkAuth(cookieHeader: string): Promise<boolean> {
-	const match = cookieHeader.match(/accessToken=([^;]+)/);
-	const token = match?.[1];
-	if (!token) return false;
-
-	try {
-		await jwtVerify(
-			token,
-			new TextEncoder().encode(process.env.JWT_ACCESS_TOKEN_SECRET),
-		);
-		return true;
-	} catch {
-		return false;
-	}
+function hasSessionCookie(request: NextRequest): boolean {
+	return (
+		request.cookies.has("accessToken") ||
+		request.cookies.has("refreshToken")
+	);
 }
 
 export async function proxy(request: NextRequest) {
 	const { pathname } = request.nextUrl;
-	const cookieHeader = request.headers.get("cookie") ?? "";
 	const hasVisited = request.cookies.has("pt_visited");
 
-	const isAuthenticated = await checkAuth(cookieHeader);
+	const isAuthenticated = hasSessionCookie(request);
 
 	if (isAuthenticated && AUTH_ROUTES.includes(pathname)) {
 		return NextResponse.redirect(new URL("/dashboard", request.url));

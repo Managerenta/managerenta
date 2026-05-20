@@ -20,7 +20,7 @@ interface IProps {
 
 function Main({ children }: IProps) {
 	const [excludedRoutes] = useState(["/login", "/signup", "/"]);
-	const [isAuthCheckComplete, setIsAuthCheckComplete] = useState(false);
+	const [isAuthCheckComplete, _setIsAuthCheckComplete] = useState(false);
 
 	const { navHeight, isUserLoggedIn } = useContext(AppContextProvider);
 	const pathname = usePathname();

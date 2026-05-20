@@ -83,7 +83,7 @@ export default function Signup() {
 			formData.append("email", state.email);
 			formData.append("password", state.createPassword);
 
-			await api().post("/api/auth/signup", formData);
+			await api().post("/api/auth/signup", formData, { baseURL: "" });
 
 			toast.success("Account created! Please sign in.");
 			router.push("/login");

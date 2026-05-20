@@ -68,7 +68,8 @@ function Navbar({ background, navHeight }: IProps) {
 		if (dropdownOpen) {
 			document.addEventListener("mousedown", handleClickOutside);
 		}
-		return () => document.removeEventListener("mousedown", handleClickOutside);
+		return () =>
+			document.removeEventListener("mousedown", handleClickOutside);
 	}, [dropdownOpen]);
 
 	return (
@@ -87,7 +88,8 @@ function Navbar({ background, navHeight }: IProps) {
 				<Box
 					className="user-profile"
 					ref={dropdownRef}
-					onClick={() => setDropdownOpen((prev) => !prev)}>
+					onClick={() => setDropdownOpen((prev) => !prev)}
+				>
 					<Box className="avatar">
 						{userAvatar ? (
 							<Image
