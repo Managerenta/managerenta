@@ -31,18 +31,6 @@ function Main({ children }: IProps) {
 		[pathname, excludedRoutes],
 	);
 
-	console.log("-".repeat(50));
-	console.log("isAuthRoute", isAuthRoute);
-	console.log("isUserLoggedIn", isUserLoggedIn);
-	console.log("isAuthCheckComplete", isAuthCheckComplete);
-	console.log("-".repeat(50));
-
-	// Mark auth check as complete after initial load
-	useEffect(() => {
-		setIsAuthCheckComplete(true);
-	}, []);
-
-	// Redirect logged-in users away from auth routes
 	useEffect(() => {
 		if (isUserLoggedIn && isAuthRoute) {
 			console.log("User is logged in, redirecting to dashboard...");

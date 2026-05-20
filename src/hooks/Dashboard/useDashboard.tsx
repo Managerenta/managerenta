@@ -25,7 +25,7 @@ interface IRawProperty {
 	address: string;
 	totalUnits: number;
 	occupied: number;
-	monthlyRent: number;
+	monthlyRent?: number;
 	image?: string;
 }
 
@@ -130,7 +130,7 @@ export default function useDashboardData() {
 			location: p.address,
 			totalUnits: p.totalUnits,
 			occupied: p.occupied ?? 0,
-			monthlyRevenue: `₦${p.monthlyRent.toLocaleString("en-NG")}/mo`,
+			monthlyRevenue: `₦${(p.monthlyRent ?? 0).toLocaleString("en-NG")}/mo`,
 			image: p.image ?? "",
 		}));
 	}, [rawProperties]);

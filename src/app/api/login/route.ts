@@ -101,17 +101,20 @@ export async function POST(req: Request) {
 		}
 
 		headers.set("content-type", "application/json");
+		const domainAttr = cookieOptions.domain
+			? `; Domain=${cookieOptions.domain}`
+			: "";
 		headers.append(
 			"Set-Cookie",
 			`accessToken=${accessToken}; Path=/; HttpOnly; SameSite=${cookieOptions.sameSite}; Secure=${cookieOptions.secure}; Max-Age=${Math.floor(
 				(new Date(accessTokenExpiresIn).getTime() - Date.now()) / 1000,
-			)}; Domain=${cookieOptions.domain};`,
+			)}${domainAttr}`,
 		);
 		headers.append(
 			"Set-Cookie",
 			`refreshToken=${refreshToken}; Path=/; HttpOnly; SameSite=${cookieOptions.sameSite}; Secure=${cookieOptions.secure}; Max-Age=${Math.floor(
 				(new Date(refreshTokenExpiresIn).getTime() - Date.now()) / 1000,
-			)}; Domain=${cookieOptions.domain};`,
+			)}${domainAttr}`,
 		);
 
 		const responseData: IResponseData<{ account: string }> = {
