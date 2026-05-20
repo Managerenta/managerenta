@@ -96,10 +96,10 @@ schema.post("aggregate", async (documents: IOrganization[]) => {
 	);
 });
 
-export const Organization = mongoose.model<IOrganization>(
-	collectionName,
-	schema,
-);
+export const Organization: mongoose.Model<IOrganization> =
+	(mongoose.models[collectionName] as
+		| mongoose.Model<IOrganization>
+		| undefined) ?? mongoose.model<IOrganization>(collectionName, schema);
 
 export async function createOrganizationDB({
 	payload,

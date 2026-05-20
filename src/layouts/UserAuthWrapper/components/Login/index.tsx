@@ -64,7 +64,7 @@ function Login() {
 
 		try {
 			await api().post(
-				"/api/login",
+				"/api/auth/login",
 				{ email: state.email, password: state.password },
 				{ baseURL: "" },
 			);

@@ -4,9 +4,10 @@ export default async function verifyUserLogin({
 	cookieHeader?: string;
 } = {}): Promise<boolean> {
 	try {
-		const url = `/api/verify`;
+		const url = `/api/auth/verify`;
 
 		const response = await fetch(url, {
+			method: "POST",
 			headers: cookieHeader ? { Cookie: cookieHeader } : undefined,
 		});
 

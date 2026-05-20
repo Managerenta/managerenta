@@ -154,7 +154,9 @@ schema.methods.hashPassword = async (value: string): Promise<string | null> => {
 	}
 };
 
-export const User = mongoose.model<IUser, UserModel>(collectionName, schema);
+export const User: UserModel =
+	(mongoose.models[collectionName] as UserModel | undefined) ??
+	mongoose.model<IUser, UserModel>(collectionName, schema);
 
 export async function createUserDB({
 	payload,

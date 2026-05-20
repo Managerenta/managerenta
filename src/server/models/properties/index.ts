@@ -63,7 +63,10 @@ schema.post("aggregate", async (documents: IProperty[]) => {
 	);
 });
 
-export const Property = mongoose.model<IProperty>(collectionName, schema);
+export const Property: mongoose.Model<IProperty> =
+	(mongoose.models[collectionName] as
+		| mongoose.Model<IProperty>
+		| undefined) ?? mongoose.model<IProperty>(collectionName, schema);
 
 export async function createPropertyDB({
 	payload,

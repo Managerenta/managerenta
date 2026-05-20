@@ -49,7 +49,9 @@ schema.pre("aggregate", function () {
 	this.pipeline().push({ $project: { __v: 0, deleted: 0 } });
 });
 
-export const Unit = mongoose.model<IUnit>(collectionName, schema);
+export const Unit: mongoose.Model<IUnit> =
+	(mongoose.models[collectionName] as mongoose.Model<IUnit> | undefined) ??
+	mongoose.model<IUnit>(collectionName, schema);
 
 export async function createUnitDB({
 	payload,

@@ -41,7 +41,7 @@ export default function AppContext({
 
 	const deleteAllCookies = useCallback(async (): Promise<boolean> => {
 		try {
-			const { status } = await api().delete("/api/logout", {
+			const { status } = await api().delete("/api/auth/logout", {
 				baseURL: "",
 			});
 			if (status !== 200) return false;
