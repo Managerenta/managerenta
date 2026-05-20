@@ -1,0 +1,74 @@
+import "server-only";
+import type { NextRequest } from "next/server";
+import { ADMIN_API_KEY, DB_NAME, isOriginAllowed } from "../constants";
+import { Redis } from "../databases";
+import { getClientIp } from "./clientIp";
+
+interface RateLimitOptions {
+	windowMs: number;
+	maxRequests: number;
+	keyGenerator?: (req: NextRequest | Request) => string;
+}
+
+export interface RateLimitResult {
+	allowed: boolean;
+	limit: number;
+	remaining: number;
+	retryAfterSeconds?: number;
+}
+
+/**
+ * Token-bucket-ish rate limiter backed by Redis. Mirrors the original
+ * Express middleware: ADMIN_API_KEY bypasses; allowed origins get 2x quota.
+ */
+export async function enforceRateLimit(
+	req: NextRequest | Request,
+	options: RateLimitOptions,
+): Promise<RateLimitResult> {
+	const { windowMs, keyGenerator } = options;
+	let maxRequests = options.maxRequests;
+
+	const apiKey = req.headers.get("x-api-key");
+	const origin = req.headers.get("origin");
+
+	if (apiKey && apiKey === ADMIN_API_KEY) {
+		return { allowed: true, limit: maxRequests, remaining: maxRequests };
+	}
+	if (isOriginAllowed(origin || "")) {
+		maxRequests *= 2;
+	}
+
+	const key = keyGenerator ? keyGenerator(req) : getClientIp(req);
+	const rateLimitKey = `rate-limit:${DB_NAME}:${key}`;
+
+	const current = await Redis.incr(rateLimitKey);
+	if (current === 1) {
+		await Redis.expire(rateLimitKey, Math.ceil(windowMs / 1000));
+	}
+
+	const remaining = Math.max(0, maxRequests - current);
+
+	if (current > maxRequests) {
+		const ttl = await Redis.ttl(rateLimitKey);
+		return {
+			allowed: false,
+			limit: maxRequests,
+			remaining: 0,
+			retryAfterSeconds: ttl > 0 ? ttl : Math.ceil(windowMs / 1000),
+		};
+	}
+
+	return { allowed: true, limit: maxRequests, remaining };
+}
+
+export function applyRateLimitHeaders(
+	response: Response,
+	result: RateLimitResult,
+): Response {
+	response.headers.set("X-RateLimit-Limit", String(result.limit));
+	response.headers.set("X-RateLimit-Remaining", String(result.remaining));
+	if (result.retryAfterSeconds !== undefined) {
+		response.headers.set("Retry-After", String(result.retryAfterSeconds));
+	}
+	return response;
+}
