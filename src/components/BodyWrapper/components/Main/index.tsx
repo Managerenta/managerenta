@@ -20,6 +20,7 @@ interface IProps {
 
 function Main({ children }: IProps) {
 	const [excludedRoutes] = useState(["/login", "/signup", "/"]);
+	const [isAuthCheckComplete, setIsAuthCheckComplete] = useState(false);
 
 	const { navHeight, isUserLoggedIn } = useContext(AppContextProvider);
 	const pathname = usePathname();
@@ -33,14 +34,29 @@ function Main({ children }: IProps) {
 	console.log("-".repeat(50));
 	console.log("isAuthRoute", isAuthRoute);
 	console.log("isUserLoggedIn", isUserLoggedIn);
+	console.log("isAuthCheckComplete", isAuthCheckComplete);
 	console.log("-".repeat(50));
 
+	// Mark auth check as complete after initial load
+	useEffect(() => {
+		setIsAuthCheckComplete(true);
+	}, []);
+
+	// Redirect logged-in users away from auth routes
 	useEffect(() => {
 		if (isUserLoggedIn && isAuthRoute) {
-			console.log("Rerouting...");
+			console.log("User is logged in, redirecting to dashboard...");
 			router.push("/dashboard");
 		}
-	}, [isUserLoggedIn, router, isAuthRoute]);
+	}, [isUserLoggedIn, isAuthRoute, router]);
+
+	// Redirect non-logged-in users away from protected routes
+	useEffect(() => {
+		if (isAuthCheckComplete && !isUserLoggedIn && !isAuthRoute) {
+			console.log("User is not logged in, redirecting to login...");
+			router.push("/login");
+		}
+	}, [isAuthCheckComplete, isUserLoggedIn, isAuthRoute, router]);
 
 	return (
 		<MainStyled $navHeight={navHeight}>
