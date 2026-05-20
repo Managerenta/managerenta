@@ -1,96 +1,41 @@
-import { defaultEnvOptions } from "@/constants";
-import type { IResponseData } from "@/types";
+import type { NextRequest } from "next/server";
+import { ErrAccountCreationFailed, ErrInvalidFields } from "@/server/constants";
+import {
+	clearAuthCookies,
+	created,
+	getClientIp,
+	handleError,
+	parseMultipart,
+	setAuthCookies,
+	singleFileBuffer,
+	withApiHandler,
+} from "@/server/lib";
+import { signup } from "@/server/services";
+import { createUserBodySchema } from "@/server/validators/users/validate";
 
-export async function POST(req: Request) {
-	try {
-		const formData = await req.formData();
+export const runtime = "nodejs";
 
-		const name = formData.get("name") as string;
-		const username = formData.get("username") as string;
-		const email = formData.get("email") as string;
-		const password = formData.get("password") as string;
+export const POST = withApiHandler(
+	{ route: "/api/auth/signup" },
+	async ({ req }) => {
+		try {
+			const parsed = await parseMultipart(req as NextRequest);
+			const avatar = singleFileBuffer(parsed, "avatar");
 
-		if (!name || !username || !email || !password) {
-			const responseData: IResponseData<null> = {
-				message: "Missing required fields",
-				code: 400,
-				data: null,
-			};
+			const body = createUserBodySchema.safeParse(parsed.fields);
+			if (!body.success) throw ErrInvalidFields;
 
-			return new Response(JSON.stringify(responseData), {
-				status: 400,
-				statusText: "Bad Request",
-				headers: { "content-type": "application/json" },
+			const result = await signup({
+				payload: { ...body.data, avatar },
+				ip: getClientIp(req),
 			});
+			if (!result) throw ErrAccountCreationFailed;
+
+			await setAuthCookies(result);
+			return created(result, "Account created successfully");
+		} catch (error) {
+			await clearAuthCookies();
+			return handleError(error);
 		}
-
-		const payload = {
-			name,
-			username,
-			email,
-			password,
-		};
-
-		const { MAIN_SERVICE_URL } = defaultEnvOptions();
-		const url = `${MAIN_SERVICE_URL}/api/auth/signup`;
-
-		const response = await fetch(url, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(payload),
-		});
-
-		if (response.status !== 201) {
-			const data = await response.json();
-			const headers = new Headers();
-			headers.set("content-type", "application/json");
-
-			const responseData: IResponseData<null> = {
-				message: data?.message || "Signup failed",
-				code: data.code || response.status,
-				data: null,
-			};
-
-			return new Response(JSON.stringify(responseData), {
-				status: response.status,
-				statusText: response.statusText,
-				headers,
-			});
-		}
-
-		const json: IResponseData<{
-			account: string;
-		}> = await response.json();
-
-		const { data } = json;
-
-		const responseData: IResponseData<{ account: string }> = {
-			data: {
-				account: data?.account || "",
-			},
-			message: "Signup successful",
-			code: response.status,
-		};
-
-		return new Response(JSON.stringify(responseData), {
-			status: response.status,
-			statusText: response.statusText,
-			headers: { "content-type": "application/json" },
-		});
-	} catch (_error) {
-		const headers = new Headers();
-		headers.set("content-type", "application/json");
-		const responseData: IResponseData<null> = {
-			message: "Internal server error",
-			code: 500,
-			data: null,
-		};
-		return new Response(JSON.stringify(responseData), {
-			status: responseData.code,
-			statusText: responseData.message || "Internal Server Error",
-			headers,
-		});
-	}
-}
+	},
+);
