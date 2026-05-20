@@ -20,6 +20,7 @@ interface IProps {
 	title?: string;
 	sizes?: string | undefined;
 	placeholder?: PlaceholderValue;
+	loading?: "lazy" | "eager";
 }
 
 export default function Image({
@@ -35,6 +36,7 @@ export default function Image({
 	title,
 	sizes,
 	placeholder,
+	loading = "eager",
 }: IProps) {
 	const { env } = useContext(AppContextProvider);
 
@@ -43,7 +45,7 @@ export default function Image({
 			className={className}
 			unoptimized
 			// priority
-			loading="lazy"
+			loading={loading}
 			// title="image"
 			src={
 				typeof url === "string" && url.length > 0
