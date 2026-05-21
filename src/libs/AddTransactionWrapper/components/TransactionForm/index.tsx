@@ -1,10 +1,9 @@
 "use client";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { FiHome, FiPlus, FiTool, FiZap } from "react-icons/fi";
-import { toast } from "react-toastify";
 import { Box, Button, Input, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
-import { useAddTransactionNavigation } from "@/hooks";
+import { useAddTransactionNavigation, useToast } from "@/hooks";
 import { TransactionFormStyled } from "./styled";
 
 interface IProps {
@@ -56,6 +55,7 @@ const PERIODS = [
 ];
 
 function TransactionForm({ tenantId, monthlyRent }: IProps) {
+	const toast = useToast();
 	const { closeAddTransaction } = useAddTransactionNavigation();
 	const [selectedType, setSelectedType] = useState("rent");
 	const [period, setPeriod] = useState(1);
@@ -122,11 +122,11 @@ function TransactionForm({ tenantId, monthlyRent }: IProps) {
 	const handleSave = useCallback(async () => {
 		const parsedAmount = parseFloat(amount.replace(/,/g, ""));
 		if (!parsedAmount || parsedAmount <= 0) {
-			toast.error("Please enter a valid amount");
+			toast.push("Please enter a valid amount", { type: "warn" });
 			return;
 		}
 		if (!transactionDate) {
-			toast.error("Please select a transaction date");
+			toast.push("Please select a transaction date", { type: "warn" });
 			return;
 		}
 		setIsSubmitting(true);
@@ -139,10 +139,14 @@ function TransactionForm({ tenantId, monthlyRent }: IProps) {
 				paymentMethod,
 				...(selectedType === "rent" && period > 1 ? { period } : {}),
 			});
-			toast.success("Transaction recorded successfully");
+			toast.push("Transaction recorded successfully", {
+				type: "success",
+			});
 			closeAddTransaction();
 		} catch (err: unknown) {
-			toast.error(getErrorMessage(err, "Failed to record transaction"));
+			toast.push(getErrorMessage(err, "Failed to record transaction"), {
+				type: "warn",
+			});
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -155,6 +159,7 @@ function TransactionForm({ tenantId, monthlyRent }: IProps) {
 		transactionDate,
 		paymentMethod,
 		closeAddTransaction,
+		toast,
 	]);
 
 	return (

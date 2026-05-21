@@ -3,9 +3,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { memo, useCallback, useState } from "react";
 import { FiX } from "react-icons/fi";
-import { toast } from "react-toastify";
 import { Box, Button, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
+import { useToast } from "@/hooks";
 import { AddPropertyWrapperStyled } from "./styled";
 
 const PROPERTY_TYPES = [
@@ -28,6 +28,7 @@ const EMPTY_PROPERTY_FORM = {
 };
 
 function AddPropertyWrapper() {
+	const toast = useToast();
 	const router = useRouter();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [propertyForm, setPropertyForm] = useState(EMPTY_PROPERTY_FORM);
@@ -58,7 +59,7 @@ function AddPropertyWrapper() {
 			!propertyForm.address.trim() ||
 			!propertyForm.type
 		) {
-			toast.error("Please fill in all required fields");
+			toast.push("Please fill in all required fields", { type: "warn" });
 			return;
 		}
 
@@ -75,15 +76,15 @@ function AddPropertyWrapper() {
 			if (imageFile) formData.append("image", imageFile);
 
 			await api().post("/api/properties", formData);
-			toast.success("Property added successfully");
+			toast.push("Property added successfully", { type: "success" });
 			router.push("/properties");
 			router.refresh();
 		} catch (err: unknown) {
-			toast.error(getErrorMessage(err));
+			toast.push(getErrorMessage(err), { type: "warn" });
 		} finally {
 			setIsSubmitting(false);
 		}
-	}, [propertyForm, imageFile, router]);
+	}, [propertyForm, imageFile, router, toast]);
 
 	return (
 		<AddPropertyWrapperStyled>

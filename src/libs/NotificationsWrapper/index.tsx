@@ -9,10 +9,10 @@ import {
 	FiMail,
 	FiUsers,
 } from "react-icons/fi";
-import { toast } from "react-toastify";
 import useSWR from "swr";
 import { Box, Button, Text } from "@/components";
 import { api, fetcher, getErrorMessage } from "@/constants";
+import { useToast } from "@/hooks";
 import { NotificationsWrapperStyled } from "./styled";
 
 interface NotificationRow {
@@ -54,6 +54,7 @@ function kindIcon(kind: string) {
 }
 
 function NotificationsWrapper() {
+	const toast = useToast();
 	const { data, mutate, isLoading } = useSWR<ListResponse>(
 		"/api/notifications?limit=50",
 		fetcher,
@@ -70,11 +71,13 @@ function NotificationsWrapper() {
 		try {
 			await api().post("/api/notifications/read-all", {});
 			await mutate();
-			toast.success("Marked all as read");
+			toast.push("Marked all as read", { type: "success" });
 		} catch (err) {
-			toast.error(getErrorMessage(err, "Failed to mark as read"));
+			toast.push(getErrorMessage(err, "Failed to mark as read"), {
+				type: "warn",
+			});
 		}
-	}, [mutate]);
+	}, [mutate, toast]);
 
 	const markRead = useCallback(
 		async (id: string) => {
@@ -82,10 +85,10 @@ function NotificationsWrapper() {
 				await api().post(`/api/notifications/${id}/read`, {});
 				await mutate();
 			} catch (err) {
-				toast.error(getErrorMessage(err, "Failed"));
+				toast.push(getErrorMessage(err, "Failed"), { type: "warn" });
 			}
 		},
-		[mutate],
+		[mutate, toast],
 	);
 
 	return (

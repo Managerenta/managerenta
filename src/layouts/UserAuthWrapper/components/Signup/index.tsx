@@ -5,9 +5,9 @@ import { type ReactNode, useMemo, useReducer, useState } from "react";
 import { FaLock, FaUser } from "react-icons/fa";
 import { FaRegCircleUser } from "react-icons/fa6";
 import { HiOutlineMail } from "react-icons/hi";
-import { toast } from "react-toastify";
 import { Box, Button, Input, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
+import { useToast } from "@/hooks";
 import { AlternativeSeparator } from "@/layouts";
 import Header from "../Header";
 import { SignupStyled } from "./styled";
@@ -58,6 +58,7 @@ function signupReducer(state: SignupState, action: SignupAction): SignupState {
 }
 
 export default function Signup() {
+	const toast = useToast();
 	const [state, dispatch] = useReducer(signupReducer, initialState);
 	const [isLoading, setIsLoading] = useState(false);
 
@@ -67,7 +68,7 @@ export default function Signup() {
 		e.preventDefault();
 
 		if (state.createPassword !== state.confirmPassword) {
-			toast.error("Passwords do not match");
+			toast.push("Passwords do not match", { type: "warn" });
 			return;
 		}
 
@@ -85,10 +86,12 @@ export default function Signup() {
 
 			await api().post("/api/auth/signup", formData, { baseURL: "" });
 
-			toast.success("Account created! Please sign in.");
+			toast.push("Account created! Please sign in.", { type: "success" });
 			router.push("/login");
 		} catch (err: unknown) {
-			toast.error(getErrorMessage(err, "Failed to create account"));
+			toast.push(getErrorMessage(err, "Failed to create account"), {
+				type: "warn",
+			});
 		} finally {
 			setIsLoading(false);
 		}

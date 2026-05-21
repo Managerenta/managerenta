@@ -1,8 +1,8 @@
 "use client";
 import { memo, useCallback, useEffect, useState } from "react";
-import { toast } from "react-toastify";
 import { Box, Button, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
+import { useToast } from "@/hooks";
 import type { ITenantDetail } from "@/types";
 import ModalWrapper from "../ModalWrapper";
 import { TenantModalStyled } from "./styled";
@@ -26,6 +26,7 @@ const EMPTY_FORM = {
 };
 
 function TenantModal({ open, close, mode, onSuccess }: IProps) {
+	const toast = useToast();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [form, setForm] = useState(EMPTY_FORM);
 	const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -61,7 +62,7 @@ function TenantModal({ open, close, mode, onSuccess }: IProps) {
 
 	const handleSubmit = useCallback(async () => {
 		if (!form.name.trim() || !form.phone.trim() || !form.email.trim()) {
-			toast.error("Please fill in all required fields");
+			toast.push("Please fill in all required fields", { type: "warn" });
 			return;
 		}
 
@@ -77,17 +78,17 @@ function TenantModal({ open, close, mode, onSuccess }: IProps) {
 				formData.append("leaseExpiry", form.leaseExpiry);
 			if (avatarFile) formData.append("avatar", avatarFile);
 			await api().patch(`/api/tenants/${mode.tenant.id}`, formData);
-			toast.success("Tenant updated successfully");
+			toast.push("Tenant updated successfully", { type: "success" });
 			setAvatarFile(null);
 
 			onSuccess?.();
 			close();
 		} catch (err: unknown) {
-			toast.error(getErrorMessage(err));
+			toast.push(getErrorMessage(err), { type: "warn" });
 		} finally {
 			setIsSubmitting(false);
 		}
-	}, [form, avatarFile, mode, close, onSuccess]);
+	}, [form, avatarFile, mode, close, onSuccess, toast]);
 
 	return (
 		<ModalWrapper open={open} close={handleClose}>

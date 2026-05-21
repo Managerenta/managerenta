@@ -1,12 +1,13 @@
 "use client";
 import Link from "next/link";
 import { useCallback, useState } from "react";
-import { toast } from "react-toastify";
 import { Box, Button, Input, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
+import { useToast } from "@/hooks";
 import { AuthPageStyled } from "../(auth-pages)/styled";
 
 export default function ForgotPasswordPage() {
+	const toast = useToast();
 	const [email, setEmail] = useState("");
 	const [submitting, setSubmitting] = useState(false);
 	const [done, setDone] = useState(false);
@@ -22,11 +23,11 @@ export default function ForgotPasswordPage() {
 			);
 			setDone(true);
 		} catch (err) {
-			toast.error(getErrorMessage(err, "Failed"));
+			toast.push(getErrorMessage(err, "Failed"), { type: "warn" });
 		} finally {
 			setSubmitting(false);
 		}
-	}, [email]);
+	}, [email, toast]);
 
 	return (
 		<AuthPageStyled>

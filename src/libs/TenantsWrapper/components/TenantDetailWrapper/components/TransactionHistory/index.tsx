@@ -10,8 +10,8 @@ import {
 	FiTool,
 	FiZap,
 } from "react-icons/fi";
-import { toast } from "react-toastify";
 import { Box, Button, Input, Text } from "@/components";
+import { useToast } from "@/hooks";
 import type { ITenantTransaction } from "@/types";
 import { downloadReceipt } from "./downloadReceipt";
 import { TransactionHistoryStyled } from "./styled";
@@ -100,6 +100,7 @@ function ShareMenu({
 	transaction: ITenantTransaction;
 	tenantInfo: ITenantInfo;
 }) {
+	const toast = useToast();
 	const [open, setOpen] = useState(false);
 	const [isDownloading, setIsDownloading] = useState(false);
 
@@ -109,11 +110,11 @@ function ShareMenu({
 		try {
 			await downloadReceipt(transaction, tenantInfo);
 		} catch {
-			toast.error("Failed to generate receipt");
+			toast.push("Failed to generate receipt", { type: "warn" });
 		} finally {
 			setIsDownloading(false);
 		}
-	}, [transaction, tenantInfo]);
+	}, [transaction, tenantInfo, toast]);
 
 	const handleEmailShare = useCallback(() => {
 		setOpen(false);
@@ -182,6 +183,7 @@ function ShareMenu({
 }
 
 function TransactionHistory({ transactions, totals, tenantInfo }: IProps) {
+	const toast = useToast();
 	const { totalReceived, totalExpenses, netBalance } = totals;
 	const [typeFilter, setTypeFilter] = useState<
 		"all" | "rent" | "maintenance" | "utilities" | "other"
@@ -221,12 +223,12 @@ function TransactionHistory({ transactions, totals, tenantInfo }: IProps) {
 
 	const handleExportAll = useCallback(() => {
 		if (filtered.length === 0) {
-			toast.info("Nothing to export under current filters");
+			toast.push("Nothing to export under current filters");
 			return;
 		}
 		exportCsv(filtered, tenantInfo.name);
-		toast.success("Exported");
-	}, [filtered, tenantInfo.name]);
+		toast.push("Exported", { type: "success" });
+	}, [filtered, tenantInfo.name, toast]);
 
 	const renderedRows = useMemo(
 		() =>

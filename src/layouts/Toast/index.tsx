@@ -1,23 +1,13 @@
 "use client";
-import { memo } from "react";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { memo, type ReactNode } from "react";
+import { ToastProvider } from "@/hooks";
 
-function Toast() {
-	return (
-		<ToastContainer
-			closeOnClick
-			draggable
-			pauseOnHover={false}
-			position="bottom-right"
-			pauseOnFocusLoss={false}
-			limit={3}
-			autoClose={5000}
-			style={{
-				color: "var(--Black)",
-			}}
-		/>
-	);
+interface IProps {
+	children: ReactNode;
+}
+
+function Toast({ children }: IProps) {
+	return <ToastProvider>{children}</ToastProvider>;
 }
 
 export default memo(Toast);

@@ -48,16 +48,17 @@ function Main({ children }: IProps) {
 
 	return (
 		<MainStyled $navHeight={navHeight}>
-			<Box className="body-wrapper">
-				<Toast />
-				<Box className="body-container-max-width">
-					{isAuthRoute ? (
-						children
-					) : (
-						<DashboardWrapper>{children}</DashboardWrapper>
-					)}
+			<Toast>
+				<Box className="body-wrapper">
+					<Box className="body-container-max-width">
+						{isAuthRoute ? (
+							children
+						) : (
+							<DashboardWrapper>{children}</DashboardWrapper>
+						)}
+					</Box>
 				</Box>
-			</Box>
+			</Toast>
 		</MainStyled>
 	);
 }

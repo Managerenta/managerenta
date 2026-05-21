@@ -2,9 +2,8 @@
 import { useRouter } from "next/navigation";
 import { memo, useCallback, useMemo, useState } from "react";
 import { FiBell, FiDownload, FiHome, FiPlus } from "react-icons/fi";
-import { toast } from "react-toastify";
 import { Box, Button, Text } from "@/components";
-import { useAddTransactionNavigation } from "@/hooks";
+import { useAddTransactionNavigation, useToast } from "@/hooks";
 import type { ITenantTransaction } from "@/types";
 import { TenantQuickActionsStyled } from "./styled";
 
@@ -43,6 +42,7 @@ function TenantQuickActions({
 	transactions,
 	onSendReminder,
 }: IProps) {
+	const toast = useToast();
 	const router = useRouter();
 	const { openAddTransaction } = useAddTransactionNavigation();
 	const [isSendingReminder, setIsSendingReminder] = useState(false);
@@ -63,15 +63,15 @@ function TenantQuickActions({
 
 	const handleViewUnit = useCallback(() => {
 		if (!propertyId) {
-			toast.info("Unit details unavailable for this tenant");
+			toast.push("Unit details unavailable for this tenant");
 			return;
 		}
 		router.push(`/properties/${propertyId}`);
-	}, [router, propertyId]);
+	}, [router, propertyId, toast]);
 
 	const handleDownloadReport = useCallback(() => {
 		if (transactions.length === 0) {
-			toast.info("No transactions to export");
+			toast.push("No transactions to export");
 			return;
 		}
 		const header = [
@@ -94,8 +94,8 @@ function TenantQuickActions({
 		]);
 		const safeName = tenantName.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
 		downloadCsv(`${safeName || "tenant"}-statement.csv`, [header, ...body]);
-		toast.success("Statement downloaded");
-	}, [transactions, tenantName]);
+		toast.push("Statement downloaded", { type: "success" });
+	}, [transactions, tenantName, toast]);
 
 	const actions = useMemo(
 		() => [

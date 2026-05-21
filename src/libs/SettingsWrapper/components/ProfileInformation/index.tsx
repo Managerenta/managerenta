@@ -12,7 +12,6 @@ import {
 import { FiCamera } from "react-icons/fi";
 import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
 import "react-phone-number-input/style.css";
-import { toast } from "react-toastify";
 import useSWR from "swr";
 import { Box, Button, Image, Input, Text } from "@/components";
 import {
@@ -21,6 +20,7 @@ import {
 	getErrorMessage,
 	supportedImageMimeTypes,
 } from "@/constants";
+import { useToast } from "@/hooks";
 import { ProfileInformationStyled } from "./styled";
 
 interface IUserProfileResponse {
@@ -58,6 +58,7 @@ const EMPTY: ProfileState = { name: "", email: "", phone: "", avatar: "" };
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 
 function ProfileInformation() {
+	const toast = useToast();
 	const [isSaving, setIsSaving] = useState(false);
 	const [state, dispatch] = useReducer(reducer, EMPTY);
 	const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -118,26 +119,26 @@ function ProfileInformation() {
 			const file = e.target.files?.[0];
 			if (!file) return;
 			if (!supportedImageMimeTypes.includes(file.type)) {
-				toast.error("Unsupported image format");
+				toast.push("Unsupported image format", { type: "warn" });
 				return;
 			}
 			if (file.size > MAX_AVATAR_BYTES) {
-				toast.error("Image must be 5MB or smaller");
+				toast.push("Image must be 5MB or smaller", { type: "warn" });
 				return;
 			}
 			setAvatarFile(file);
 			e.target.value = "";
 		},
-		[],
+		[toast],
 	);
 
 	const handleSave = useCallback(async () => {
 		if (!state.name.trim()) {
-			toast.error("Full name is required");
+			toast.push("Full name is required", { type: "warn" });
 			return;
 		}
 		if (state.phone && !isValidPhoneNumber(state.phone)) {
-			toast.error("Please enter a valid phone number");
+			toast.push("Please enter a valid phone number", { type: "warn" });
 			return;
 		}
 		setIsSaving(true);
@@ -153,16 +154,18 @@ function ProfileInformation() {
 			}
 
 			await api().patch("/api/users", formData);
-			toast.success("Profile updated successfully");
+			toast.push("Profile updated successfully", { type: "success" });
 			setAvatarFile(null);
 			mutate();
 			router.refresh();
 		} catch (err: unknown) {
-			toast.error(getErrorMessage(err, "Failed to update profile"));
+			toast.push(getErrorMessage(err, "Failed to update profile"), {
+				type: "warn",
+			});
 		} finally {
 			setIsSaving(false);
 		}
-	}, [state, avatarFile, mutate, router.refresh]);
+	}, [state, avatarFile, mutate, router.refresh, toast]);
 
 	const handleCancel = useCallback(() => {
 		setAvatarFile(null);

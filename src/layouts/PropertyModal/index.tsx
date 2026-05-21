@@ -1,8 +1,8 @@
 "use client";
 import { memo, useCallback, useEffect, useState } from "react";
-import { toast } from "react-toastify";
 import { Box, Button, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
+import { useToast } from "@/hooks";
 import type { IPropertyDetail } from "@/types";
 import ModalWrapper from "../ModalWrapper";
 import { PropertyModalStyled } from "./styled";
@@ -39,6 +39,7 @@ const EMPTY_PROPERTY_FORM = {
 };
 
 function PropertyModal({ open, close, mode, onSuccess }: IProps) {
+	const toast = useToast();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [propertyForm, setPropertyForm] = useState(EMPTY_PROPERTY_FORM);
 	const [unitForm, setUnitForm] = useState({ name: "", rent: "" });
@@ -97,7 +98,9 @@ function PropertyModal({ open, close, mode, onSuccess }: IProps) {
 					!propertyForm.address.trim() ||
 					!propertyForm.type
 				) {
-					toast.error("Please fill in all required fields");
+					toast.push("Please fill in all required fields", {
+						type: "warn",
+					});
 					return;
 				}
 				const formData = new FormData();
@@ -118,33 +121,37 @@ function PropertyModal({ open, close, mode, onSuccess }: IProps) {
 					`/api/properties/${mode.property.id}`,
 					formData,
 				);
-				toast.success("Property updated successfully");
+				toast.push("Property updated successfully", {
+					type: "success",
+				});
 				setImageFile(null);
 			} else {
 				if (!unitForm.name.trim()) {
-					toast.error("Unit name is required");
+					toast.push("Unit name is required", { type: "warn" });
 					return;
 				}
 				if (!unitForm.rent || Number(unitForm.rent) <= 0) {
-					toast.error("Please enter a valid rent amount");
+					toast.push("Please enter a valid rent amount", {
+						type: "warn",
+					});
 					return;
 				}
 				await api().post(`/api/properties/${mode.propertyId}/units`, {
 					name: unitForm.name.trim(),
 					rent: Number(unitForm.rent),
 				});
-				toast.success("Unit added successfully");
+				toast.push("Unit added successfully", { type: "success" });
 				setUnitForm({ name: "", rent: "" });
 			}
 
 			onSuccess?.();
 			close();
 		} catch (err: unknown) {
-			toast.error(getErrorMessage(err));
+			toast.push(getErrorMessage(err), { type: "warn" });
 		} finally {
 			setIsSubmitting(false);
 		}
-	}, [mode, propertyForm, unitForm, imageFile, close, onSuccess]);
+	}, [mode, propertyForm, unitForm, imageFile, close, onSuccess, toast]);
 
 	const title =
 		mode.type === "edit-property" ? "Edit Property" : "Add New Unit";

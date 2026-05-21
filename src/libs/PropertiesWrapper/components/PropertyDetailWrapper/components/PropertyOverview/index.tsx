@@ -1,8 +1,8 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { memo, useCallback, useMemo } from "react";
-import { toast } from "react-toastify";
 import { Box, Text } from "@/components";
+import { useToast } from "@/hooks";
 import type { IPropertyDetail } from "@/types";
 import { PropertyOverviewStyled } from "./styled";
 
@@ -12,14 +12,15 @@ interface IProps {
 }
 
 function PropertyOverview({ propertyDetail, onExport }: IProps) {
+	const toast = useToast();
 	const router = useRouter();
 	const { occupancyRate, monthlyRentTotal, dateAdded } = propertyDetail;
 	const percentage = useMemo<number>(() => occupancyRate, [occupancyRate]);
 
 	const handleViewTransactions = useCallback(() => {
 		router.push("/tenants");
-		toast.info(`Showing tenants in ${propertyDetail.name}`);
-	}, [router, propertyDetail.name]);
+		toast.push(`Showing tenants in ${propertyDetail.name}`);
+	}, [router, propertyDetail.name, toast]);
 
 	return (
 		<PropertyOverviewStyled>
