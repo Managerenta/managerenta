@@ -30,7 +30,7 @@ function Navbar({ background, navHeight }: IProps) {
 
 	const { data: profileData } = useSWR<{
 		data: { avatar?: string; name?: string };
-	}>("/api/users/user-profile", fetcher);
+	}>("/api/users/user-profile", fetcher, { revalidateOnMount: true });
 	const userAvatar = useMemo(
 		() => profileData?.data?.avatar ?? "",
 		[profileData],
