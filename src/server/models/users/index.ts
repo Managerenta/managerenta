@@ -37,6 +37,8 @@ const schema = new mongoose.Schema<IUser, UserModel, IUserMethods>(
 			type: String,
 			required: true,
 			unique: true,
+			lowercase: true,
+			trim: true,
 			validate(value: string) {
 				if (!isEmail(value)) {
 					throw ErrInvalidEmail;
@@ -238,7 +240,10 @@ schema.methods.generateAuthToken = async function (
 	});
 	if (!result) throw ErrInvalidAction;
 
-	const MAX_REFRESH_TOKENS = 10;
+	// SECURITY: 3 concurrent sessions max. A higher cap makes it possible
+	// for a stolen refresh token to coexist with the victim's legitimate
+	// sessions undetected — see SECURITY_REVIEW.md H7.
+	const MAX_REFRESH_TOKENS = 3;
 	const existing = this?.refreshTokens ?? [];
 	const trimmed =
 		existing.length >= MAX_REFRESH_TOKENS
@@ -619,28 +624,33 @@ export async function reLoginUserWithRefreshTokenDB({
 }): Promise<IJwtPayload | null> {
 	const timer = databaseResponseTimeHistogram.startTimer();
 	try {
-		const user = await User.findById(
-			new mongoose.Types.ObjectId(id),
-			null,
-			{
-				session,
-			},
-		);
-
-		if (!user || user.deleted) throw ErrUserNotFound;
-
+		// Atomic claim-and-pull: if two concurrent requests arrive with the
+		// same refresh token, only one succeeds. The other sees `null` and
+		// is rejected — preventing the read-modify-write race that allowed
+		// a stolen token to silently coexist with a legitimate session
+		// (see SECURITY_REVIEW.md H8).
 		const now = new Date();
-		const hasValidToken = (user.refreshTokens ?? []).some(
-			(rt) => rt.refreshToken === refreshToken && rt.deadline > now,
+		const filter = {
+			_id: new mongoose.Types.ObjectId(id),
+			deleted: false,
+			refreshTokens: {
+				$elemMatch: {
+					refreshToken,
+					deadline: { $gt: now },
+				},
+			},
+		} as unknown as Parameters<typeof User.findOneAndUpdate>[0];
+		const claimed = await User.findOneAndUpdate(
+			filter,
+			{ $pull: { refreshTokens: { refreshToken } } },
+			{ session, returnDocument: "after" },
 		);
-		if (!hasValidToken) throw ErrUserNotFound;
 
-		const result = await user.generateAuthToken(ip);
+		if (!claimed) throw ErrUserNotFound;
 
-		user.refreshTokens = (user.refreshTokens ?? []).filter(
-			(rt) => rt.refreshToken !== refreshToken,
-		);
-		await user.save({ session });
+		const result = await (
+			claimed as unknown as IUserMethods
+		).generateAuthToken(ip);
 
 		timer({
 			operation: IOperationType.Update,
@@ -750,13 +760,16 @@ export async function getUserByEmailDB({
 }): Promise<IUser | null> {
 	const timer = databaseResponseTimeHistogram.startTimer();
 	try {
+		// Exact match against a normalized email. Earlier versions of this
+		// function used `$regex` with unescaped user input, which made the
+		// helper a regex-injection / ReDoS sink (see SECURITY_REVIEW.md C3).
+		const normalized = (email ?? "").trim().toLowerCase();
+		if (!normalized) throw ErrInvalidEmail;
 		const result = (
 			await User.aggregate<IUser>(
 				[
 					{
-						$match: {
-							email: { $regex: email, $options: "i" },
-						},
+						$match: { email: normalized },
 					},
 					{ $limit: 1 },
 				],
@@ -843,9 +856,12 @@ export async function getUserByEmailWithPasswordDB({
 }): Promise<(IUser & { password: string }) | null> {
 	const timer = databaseResponseTimeHistogram.startTimer();
 	try {
-		const result = await User.findOne({ email, deleted: false }, null, {
-			session,
-		}).select("+password");
+		const normalized = (email ?? "").trim().toLowerCase();
+		const result = await User.findOne(
+			{ email: normalized, deleted: false },
+			null,
+			{ session },
+		).select("+password");
 
 		if (!result) throw ErrUserNotFound;
 

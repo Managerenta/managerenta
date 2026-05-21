@@ -39,6 +39,19 @@ function daysFromNow(n: number): Date {
 }
 
 async function run() {
+	// SECURITY: this script wipes every collection and seeds known-weak
+	// passwords. Refuse to touch a production database under any
+	// circumstances. See SECURITY_REVIEW.md M10.
+	if (process.env.NODE_ENV === "production") {
+		throw new Error("Refusing to run seed.ts with NODE_ENV=production");
+	}
+	const uri = process.env.MONGODB_URI ?? "";
+	if (uri.includes("mongodb+srv://") || uri.includes("mongodb.net")) {
+		throw new Error(
+			"Refusing to run seed.ts against what looks like a hosted MongoDB cluster",
+		);
+	}
+
 	console.log("Connecting to MongoDB…");
 	await connectMongoDB();
 

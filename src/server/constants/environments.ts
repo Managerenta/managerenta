@@ -19,5 +19,8 @@ export const JWT_ACCESS_TOKEN_SECRET =
 export const JWT_REFRESH_TOKEN_SECRET =
 	process.env.JWT_REFRESH_TOKEN_SECRET ?? "";
 
+export const METRICS_TOKEN = process.env.METRICS_TOKEN ?? "";
+export const TRUSTED_PROXY = process.env.TRUSTED_PROXY === "1";
+
 export const ACCESS_TOKEN_MAX_AGE_SECONDS = 60 * 60 * 24; // 24 hours
 export const REFRESH_TOKEN_MAX_AGE_SECONDS = 24 * 60 * 60 * 30; // 30 days

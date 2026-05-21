@@ -12,7 +12,11 @@ import { totpDisableBodySchema } from "@/server/validators/users/settings";
 export const runtime = "nodejs";
 
 export const POST = withApiHandler(
-	{ route: "/api/users/2fa/disable" },
+	{
+		route: "/api/users/2fa/disable",
+		// Disabling 2FA requires the password; throttle to slow brute force.
+		rateLimit: { windowMs: 15 * 60_000, maxRequests: 10 },
+	},
 	withAuth(async ({ req, auth }) => {
 		try {
 			let body: unknown;

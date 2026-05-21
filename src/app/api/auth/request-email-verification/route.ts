@@ -34,7 +34,7 @@ export const POST = withApiHandler(
 				title: "Verify your email",
 				body: `Confirm your email by clicking: /verify-email?token=${token}`,
 				to: user.email,
-				meta: { token },
+				// See SECURITY_REVIEW.md H6 — don't echo the token in meta.
 			});
 			return ok(null, "Verification email sent");
 		} catch (error) {

@@ -11,7 +11,11 @@ import { totpEnableBodySchema } from "@/server/validators/users/settings";
 export const runtime = "nodejs";
 
 export const POST = withApiHandler(
-	{ route: "/api/users/2fa/enable" },
+	{
+		route: "/api/users/2fa/enable",
+		// TOTP brute-force defence — see SECURITY_REVIEW.md H4.
+		rateLimit: { windowMs: 5 * 60_000, maxRequests: 10 },
+	},
 	withAuth(async ({ req, auth }) => {
 		try {
 			let body: unknown;

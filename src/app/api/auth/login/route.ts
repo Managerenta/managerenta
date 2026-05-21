@@ -13,7 +13,12 @@ import { loginBodySchema } from "@/server/validators/auth/validate";
 export const runtime = "nodejs";
 
 export const POST = withApiHandler(
-	{ route: "/api/auth/login" },
+	{
+		route: "/api/auth/login",
+		// Brute-force / credential-stuffing limit. The default 100/min is far
+		// too permissive for an auth endpoint. See SECURITY_REVIEW.md H4.
+		rateLimit: { windowMs: 15 * 60_000, maxRequests: 10 },
+	},
 	async ({ req }) => {
 		try {
 			let body: unknown;

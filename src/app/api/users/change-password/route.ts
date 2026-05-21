@@ -6,7 +6,10 @@ import { changePasswordBodySchema } from "@/server/validators/users/validate";
 export const runtime = "nodejs";
 
 export const POST = withApiHandler(
-	{ route: "/api/users/change-password" },
+	{
+		route: "/api/users/change-password",
+		rateLimit: { windowMs: 15 * 60_000, maxRequests: 10 },
+	},
 	withAuth(async ({ req, auth }) => {
 		try {
 			let body: unknown;

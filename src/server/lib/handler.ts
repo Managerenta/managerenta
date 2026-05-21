@@ -2,7 +2,6 @@ import "server-only";
 import type { NextRequest } from "next/server";
 import { connectMongoDB } from "../databases";
 import { restResponseTimeHistogram } from "../metrics";
-import { getClientIp } from "./clientIp";
 import {
 	applyRateLimitHeaders,
 	enforceRateLimit,
@@ -77,7 +76,6 @@ function observe(
 		const elapsedMs = Number(process.hrtime.bigint() - startNs) / 1_000_000;
 		restResponseTimeHistogram.observe(
 			{
-				ip: getClientIp(req),
 				method: req.method,
 				route,
 				status_code: status,
