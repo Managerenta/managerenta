@@ -1,9 +1,9 @@
 "use client";
-import { memo, useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { memo, useCallback } from "react";
 import { Box } from "@/components";
 import { api } from "@/constants";
 import { useTenantDetail, useToast } from "@/hooks";
-import { TenantModal } from "@/layouts";
 import {
 	ContactInfo,
 	PaymentStatistics,
@@ -21,10 +21,7 @@ interface IProps {
 
 function TenantDetailWrapper({ tenantId: selectedTenantId }: IProps) {
 	const toast = useToast();
-	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-	const [mounted, setMounted] = useState(false);
-
-	useEffect(() => setMounted(true), []);
+	const router = useRouter();
 
 	const {
 		tenantDetail,
@@ -33,15 +30,11 @@ function TenantDetailWrapper({ tenantId: selectedTenantId }: IProps) {
 		recentActivity,
 		paymentStats,
 		transactionTotals,
-		mutate,
 	} = useTenantDetail(selectedTenantId);
 
-	const openEditModal = useCallback(() => setIsEditModalOpen(true), []);
-	const closeEditModal = useCallback(() => setIsEditModalOpen(false), []);
-
-	const handleTenantUpdated = useCallback(async () => {
-		await mutate();
-	}, [mutate]);
+	const handleEditTenant = useCallback(() => {
+		router.push(`/tenants/${selectedTenantId}/edit`);
+	}, [router, selectedTenantId]);
 
 	const handleSendReminder = useCallback(async () => {
 		if (!selectedTenantId) return;
@@ -59,17 +52,9 @@ function TenantDetailWrapper({ tenantId: selectedTenantId }: IProps) {
 		<TenantDetailWrapperStyled>
 			<TenantDetailHeader
 				tenantDetail={tenantDetail}
-				onEditTenant={openEditModal}
+				onEditTenant={handleEditTenant}
 				onSendReminder={handleSendReminder}
 			/>
-			{mounted && (
-				<TenantModal
-					open={isEditModalOpen}
-					close={closeEditModal}
-					mode={{ type: "edit-tenant", tenant: tenantDetail }}
-					onSuccess={handleTenantUpdated}
-				/>
-			)}
 
 			<Box className="bottom-grid">
 				<Box className="left-grid">

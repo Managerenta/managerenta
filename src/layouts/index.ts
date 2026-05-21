@@ -7,8 +7,6 @@ export { default as NotFound } from "./NotFound";
 export { default as Pagination } from "./Pagination";
 export type { PropertyModalMode } from "./PropertyModal";
 export { default as PropertyModal } from "./PropertyModal";
-export type { TenantModalMode } from "./TenantModal";
-export { default as TenantModal } from "./TenantModal";
 export { default as Toast } from "./Toast";
 export { default as Tooltip } from "./Tooltip";
 export { default as UserAuthWrapper } from "./UserAuthWrapper";
