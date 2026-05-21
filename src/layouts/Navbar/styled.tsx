@@ -248,8 +248,8 @@ export const NavbarStyled = styled(Box)<{
 			user-select: none;
 
 			.avatar {
-				width: 50px;
-				height: 50px;
+				width: 34px;
+				height: 34px;
 				border-radius: 50%;
 				background: var(--Main-Blue);
 				color: white;
