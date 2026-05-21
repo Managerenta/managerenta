@@ -1,43 +1,31 @@
 "use client";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { memo, useCallback, useMemo, useState } from "react";
 import { Box } from "@/components";
 import { useTenantsData } from "@/hooks";
-import { Pagination, TenantModal } from "@/layouts";
+import { Pagination } from "@/layouts";
 import { TenantsFilter, TenantsGrid, TenantsHeader } from "./components";
 import { TenantsWrapperStyled } from "./styled";
 
 function TenantsWrapper() {
+	const router = useRouter();
 	const [offset, setOffset] = useState<number>(0);
 	const [pageSize, setPageSize] = useState<number>(12);
 	const [search, setSearch] = useState("");
 	const [filterStatus, setFilterStatus] = useState("all");
 	const [sortBy, setSortBy] = useState("name");
-	const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-	const [mounted, setMounted] = useState(false);
 	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
 	const handleViewModeChange = useCallback((mode: "grid" | "list") => {
 		setViewMode(mode);
 	}, []);
 
-	useEffect(() => setMounted(true), []);
+	const { tenants, stats, filterOptions, sortOptions, isLoading, total } =
+		useTenantsData(pageSize, offset, filterStatus, search, sortBy);
 
-	const {
-		tenants,
-		stats,
-		filterOptions,
-		sortOptions,
-		isLoading,
-		mutate,
-		total,
-	} = useTenantsData(pageSize, offset, filterStatus, search, sortBy);
-
-	const openAddModal = useCallback(() => setIsAddModalOpen(true), []);
-	const closeAddModal = useCallback(() => setIsAddModalOpen(false), []);
-
-	const handleTenantAdded = useCallback(async () => {
-		await mutate();
-	}, [mutate]);
+	const handleAddTenant = useCallback(() => {
+		router.push("/tenants/new");
+	}, [router]);
 
 	const totalPages = useMemo<number>(() => {
 		return Math.ceil((total || 1) / pageSize);
@@ -48,16 +36,8 @@ function TenantsWrapper() {
 			<TenantsHeader
 				stats={stats}
 				isLoading={isLoading}
-				onAddTenant={openAddModal}
+				onAddTenant={handleAddTenant}
 			/>
-			{mounted && (
-				<TenantModal
-					open={isAddModalOpen}
-					close={closeAddModal}
-					mode={{ type: "add-tenant" }}
-					onSuccess={handleTenantAdded}
-				/>
-			)}
 			<TenantsFilter
 				search={search}
 				onSearchChange={setSearch}

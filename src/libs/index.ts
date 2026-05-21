@@ -1,3 +1,5 @@
+export { default as AddPropertyWrapper } from "./AddPropertyWrapper";
+export { default as AddTenantWrapper } from "./AddTenantWrapper";
 export { default as AddTransactionWrapper } from "./AddTransactionWrapper";
 export { default as DashboardWrapper } from "./DashboardWrapper";
 export { default as LoginWrapper } from "./LoginWrapper";
