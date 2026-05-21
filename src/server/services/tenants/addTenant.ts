@@ -6,6 +6,7 @@ import {
 	getUnitsByIdsDB,
 	setUnitOccupiedDB,
 } from "../../models";
+import { notifyTenantMoveIn } from "../notifications";
 import { invalidateCacheKeys } from "./utils";
 
 export default async function addTenant({
@@ -79,6 +80,12 @@ export default async function addTenant({
 
 		await session.commitTransaction();
 		await invalidateCacheKeys({ userId });
+		void notifyTenantMoveIn({
+			userId,
+			tenantId: tenant.id,
+			tenantName: tenant.name,
+			unitName: unitDoc.name,
+		});
 		return tenant;
 	} catch (err) {
 		if (session.inTransaction()) await session.abortTransaction();

@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { User } from "../../models/users";
 import sendRentReminder from "../tenants/sendRentReminder";
+import { notifyLeaseExpiring } from "./events";
 
 /**
  * Sweeps every active landlord's tenants and dispatches due/overdue reminders
@@ -21,6 +22,7 @@ export default async function dailyRemindersJob(): Promise<{
 	const today = now.getDate();
 	const year = now.getFullYear();
 	const month = now.getMonth();
+	const MS_PER_DAY = 1000 * 60 * 60 * 24;
 	let remindersSent = 0;
 
 	const users = await User.find({ deleted: false }).lean();
@@ -32,6 +34,7 @@ export default async function dailyRemindersJob(): Promise<{
 					autoSendForOverdue?: boolean;
 					rentDueLeadDays?: number;
 					overdueRepeatDays?: number;
+					leaseExpiryLeadDays?: number;
 				};
 			}
 		).reminders;
@@ -43,15 +46,47 @@ export default async function dailyRemindersJob(): Promise<{
 			status: "Active",
 		}).lean();
 
+		const leaseLeadDays = reminders.leaseExpiryLeadDays ?? 14;
+
 		for (const tenant of tenants as Array<{
 			_id: mongoose.Types.ObjectId;
+			name: string;
 			rentDueDay?: number;
 			unitId: string;
+			leaseExpiry?: Date | null;
 		}>) {
+			if (tenant.leaseExpiry) {
+				const leaseDate = new Date(tenant.leaseExpiry);
+				const daysLeft = Math.ceil(
+					(leaseDate.getTime() - now.getTime()) / MS_PER_DAY,
+				);
+				if (daysLeft >= 0 && daysLeft === leaseLeadDays) {
+					try {
+						const Unit2 = mongoose.models.units;
+						const unit = Unit2
+							? await Unit2.findById(
+									new mongoose.Types.ObjectId(tenant.unitId),
+								).lean()
+							: null;
+						await notifyLeaseExpiring({
+							userId: user._id.toString(),
+							tenantId: tenant._id.toString(),
+							tenantName: tenant.name,
+							unitName: (unit as { name?: string } | null)?.name,
+							daysLeft,
+							leaseExpiry: leaseDate,
+						});
+						remindersSent++;
+					} catch {
+						// non-fatal
+					}
+				}
+			}
+
 			const due = tenant.rentDueDay ?? 1;
 			const dueDate = new Date(year, month, due);
 			const diffDays = Math.floor(
-				(dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+				(dueDate.getTime() - now.getTime()) / MS_PER_DAY,
 			);
 
 			// Lead-time reminder

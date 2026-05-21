@@ -155,4 +155,22 @@ export async function markAllNotificationsReadDB({
 	}
 }
 
+export async function deleteNotificationDB({
+	userId,
+	id,
+}: {
+	userId: string;
+	id: string;
+}): Promise<boolean> {
+	try {
+		const result = await Notification.deleteOne({
+			_id: new mongoose.Types.ObjectId(id),
+			userId,
+		});
+		return result.deletedCount > 0;
+	} catch {
+		return false;
+	}
+}
+
 export * from "./types";

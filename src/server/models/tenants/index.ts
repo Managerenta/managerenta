@@ -279,7 +279,7 @@ export async function deleteTenantDB({
 	id: string;
 	userId: string;
 	session?: ClientSession;
-}): Promise<{ unitId: string } | null> {
+}): Promise<{ unitId: string; name: string } | null> {
 	const timer = databaseResponseTimeHistogram.startTimer();
 	try {
 		const result = await Tenant.findOneAndUpdate(
@@ -295,7 +295,7 @@ export async function deleteTenantDB({
 			method: "deleteTenantDB",
 			success: "true",
 		});
-		return { unitId: result.unitId };
+		return { unitId: result.unitId, name: result.name };
 	} catch {
 		timer({
 			operation: IOperationType.Update,
