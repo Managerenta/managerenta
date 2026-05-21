@@ -24,6 +24,6 @@ export default async function createUser({
 
 	if (!result) return null;
 
-	await invalidateCacheKeys({ id: result._id, email: result.email });
+	await invalidateCacheKeys({ id: String(result._id), email: result.email });
 	return result;
 }

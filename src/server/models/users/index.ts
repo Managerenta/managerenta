@@ -444,7 +444,7 @@ export async function updateUserRawDB({
 		const result = await User.findByIdAndUpdate(
 			new mongoose.Types.ObjectId(id),
 			update,
-			{ session, new: true },
+			{ session, returnDocument: "after" },
 		);
 		if (!result) throw ErrUserNotFound;
 		timer({

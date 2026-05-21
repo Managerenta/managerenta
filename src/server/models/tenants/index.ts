@@ -244,7 +244,7 @@ export async function updateTenantDB({
 		const result = await Tenant.findOneAndUpdate(
 			{ _id: new mongoose.Types.ObjectId(id), userId, deleted: false },
 			{ $set: payload },
-			{ new: true, session },
+			{ returnDocument: "after", session },
 		);
 		if (!result) throw ErrTenantNotFound;
 
@@ -285,7 +285,7 @@ export async function deleteTenantDB({
 		const result = await Tenant.findOneAndUpdate(
 			{ _id: new mongoose.Types.ObjectId(id), userId, deleted: false },
 			{ $set: { deleted: true } },
-			{ new: true, session },
+			{ returnDocument: "after", session },
 		);
 		if (!result) throw ErrTenantNotFound;
 
