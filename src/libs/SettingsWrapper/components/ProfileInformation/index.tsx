@@ -62,17 +62,21 @@ function ProfileInformation() {
 	const [state, dispatch] = useReducer(reducer, EMPTY);
 	const [avatarFile, setAvatarFile] = useState<File | null>(null);
 	const [avatarPreview, setAvatarPreview] = useState<string>("");
+	const [mounted, setMounted] = useState(false);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const router = useRouter();
 
+	useEffect(() => setMounted(true), []);
+
 	const {
 		data: rawResponse,
-		isLoading,
+		isLoading: swrLoading,
 		mutate,
 	} = useSWR<IUserProfileResponse>("/api/users/user-profile", fetcher, {
 		revalidateOnMount: true,
 	});
 	const data = rawResponse?.data;
+	const isLoading = mounted ? swrLoading : false;
 
 	useEffect(() => {
 		if (data) {

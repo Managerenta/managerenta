@@ -1,5 +1,12 @@
 "use client";
-import { memo, useCallback, useContext, useMemo } from "react";
+import {
+	memo,
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useState,
+} from "react";
 import { toast } from "react-toastify";
 import { Box, Text } from "@/components";
 import {
@@ -11,8 +18,13 @@ import {
 import { PreferencesStyled } from "./styled";
 
 function Preferences() {
-	const { preferences, update, isLoading } = useUserPreferences();
+	const { preferences, update, isLoading: swrLoading } = useUserPreferences();
 	const { theme, setTheme } = useContext(ThemeContextProvider);
+	const [mounted, setMounted] = useState(false);
+
+	useEffect(() => setMounted(true), []);
+
+	const isLoading = mounted ? swrLoading : false;
 
 	const {
 		themeOptions,
