@@ -1,4 +1,4 @@
-import { ErrInvalidFields, ErrUnitNotFound } from "@/server/constants";
+import { ErrInvalidFields, ErrTryAgain } from "@/server/constants";
 import {
 	assertWriteRole,
 	created,
@@ -40,7 +40,7 @@ export const POST = withApiHandler<RouteContext>(
 				propertyId: params.data.propertyId,
 				userId: auth.effectiveOwnerId,
 			});
-			if (!result) throw ErrUnitNotFound;
+			if (!result) throw ErrTryAgain;
 			return created(result, "Unit added");
 		} catch (error) {
 			return handleError(error);
