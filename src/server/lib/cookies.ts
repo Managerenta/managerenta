@@ -14,7 +14,7 @@ export const REFRESH_COOKIE = "refreshToken";
 type CookieOptions = {
 	httpOnly: boolean;
 	secure: boolean;
-	sameSite: "lax";
+	sameSite: "lax" | "strict";
 	domain?: string;
 	path: string;
 	expires?: Date;
@@ -25,10 +25,14 @@ export function getAuthCookieOptions(extra?: {
 	expires?: Date;
 	maxAge?: number;
 }): CookieOptions {
+	const isProd = NODE_ENV === "production";
 	const opts: CookieOptions = {
 		httpOnly: true,
-		secure: NODE_ENV === "production",
-		sameSite: "lax",
+		secure: isProd,
+		// SameSite=Strict in prod (this is a same-eTLD+1 SPA, no cross-site
+		// nav-bearing requests are expected). Lax in dev so localhost
+		// browser flows stay easy. See SECURITY_REVIEW.md H10.
+		sameSite: isProd ? "strict" : "lax",
 		path: "/",
 	};
 	if (COOKIE_DOMAIN) opts.domain = COOKIE_DOMAIN;

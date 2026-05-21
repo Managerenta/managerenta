@@ -45,6 +45,7 @@ export async function generateAuthToken({
 				},
 				JWT_REFRESH_TOKEN_SECRET,
 				{
+					algorithm: "HS256",
 					expiresIn: REFRESH_TOKEN_MAX_AGE_SECONDS,
 				},
 			);
@@ -66,6 +67,7 @@ export async function generateAuthToken({
 			},
 			JWT_ACCESS_TOKEN_SECRET,
 			{
+				algorithm: "HS256",
 				expiresIn: ACCESS_TOKEN_MAX_AGE_SECONDS,
 			},
 		);

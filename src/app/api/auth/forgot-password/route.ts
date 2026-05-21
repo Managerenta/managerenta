@@ -46,7 +46,10 @@ export const POST = withApiHandler(
 					title: "Reset your manageRenta password",
 					body: `Use this link within 1 hour to reset your password: /reset-password?token=${token}`,
 					to: user.email,
-					meta: { token },
+					// Do NOT persist the raw token in notification metadata —
+					// the body already carries the user-facing link and a
+					// duplicate in `meta` only widens the leak surface
+					// (see SECURITY_REVIEW.md H6).
 				});
 			}
 			return ok(

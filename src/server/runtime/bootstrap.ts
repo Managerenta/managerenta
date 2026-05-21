@@ -8,9 +8,40 @@ declare global {
 	var __managerentaBootstrapped: boolean | undefined;
 }
 
+function assertSecrets(): void {
+	const required: Array<[string, string | undefined, number]> = [
+		["JWT_ACCESS_TOKEN_SECRET", process.env.JWT_ACCESS_TOKEN_SECRET, 32],
+		["JWT_REFRESH_TOKEN_SECRET", process.env.JWT_REFRESH_TOKEN_SECRET, 32],
+	];
+	const problems: string[] = [];
+	for (const [name, value, minLen] of required) {
+		if (!value || value.length < minLen) {
+			problems.push(`${name} missing or shorter than ${minLen} chars`);
+		}
+	}
+	if (
+		process.env.JWT_ACCESS_TOKEN_SECRET &&
+		process.env.JWT_REFRESH_TOKEN_SECRET &&
+		process.env.JWT_ACCESS_TOKEN_SECRET ===
+			process.env.JWT_REFRESH_TOKEN_SECRET
+	) {
+		problems.push(
+			"JWT_ACCESS_TOKEN_SECRET and JWT_REFRESH_TOKEN_SECRET must differ",
+		);
+	}
+	if (!problems.length) return;
+	const msg = `[bootstrap] Insecure secret config: ${problems.join("; ")}`;
+	if (process.env.NODE_ENV === "production") {
+		throw new Error(msg);
+	}
+	console.warn(msg);
+}
+
 export async function bootstrap(): Promise<void> {
 	if (global.__managerentaBootstrapped) return;
 	global.__managerentaBootstrapped = true;
+
+	assertSecrets();
 
 	try {
 		await connectMongoDB();

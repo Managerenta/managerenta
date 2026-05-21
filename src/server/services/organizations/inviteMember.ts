@@ -59,7 +59,11 @@ export default async function inviteMember({
 		title: `You've been invited to join ${org.name}`,
 		body: `Open this link to accept: /invitations/accept?token=${token}`,
 		to: normalizedEmail,
-		meta: { token, role, organizationId },
+		// SECURITY: do not persist the raw token in `meta` — keep only the
+		// safe references (role, organizationId). The body still carries the
+		// link for the invitee; the token's authoritative location is the
+		// invite record on the organization document.
+		meta: { role, organizationId },
 	});
 
 	await invalidateCacheKeys({

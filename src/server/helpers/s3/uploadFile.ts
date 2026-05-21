@@ -48,6 +48,8 @@ export default async function uploadFile({
 			Body: buffer,
 			Key: checksum,
 			ContentType: mimeType,
+			ACL: "private",
+			ServerSideEncryption: "AES256",
 		};
 
 		const command = new PutObjectCommand(params);

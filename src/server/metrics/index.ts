@@ -19,7 +19,10 @@ export const restResponseTimeHistogram: client.Histogram<string> =
 	new client.Histogram({
 		name: "http_request_duration_seconds",
 		help: "Duration of HTTP requests in seconds",
-		labelNames: ["ip", "method", "route", "status_code"],
+		// `ip` is intentionally excluded: it is high-cardinality and, because
+		// X-Forwarded-For is client-controllable, it is also an unauthenticated
+		// label-injection vector against the metrics store.
+		labelNames: ["method", "route", "status_code"],
 	});
 
 if (!global.__managerentaRestHistogram) {

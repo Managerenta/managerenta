@@ -21,7 +21,13 @@ export default async function decodeJwtToken({
 			? JWT_ACCESS_TOKEN_SECRET
 			: JWT_REFRESH_TOKEN_SECRET;
 
-		const { data: decodedToken } = verify(token, secret) as {
+		// SECURITY: pin the algorithm. Without this, an attacker who knows
+		// the public key (in RS-based deployments) could craft an HS256
+		// token signed *with* the public key as the HMAC secret —
+		// the "algorithm confusion" bug class. See SECURITY_REVIEW.md H9.
+		const { data: decodedToken } = verify(token, secret, {
+			algorithms: ["HS256"],
+		}) as {
 			data: IJwtPayload;
 		};
 

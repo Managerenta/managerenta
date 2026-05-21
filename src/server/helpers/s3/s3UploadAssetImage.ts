@@ -25,6 +25,8 @@ export default async function s3UploadAssetImage({
 			Body: data,
 			Key: fileName,
 			ContentType: contentType,
+			ACL: "private" as const,
+			ServerSideEncryption: "AES256" as const,
 		};
 
 		const command = new PutObjectCommand(params);

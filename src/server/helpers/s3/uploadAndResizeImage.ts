@@ -25,9 +25,13 @@ export default async function uploadAndResizeImage({
 			buffer = Buffer.from(data, "binary");
 		}
 
+		// SECURITY: cap decoded pixel count to defuse decompression-bomb
+		// payloads (small file, huge bitmap). 24 MP ≈ 6000×4000, generous
+		// for legitimate camera uploads. See SECURITY_REVIEW.md M6.
+		const sharpOpts = { limitInputPixels: 24_000_000 } as const;
 		const resizedImage = shouldResize
-			? await sharp(buffer).resize(600).webp().toBuffer()
-			: await sharp(buffer).webp().toBuffer();
+			? await sharp(buffer, sharpOpts).resize(600).webp().toBuffer()
+			: await sharp(buffer, sharpOpts).webp().toBuffer();
 
 		const contentId =
 			`${`${basePath}/`}` +
