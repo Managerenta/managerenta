@@ -2,6 +2,7 @@ import "server-only";
 import type { NextRequest } from "next/server";
 import { connectMongoDB } from "../databases";
 import { restResponseTimeHistogram } from "../metrics";
+import { csrfReject } from "./csrf";
 import {
 	applyRateLimitHeaders,
 	enforceRateLimit,
@@ -14,6 +15,12 @@ const DEFAULT_RATE_LIMIT = { windowMs: 60 * 1000, maxRequests: 100 };
 interface HandlerOptions {
 	route: string;
 	rateLimit?: { windowMs: number; maxRequests: number } | false;
+	/**
+	 * Skip Origin/Referer CSRF validation. Default: false.
+	 * Only set this on routes that legitimately accept non-browser callers
+	 * (webhooks, bot endpoints). No current route needs it.
+	 */
+	csrf?: false;
 }
 
 export type RouteHandler<TCtx = unknown> = (args: {
@@ -39,6 +46,17 @@ export function withApiHandler<TCtx = unknown>(
 		let rlResult: RateLimitResult | null = null;
 
 		try {
+			// CSRF gate first — cheaper than rate limiting (no Redis call)
+			// and a failed check should not consume a rate-limit token.
+			if (options.csrf !== false) {
+				const reason = csrfReject(req);
+				if (reason) {
+					const res = fail(403, reason);
+					observe(req, res.status, options.route, startNs);
+					return res;
+				}
+			}
+
 			if (rl) {
 				rlResult = await enforceRateLimit(req, rl);
 				if (!rlResult.allowed) {

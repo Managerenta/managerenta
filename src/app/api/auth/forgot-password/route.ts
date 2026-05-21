@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { ErrInvalidFields } from "@/server/constants";
+import { ErrInvalidFields, hashToken } from "@/server/constants";
 import { handleError, ok, withApiHandler } from "@/server/lib";
 import { getUserByEmailDB, updateUserRawDB } from "@/server/models";
 import { sendNotification } from "@/server/services";
@@ -30,11 +30,14 @@ export const POST = withApiHandler(
 			if (user) {
 				const token = crypto.randomBytes(32).toString("hex");
 				const expires = new Date(Date.now() + 1000 * 60 * 60); // 1h
+				// Store ONLY the hash — see SECURITY_REVIEW.md H6.
+				// The plaintext leaves the server exactly once, in the
+				// outbound email body.
 				await updateUserRawDB({
 					id: user._id,
 					update: {
 						$set: {
-							"security.passwordResetToken": token,
+							"security.passwordResetToken": hashToken(token),
 							"security.passwordResetExpires": expires,
 						},
 					},

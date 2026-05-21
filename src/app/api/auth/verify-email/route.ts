@@ -1,4 +1,8 @@
-import { ErrInvalidAction, ErrInvalidFields } from "@/server/constants";
+import {
+	ErrInvalidAction,
+	ErrInvalidFields,
+	hashToken,
+} from "@/server/constants";
 import { handleError, ok, withApiHandler } from "@/server/lib";
 import { findUserBySecurityTokenDB, updateUserRawDB } from "@/server/models";
 import { verifyEmailBodySchema } from "@/server/validators/users/settings";
@@ -18,9 +22,10 @@ export const POST = withApiHandler(
 			const parsed = verifyEmailBodySchema.safeParse(body);
 			if (!parsed.success) throw ErrInvalidFields;
 
+			// See SECURITY_REVIEW.md H6 — incoming token is raw, stored is hashed.
 			const user = await findUserBySecurityTokenDB({
 				field: "emailVerificationToken",
-				token: parsed.data.token,
+				token: hashToken(parsed.data.token),
 			});
 			if (!user) throw ErrInvalidAction;
 

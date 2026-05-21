@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { hashToken } from "../../constants";
 import {
 	consumeInviteAndAddMemberDB,
 	findOrganizationByInviteTokenDB,
@@ -19,14 +20,17 @@ export default async function acceptInvite({
 	token: string;
 	userId: string;
 }) {
+	// The token from the URL is raw; the org document holds only its
+	// hash — see SECURITY_REVIEW.md H6.
+	const hashed = hashToken(token);
 	const org = (await findOrganizationByInviteTokenDB({
-		token,
+		token: hashed,
 	})) as unknown as DocWithId | null;
 	if (!org) return null;
 	const orgIdStr = org._id?.toString() ?? "";
 	const updated = (await consumeInviteAndAddMemberDB({
 		orgId: orgIdStr,
-		token,
+		token: hashed,
 		memberId: new mongoose.Types.ObjectId(userId),
 	})) as unknown as DocWithId | null;
 	if (!updated) return null;

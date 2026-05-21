@@ -466,3 +466,71 @@ by the `/tenants` prefix.
 | S7 | Medium | `/api/auth/verify` un-rate-limited | ✅ Fixed |
 | S8 | Medium | Invite token lost across login redirect | ✅ Fixed |
 | S9 | Low | Dead `/add-transaction` in PROTECTED_ROUTES | ✅ Fixed |
+
+---
+
+## Third pass (2026-05-21) — remaining backlog cleared
+
+### M3 — `__Host-` cookie scoping ✅ Fixed
+
+`src/server/lib/cookies.ts` now names the cookies `__Host-accessToken` and
+`__Host-refreshToken` in production, drops the `Domain` attribute, and
+keeps `Path=/` and `Secure=true`. The browser will refuse to set these
+without HTTPS, so dev (which runs over `http://localhost`) keeps the bare
+names. `clearAuthCookies` also expires the legacy names so any user who
+held a pre-migration cookie is cleaned up on their next sign-out / auth
+failure. `src/proxy.ts` mirrors the same naming in lockstep.
+
+**Operator note:** subdomain sharing is gone — auth cookies are host-only.
+If the deployment ever needs to share sessions between, e.g., `app.X` and
+`admin.X`, switch to a single host or build an SSO bridge instead of
+widening the cookie.
+
+### H10 — Origin / Referer CSRF validation ✅ Fixed
+
+New `src/server/lib/csrf.ts` rejects any POST/PUT/PATCH/DELETE that does
+not carry an `Origin` (or, as fallback, a `Referer`) matching the app's
+allow-list (`isOriginAllowed`). Wired into `withApiHandler` so every route
+gets it by default; opt-out with `csrf: false` if a route ever genuinely
+needs to accept non-browser callers (none today). Runs BEFORE the rate
+limiter so a failed CSRF check does not burn a quota slot. Combined with
+`SameSite=Strict` cookies this closes the classic CSRF surface even on
+browsers that fail to honour SameSite.
+
+### H6 — Hash security tokens at rest ✅ Fixed
+
+New `src/server/constants/hashToken.ts` provides an unsalted SHA-256 hash
+(adequate because the input is 32 bytes of `crypto.randomBytes`).
+- Password reset: `forgot-password` hashes the generated token before
+  storing it; `reset-password` hashes the URL token before lookup.
+- Email verification: `request-email-verification` hashes before store;
+  `verify-email` hashes before lookup.
+- Org invites: `inviteMember` stores `hashToken(token)` on the org
+  document; `acceptInvite` hashes the URL token before lookup. The admin
+  revoke route works with the hashed reference (which is what GET
+  `/members` returns), so DB read access alone is not enough to redeem an
+  invite.
+
+Plaintext tokens now leave the server exactly once — in the outbound
+email body — and never live in the database, the audit log, or the
+notification record's `meta`.
+
+### M1 — `updateUserRawDB` allowlist ✅ Fixed
+
+`src/server/models/users/index.ts` now refuses to dispatch an update
+whose paths fall outside an explicit allowlist
+(`WRITABLE_USER_PATH_PREFIXES`: `password`, `refreshTokens`,
+`preferences.*`, `notifications.*`, `reminders.*`, `security.*`,
+`currentOrganizationId`). The guard inspects all known MongoDB update
+operators (`$set` / `$unset` / `$push` / `$pull` / `$pullAll` / `$inc` /
+`$addToSet`) and trips on any unsupported operator or any path outside
+the list — so a copy-paste that forwards user input to this function
+fails closed rather than silently mass-assigning. Dev logs the rejection
+to the server console; prod returns `null`.
+
+| ID | Severity | Title | Status |
+|----|----------|-------|--------|
+| M3 | Medium | `__Host-` cookie prefix | ✅ Fixed |
+| H10 | High | CSRF (Origin/Referer) validation | ✅ Fixed |
+| H6 | High | Tokens hashed at rest | ✅ Fixed |
+| M1 | Medium | `updateUserRawDB` allowlist | ✅ Fixed |

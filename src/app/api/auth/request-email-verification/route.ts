@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { ErrUserNotFound } from "@/server/constants";
+import { ErrUserNotFound, hashToken } from "@/server/constants";
 import { handleError, ok, withApiHandler, withAuth } from "@/server/lib";
 import { updateUserRawDB } from "@/server/models";
 import { getUserById, sendNotification } from "@/server/services";
@@ -18,11 +18,12 @@ export const POST = withApiHandler(
 
 			const token = crypto.randomBytes(32).toString("hex");
 			const expires = new Date(Date.now() + 1000 * 60 * 60 * 24);
+			// Hash at rest — see SECURITY_REVIEW.md H6.
 			await updateUserRawDB({
 				id: auth.userId,
 				update: {
 					$set: {
-						"security.emailVerificationToken": token,
+						"security.emailVerificationToken": hashToken(token),
 						"security.emailVerificationExpires": expires,
 					},
 				},
