@@ -344,6 +344,88 @@ export async function updateUserDB({
 	}
 }
 
+// SECURITY — see SECURITY_REVIEW.md M1.
+//
+// `updateUserRawDB` accepts a raw MongoDB update document. That is exactly
+// the mass-assignment footgun OWASP A03 warns about: a caller that ever
+// forwards user input into this function gets a privilege-escalation bug
+// (set `email`, set `_id`, set arbitrary security flags …). Every caller
+// today is internal and writes to one of the audited paths below, but the
+// allowlist guards against a future copy-paste landing user input here by
+// accident.
+//
+// To allow a new top-level field, add it (or a prefix) to this list and
+// describe WHY in the comment. Never widen this to a wildcard.
+const WRITABLE_USER_PATH_PREFIXES: readonly string[] = [
+	// credential rotation
+	"password",
+	"refreshTokens",
+	// settings sections (user-driven, never sensitive)
+	"preferences.",
+	"notifications.",
+	"reminders.",
+	// security state: 2FA, email verification, password reset, recovery
+	// codes. All sub-paths are server-controlled, never read from request
+	// bodies directly.
+	"security.",
+	// active org selection
+	"currentOrganizationId",
+];
+
+function isWritableUserPath(path: string): boolean {
+	return WRITABLE_USER_PATH_PREFIXES.some(
+		(prefix) =>
+			path === prefix ||
+			(prefix.endsWith(".") && path.startsWith(prefix)),
+	);
+}
+
+const KNOWN_UPDATE_OPERATORS = [
+	"$set",
+	"$unset",
+	"$push",
+	"$pull",
+	"$pullAll",
+	"$inc",
+	"$addToSet",
+] as const;
+
+function assertSafeUpdate(update: Record<string, unknown>): void {
+	const keys = Object.keys(update);
+	if (keys.length === 0) return;
+
+	for (const key of keys) {
+		if (key.startsWith("$")) {
+			if (
+				!KNOWN_UPDATE_OPERATORS.includes(
+					key as (typeof KNOWN_UPDATE_OPERATORS)[number],
+				)
+			) {
+				throw new Error(
+					`updateUserRawDB: unsupported operator "${key}"`,
+				);
+			}
+			const sub = update[key];
+			if (!sub || typeof sub !== "object") {
+				throw new Error(
+					`updateUserRawDB: invalid payload for "${key}"`,
+				);
+			}
+			for (const path of Object.keys(sub as Record<string, unknown>)) {
+				if (!isWritableUserPath(path)) {
+					throw new Error(
+						`updateUserRawDB: path "${path}" is not on the writable allowlist`,
+					);
+				}
+			}
+		} else if (!isWritableUserPath(key)) {
+			throw new Error(
+				`updateUserRawDB: path "${key}" is not on the writable allowlist`,
+			);
+		}
+	}
+}
+
 export async function updateUserRawDB({
 	id,
 	update,
@@ -355,6 +437,10 @@ export async function updateUserRawDB({
 }): Promise<IUser | null> {
 	const timer = databaseResponseTimeHistogram.startTimer();
 	try {
+		// Refuse to dispatch the update if any path is outside the
+		// allowlist — see the comment on WRITABLE_USER_PATH_PREFIXES.
+		assertSafeUpdate(update);
+
 		const result = await User.findByIdAndUpdate(
 			new mongoose.Types.ObjectId(id),
 			update,
@@ -368,13 +454,18 @@ export async function updateUserRawDB({
 			success: "true",
 		});
 		return result;
-	} catch {
+	} catch (error) {
 		timer({
 			operation: IOperationType.Update,
 			collection: collectionName,
 			method: "updateUserRawDB",
 			success: "false",
 		});
+		// Surface allowlist violations during development so they aren't
+		// silently swallowed; production still returns null to callers.
+		if (process.env.NODE_ENV !== "production") {
+			console.error("[updateUserRawDB] rejected update:", error);
+		}
 		return null;
 	}
 }

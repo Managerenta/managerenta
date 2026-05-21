@@ -29,8 +29,12 @@ const PROTECTED_ROUTES = [
 
 const AUTH_ROUTES = ["/login", "/signup", "/"];
 
-const ACCESS_COOKIE = "accessToken";
-const REFRESH_COOKIE = "refreshToken";
+// Cookie names mirror src/server/lib/cookies.ts — kept in lockstep because
+// the proxy runs at the edge and can't import server-only modules. See
+// SECURITY_REVIEW.md M3 for why production uses __Host- prefixed names.
+const IS_PROD = process.env.NODE_ENV === "production";
+const ACCESS_COOKIE = IS_PROD ? "__Host-accessToken" : "accessToken";
+const REFRESH_COOKIE = IS_PROD ? "__Host-refreshToken" : "refreshToken";
 
 function isProtectedRoute(pathname: string): boolean {
 	return PROTECTED_ROUTES.some(

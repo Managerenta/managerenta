@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import mongoose from "mongoose";
+import { hashToken } from "../../constants";
 import {
 	addOrganizationInviteDB,
 	getOrganizationByIdDB,
@@ -36,11 +37,14 @@ export default async function inviteMember({
 	const token = crypto.randomBytes(24).toString("hex");
 	const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 7 days
 
+	// SECURITY: store ONLY the hash on the org document — see
+	// SECURITY_REVIEW.md H6. The raw token leaves the server in the email
+	// link only. Look-ups (acceptInvite, revokeInvite) hash before query.
 	const updated = await addOrganizationInviteDB({
 		id: organizationId,
 		invite: {
 			email: normalizedEmail,
-			token,
+			token: hashToken(token),
 			role,
 			invitedById: new mongoose.Types.ObjectId(invitedById),
 			expiresAt,

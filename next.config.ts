@@ -49,7 +49,7 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
 	/* config options here */
 	output: "standalone",
-	// allowedDevOrigins: ["192.168.18.10"],
+	allowedDevOrigins: ["192.168.18.10"],
 	reactStrictMode: true,
 	poweredByHeader: false,
 	productionBrowserSourceMaps: false,
