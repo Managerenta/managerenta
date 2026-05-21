@@ -11,7 +11,15 @@ import { s3GetFileLink } from "../../helpers";
 import { databaseResponseTimeHistogram } from "../../metrics";
 import type { IJwtPayload } from "../../types";
 import { IOperationType } from "../utils";
-import type { IUser, IUserCreateInput, IUserMethods } from "./types";
+import {
+	DEFAULT_USER_NOTIFICATIONS,
+	DEFAULT_USER_PREFERENCES,
+	DEFAULT_USER_REMINDERS,
+	DEFAULT_USER_SECURITY,
+	type IUser,
+	type IUserCreateInput,
+	type IUserMethods,
+} from "./types";
 import { generateAuthToken } from "./utils";
 
 export const collectionName = "users";
@@ -71,6 +79,99 @@ const schema = new mongoose.Schema<IUser, UserModel, IUserMethods>(
 				},
 			},
 		],
+		preferences: {
+			currency: {
+				type: String,
+				default: DEFAULT_USER_PREFERENCES.currency,
+			},
+			dateFormat: {
+				type: String,
+				default: DEFAULT_USER_PREFERENCES.dateFormat,
+			},
+			language: {
+				type: String,
+				default: DEFAULT_USER_PREFERENCES.language,
+			},
+			timezone: {
+				type: String,
+				default: DEFAULT_USER_PREFERENCES.timezone,
+			},
+			theme: { type: String, default: DEFAULT_USER_PREFERENCES.theme },
+		},
+		notifications: {
+			emailEnabled: {
+				type: Boolean,
+				default: DEFAULT_USER_NOTIFICATIONS.emailEnabled,
+			},
+			smsEnabled: {
+				type: Boolean,
+				default: DEFAULT_USER_NOTIFICATIONS.smsEnabled,
+			},
+			pushEnabled: {
+				type: Boolean,
+				default: DEFAULT_USER_NOTIFICATIONS.pushEnabled,
+			},
+			paymentReceived: {
+				type: Boolean,
+				default: DEFAULT_USER_NOTIFICATIONS.paymentReceived,
+			},
+			paymentOverdue: {
+				type: Boolean,
+				default: DEFAULT_USER_NOTIFICATIONS.paymentOverdue,
+			},
+			tenantMoveIn: {
+				type: Boolean,
+				default: DEFAULT_USER_NOTIFICATIONS.tenantMoveIn,
+			},
+			tenantMoveOut: {
+				type: Boolean,
+				default: DEFAULT_USER_NOTIFICATIONS.tenantMoveOut,
+			},
+			leaseExpiry: {
+				type: Boolean,
+				default: DEFAULT_USER_NOTIFICATIONS.leaseExpiry,
+			},
+		},
+		reminders: {
+			rentDueLeadDays: {
+				type: Number,
+				default: DEFAULT_USER_REMINDERS.rentDueLeadDays,
+			},
+			overdueRepeatDays: {
+				type: Number,
+				default: DEFAULT_USER_REMINDERS.overdueRepeatDays,
+			},
+			autoSendOnDueDay: {
+				type: Boolean,
+				default: DEFAULT_USER_REMINDERS.autoSendOnDueDay,
+			},
+			autoSendForOverdue: {
+				type: Boolean,
+				default: DEFAULT_USER_REMINDERS.autoSendForOverdue,
+			},
+			leaseExpiryLeadDays: {
+				type: Number,
+				default: DEFAULT_USER_REMINDERS.leaseExpiryLeadDays,
+			},
+		},
+		security: {
+			twoFactorEnabled: {
+				type: Boolean,
+				default: DEFAULT_USER_SECURITY.twoFactorEnabled,
+			},
+			totpSecret: { type: String, select: false },
+			pendingTotpSecret: { type: String, select: false },
+			recoveryCodes: { type: [String], select: false, default: [] },
+			emailVerified: {
+				type: Boolean,
+				default: DEFAULT_USER_SECURITY.emailVerified,
+			},
+			emailVerificationToken: { type: String, select: false },
+			emailVerificationExpires: { type: Date, select: false },
+			passwordResetToken: { type: String, select: false },
+			passwordResetExpires: { type: Date, select: false },
+		},
+		currentOrganizationId: { type: String, required: false },
 	},
 	{ timestamps: true },
 );
@@ -97,7 +198,19 @@ schema.pre("aggregate", function () {
 	this.pipeline().unshift({ $match: { deleted: false } });
 	this.pipeline().push({ $addFields: { id: { $toString: "$_id" } } });
 	this.pipeline().push({
-		$project: { password: 0, refreshTokens: 0, __v: 0, deleted: 0 },
+		$project: {
+			password: 0,
+			refreshTokens: 0,
+			__v: 0,
+			deleted: 0,
+			"security.totpSecret": 0,
+			"security.pendingTotpSecret": 0,
+			"security.recoveryCodes": 0,
+			"security.emailVerificationToken": 0,
+			"security.emailVerificationExpires": 0,
+			"security.passwordResetToken": 0,
+			"security.passwordResetExpires": 0,
+		},
 	});
 });
 
@@ -220,6 +333,125 @@ export async function updateUserDB({
 			operation: IOperationType.Update,
 			collection: collectionName,
 			method: "updateUserDB",
+			success: "false",
+		});
+		return null;
+	}
+}
+
+export async function updateUserRawDB({
+	id,
+	update,
+	session,
+}: {
+	id: string;
+	update: Record<string, unknown>;
+	session?: ClientSession;
+}): Promise<IUser | null> {
+	const timer = databaseResponseTimeHistogram.startTimer();
+	try {
+		const result = await User.findByIdAndUpdate(
+			new mongoose.Types.ObjectId(id),
+			update,
+			{ session, new: true },
+		);
+		if (!result) throw ErrUserNotFound;
+		timer({
+			operation: IOperationType.Update,
+			collection: collectionName,
+			method: "updateUserRawDB",
+			success: "true",
+		});
+		return result;
+	} catch {
+		timer({
+			operation: IOperationType.Update,
+			collection: collectionName,
+			method: "updateUserRawDB",
+			success: "false",
+		});
+		return null;
+	}
+}
+
+export async function findUserBySecurityTokenDB({
+	field,
+	token,
+	session,
+}: {
+	field: "passwordResetToken" | "emailVerificationToken";
+	token: string;
+	session?: ClientSession;
+}): Promise<IUser | null> {
+	const timer = databaseResponseTimeHistogram.startTimer();
+	try {
+		const result = await User.findOne(
+			{
+				[`security.${field}`]: token,
+				deleted: false,
+			},
+			null,
+			{ session },
+		).select(
+			`+security.${field} +security.passwordResetExpires +security.emailVerificationExpires +security.totpSecret +security.pendingTotpSecret`,
+		);
+		if (!result) return null;
+		timer({
+			operation: IOperationType.Read,
+			collection: collectionName,
+			method: "findUserBySecurityTokenDB",
+			success: "true",
+		});
+		return result as unknown as IUser;
+	} catch {
+		timer({
+			operation: IOperationType.Read,
+			collection: collectionName,
+			method: "findUserBySecurityTokenDB",
+			success: "false",
+		});
+		return null;
+	}
+}
+
+export async function getUserSecretsDB({
+	id,
+	session,
+}: {
+	id: string;
+	session?: ClientSession;
+}): Promise<{
+	totpSecret?: string;
+	pendingTotpSecret?: string;
+	recoveryCodes?: string[];
+} | null> {
+	const timer = databaseResponseTimeHistogram.startTimer();
+	try {
+		const result = await User.findById(
+			new mongoose.Types.ObjectId(id),
+			null,
+			{ session },
+		).select(
+			"+security.totpSecret +security.pendingTotpSecret +security.recoveryCodes",
+		);
+		if (!result) return null;
+		timer({
+			operation: IOperationType.Read,
+			collection: collectionName,
+			method: "getUserSecretsDB",
+			success: "true",
+		});
+		const sec = (result as unknown as IUser).security;
+		return {
+			totpSecret: sec?.totpSecret,
+			pendingTotpSecret: sec?.pendingTotpSecret,
+			recoveryCodes: sec?.recoveryCodes,
+		};
+	} catch {
+		timer({
+			operation: IOperationType.Read,
+			collection: collectionName,
+			method: "getUserSecretsDB",
 			success: "false",
 		});
 		return null;

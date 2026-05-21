@@ -1,11 +1,18 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { memo, useMemo } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BsCalculator } from "react-icons/bs";
-import { FiGrid, FiSettings, FiUsers } from "react-icons/fi";
+import {
+	FiChevronDown,
+	FiGrid,
+	FiPlus,
+	FiSettings,
+	FiUsers,
+} from "react-icons/fi";
 import { HiOutlineBuildingOffice2 } from "react-icons/hi2";
 import { Box, Text } from "@/components";
+import { useOrganizations } from "@/hooks";
 import { TabSidebarStyled } from "./styled";
 
 const TAB_ITEMS = [
@@ -16,22 +23,41 @@ const TAB_ITEMS = [
 		icon: <HiOutlineBuildingOffice2 size={20} />,
 	},
 	{ label: "tenants", value: "Tenants", icon: <FiUsers size={20} /> },
+	{
+		label: "notifications",
+		value: "Notifications",
+		icon: <FiPlus size={20} />,
+	},
 	{ label: "settings", value: "Settings", icon: <FiSettings size={20} /> },
 ];
 
 function TabSidebar() {
 	const pathname = usePathname();
+	const router = useRouter();
+	const { organizations, currentOrganizationId, current, switchTo } =
+		useOrganizations();
+	const [open, setOpen] = useState(false);
+	const ref = useRef<HTMLDivElement>(null);
 
 	const currentTab = useMemo(() => {
 		const segments = pathname.split("/");
 		return segments[1] || "dashboard";
 	}, [pathname]);
 
+	const close = useCallback(() => setOpen(false), []);
+	useEffect(() => {
+		if (!open) return;
+		const handler = (e: MouseEvent) => {
+			if (ref.current && !ref.current.contains(e.target as Node)) close();
+		};
+		document.addEventListener("mousedown", handler);
+		return () => document.removeEventListener("mousedown", handler);
+	}, [open, close]);
+
 	const navigationItems = useMemo(() => {
 		return TAB_ITEMS.map((item, index) => {
 			const url = `/${item.label}`;
 			const isActive = currentTab === item.label;
-
 			return (
 				<Link
 					key={index}
@@ -47,12 +73,84 @@ function TabSidebar() {
 		});
 	}, [currentTab]);
 
+	const orgItems = useMemo(() => {
+		return [
+			{
+				id: "personal",
+				name: "Personal workspace",
+				isActive: !currentOrganizationId,
+				onClick: () => {
+					switchTo(null);
+					setOpen(false);
+				},
+			},
+			...organizations.map((o) => {
+				const id = o._id ?? o.id ?? "";
+				return {
+					id,
+					name: o.name,
+					isActive: currentOrganizationId === id,
+					onClick: () => {
+						switchTo(id);
+						setOpen(false);
+					},
+				};
+			}),
+		];
+	}, [organizations, currentOrganizationId, switchTo]);
+
+	const activeLabel = current?.name ?? "Personal workspace";
+	const activeInitials = (current?.name ?? "Me").slice(0, 2).toUpperCase();
+
 	return (
 		<TabSidebarStyled>
 			<Box className="brand-section">
 				<BsCalculator />
 				<Text className="brand-name">manageRenta</Text>
 			</Box>
+
+			<Box className="org-switcher" ref={ref}>
+				<Box
+					className="org-trigger"
+					data-testid="org-switcher-trigger"
+					onClick={() => setOpen((v) => !v)}
+				>
+					<Box className="org-avatar">{activeInitials}</Box>
+					<Box className="org-label">
+						<Text className="org-name">{activeLabel}</Text>
+						<Text className="org-role">
+							{currentOrganizationId
+								? "organization"
+								: "personal"}
+						</Text>
+					</Box>
+					<FiChevronDown size={16} />
+				</Box>
+				{open && (
+					<Box className="org-menu" data-testid="org-switcher-menu">
+						{orgItems.map((o) => (
+							<Box
+								key={o.id}
+								className={`org-menu-item ${o.isActive ? "active" : ""}`}
+								onClick={o.onClick}
+							>
+								{o.name}
+							</Box>
+						))}
+						<Box
+							className="org-menu-item create"
+							onClick={() => {
+								setOpen(false);
+								router.push("/settings?tab=organizations");
+							}}
+						>
+							<FiPlus size={14} />
+							<span>Manage organizations</span>
+						</Box>
+					</Box>
+				)}
+			</Box>
+
 			<Box className="navigation-section">{navigationItems}</Box>
 		</TabSidebarStyled>
 	);

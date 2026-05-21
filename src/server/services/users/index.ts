@@ -6,3 +6,4 @@ export { default as getUserById } from "./getUserById";
 export { default as getUsersByEmails } from "./getUsersByEmails";
 export { default as getUsersByIds } from "./getUsersByIds";
 export { default as updateUser } from "./updateUser";
+export { default as updateUserSettings } from "./updateUserSettings";

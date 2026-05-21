@@ -1,7 +1,7 @@
 "use client";
 import { memo, useCallback, useMemo, useState } from "react";
 import { Box, Button, Image, Text } from "@/components";
-import { useTenantNavigation } from "@/hooks";
+import { useAddTransactionNavigation, useTenantNavigation } from "@/hooks";
 import type { IPropertyUnit } from "@/types";
 import { UnitsGridStyled } from "./styled";
 
@@ -26,13 +26,23 @@ function getPaymentStatusColor(status: string): { bg: string; text: string } {
 
 function UnitsGrid({ units, totalCount, onAddTenant }: IProps) {
 	const [activeFilter, setActiveFilter] = useState<string>("all");
+	const [sortBy, setSortBy] = useState<string>("unit-number");
 	const { openTenantDetail } = useTenantNavigation();
+	const { openAddTransaction } = useAddTransactionNavigation();
 
 	const handleViewTenant = useCallback(
 		(tenantId: string) => {
 			openTenantDetail(tenantId);
 		},
 		[openTenantDetail],
+	);
+
+	const handleRecordPayment = useCallback(
+		(tenantId?: string) => {
+			if (!tenantId) return;
+			openAddTransaction(tenantId);
+		},
+		[openAddTransaction],
 	);
 
 	const filterTabs = useMemo(() => {
@@ -59,13 +69,26 @@ function UnitsGrid({ units, totalCount, onAddTenant }: IProps) {
 	}, [filterTabs, activeFilter]);
 
 	const filteredUnits = useMemo(() => {
-		if (activeFilter === "all") return units;
-		if (activeFilter === "occupied")
-			return units.filter((u) => u.status === "Occupied");
-		if (activeFilter === "vacant")
-			return units.filter((u) => u.status === "Vacant");
-		return units;
-	}, [units, activeFilter]);
+		const filtered =
+			activeFilter === "occupied"
+				? units.filter((u) => u.status === "Occupied")
+				: activeFilter === "vacant"
+					? units.filter((u) => u.status === "Vacant")
+					: units;
+
+		return [...filtered].sort((a, b) => {
+			switch (sortBy) {
+				case "status":
+					return a.status.localeCompare(b.status);
+				case "rent":
+					return b.rentAmount - a.rentAmount;
+				default:
+					return a.name.localeCompare(b.name, undefined, {
+						numeric: true,
+					});
+			}
+		});
+	}, [units, activeFilter, sortBy]);
 
 	const renderedUnits = useMemo(() => {
 		return filteredUnits.map(
@@ -180,6 +203,9 @@ function UnitsGrid({ units, totalCount, onAddTenant }: IProps) {
 											background="#ef4444"
 											color="white"
 											borderRadius="8px"
+											handleClick={() =>
+												handleRecordPayment(tenantId)
+											}
 										/>
 									</Box>
 								</>
@@ -222,7 +248,7 @@ function UnitsGrid({ units, totalCount, onAddTenant }: IProps) {
 				);
 			},
 		);
-	}, [filteredUnits, handleViewTenant, onAddTenant]);
+	}, [filteredUnits, handleViewTenant, handleRecordPayment, onAddTenant]);
 
 	return (
 		<UnitsGridStyled>
@@ -237,7 +263,8 @@ function UnitsGrid({ units, totalCount, onAddTenant }: IProps) {
 
 					<select
 						className="sort-dropdown"
-						defaultValue="unit-number"
+						value={sortBy}
+						onChange={(e) => setSortBy(e.target.value)}
 					>
 						<option value="unit-number">Unit Number</option>
 						<option value="status">Status</option>

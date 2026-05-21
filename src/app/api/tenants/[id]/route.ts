@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { ErrInvalidFields, ErrTenantNotFound } from "@/server/constants";
 import {
+	assertWriteRole,
 	handleError,
 	ok,
 	parseMultipart,
@@ -28,7 +29,7 @@ export const GET = withApiHandler<RouteContext>(
 
 			const result = await getTenantById({
 				id: params.data.id,
-				userId: auth.userId,
+				userId: auth.effectiveOwnerId,
 			});
 			if (!result) throw ErrTenantNotFound;
 			return ok(result);
@@ -42,6 +43,7 @@ export const PATCH = withApiHandler<RouteContext>(
 	{ route: "/api/tenants/[id]" },
 	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
+			assertWriteRole(auth);
 			const { id } = await context.params;
 			const params = tenantParamsSchema.safeParse({ id });
 			if (!params.success) throw ErrInvalidFields;
@@ -53,7 +55,7 @@ export const PATCH = withApiHandler<RouteContext>(
 			const avatar = singleFileBuffer(parsed, "avatar");
 			const result = await updateTenant({
 				id: params.data.id,
-				userId: auth.userId,
+				userId: auth.effectiveOwnerId,
 				payload: { ...body.data, avatar },
 			});
 			if (!result) throw ErrTenantNotFound;
@@ -68,11 +70,15 @@ export const DELETE = withApiHandler<RouteContext>(
 	{ route: "/api/tenants/[id]" },
 	withAuth<RouteContext>(async ({ auth, context }) => {
 		try {
+			assertWriteRole(auth);
 			const { id } = await context.params;
 			const params = tenantParamsSchema.safeParse({ id });
 			if (!params.success) throw ErrInvalidFields;
 
-			await deleteTenant({ id: params.data.id, userId: auth.userId });
+			await deleteTenant({
+				id: params.data.id,
+				userId: auth.effectiveOwnerId,
+			});
 			return ok(null, "Tenant deleted");
 		} catch (error) {
 			return handleError(error);

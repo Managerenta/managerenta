@@ -24,7 +24,9 @@ export interface IRawTenantDetail {
 	name: string;
 	avatar?: string;
 	property: string;
+	propertyId?: string;
 	unit: string;
+	unitId?: string;
 	phone: string;
 	email: string;
 	moveInDate: string;
@@ -104,7 +106,9 @@ export interface ITenantDetail {
 	name: string;
 	avatar: string;
 	property: string;
+	propertyId: string;
 	unit: string;
+	unitId: string;
 	phone: string;
 	email: string;
 	moveInDate: string;

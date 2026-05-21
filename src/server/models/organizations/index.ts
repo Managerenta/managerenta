@@ -38,7 +38,7 @@ const schema = new mongoose.Schema<IOrganization>(
 		},
 		logo: {
 			type: String,
-			required: true,
+			required: false,
 		},
 		website: {
 			type: String,
@@ -67,6 +67,23 @@ const schema = new mongoose.Schema<IOrganization>(
 					enum: IOrganizationRole,
 					required: true,
 				},
+			},
+		],
+		invites: [
+			{
+				email: { type: String, required: true, lowercase: true },
+				token: { type: String, required: true },
+				role: {
+					type: String,
+					enum: IOrganizationRole,
+					required: true,
+				},
+				invitedById: {
+					type: mongoose.Types.ObjectId,
+					required: true,
+				},
+				expiresAt: { type: Date, required: true },
+				createdAt: { type: Date, default: Date.now },
 			},
 		],
 	},
@@ -510,6 +527,252 @@ export async function getOrganizationsCountDB({
 			success: "false",
 		});
 		return 0;
+	}
+}
+
+export async function getOrganizationsForMemberDB({
+	userId,
+	session,
+}: {
+	userId: string;
+	session?: ClientSession;
+}): Promise<IOrganization[]> {
+	const timer = databaseResponseTimeHistogram.startTimer();
+	try {
+		const userObjectId = new mongoose.Types.ObjectId(userId);
+		const result = await Organization.aggregate<IOrganization>(
+			[
+				{
+					$match: {
+						$or: [
+							{ ownerId: userObjectId },
+							{ "members.memberId": userObjectId },
+						],
+					},
+				},
+				{ $sort: { createdAt: -1 } },
+			],
+			{ session },
+		);
+		timer({
+			operation: IOperationType.Read,
+			collection: collectionName,
+			method: "getOrganizationsForMemberDB",
+			success: "true",
+		});
+		return result;
+	} catch {
+		timer({
+			operation: IOperationType.Read,
+			collection: collectionName,
+			method: "getOrganizationsForMemberDB",
+			success: "false",
+		});
+		return [];
+	}
+}
+
+export async function findOrganizationByInviteTokenDB({
+	token,
+	session,
+}: {
+	token: string;
+	session?: ClientSession;
+}): Promise<IOrganization | null> {
+	const timer = databaseResponseTimeHistogram.startTimer();
+	try {
+		const result = await Organization.findOne(
+			{ "invites.token": token, deleted: false },
+			null,
+			{ session },
+		).lean<IOrganization>();
+		timer({
+			operation: IOperationType.Read,
+			collection: collectionName,
+			method: "findOrganizationByInviteTokenDB",
+			success: "true",
+		});
+		return result;
+	} catch {
+		timer({
+			operation: IOperationType.Read,
+			collection: collectionName,
+			method: "findOrganizationByInviteTokenDB",
+			success: "false",
+		});
+		return null;
+	}
+}
+
+export async function addOrganizationInviteDB({
+	id,
+	invite,
+	session,
+}: {
+	id: string;
+	invite: {
+		email: string;
+		token: string;
+		role: IOrganizationRole;
+		invitedById: mongoose.Types.ObjectId;
+		expiresAt: Date;
+	};
+	session?: ClientSession;
+}): Promise<IOrganization | null> {
+	const timer = databaseResponseTimeHistogram.startTimer();
+	try {
+		const result = await Organization.findOneAndUpdate(
+			{ _id: new mongoose.Types.ObjectId(id), deleted: false },
+			{
+				$push: {
+					invites: { ...invite, createdAt: new Date() },
+				},
+			},
+			{ new: true, session },
+		);
+		timer({
+			operation: IOperationType.Update,
+			collection: collectionName,
+			method: "addOrganizationInviteDB",
+			success: "true",
+		});
+		return result;
+	} catch {
+		timer({
+			operation: IOperationType.Update,
+			collection: collectionName,
+			method: "addOrganizationInviteDB",
+			success: "false",
+		});
+		return null;
+	}
+}
+
+export async function consumeInviteAndAddMemberDB({
+	orgId,
+	token,
+	memberId,
+	session,
+}: {
+	orgId: string;
+	token: string;
+	memberId: mongoose.Types.ObjectId;
+	session?: ClientSession;
+}): Promise<IOrganization | null> {
+	const timer = databaseResponseTimeHistogram.startTimer();
+	try {
+		const org = await Organization.findOne(
+			{
+				_id: new mongoose.Types.ObjectId(orgId),
+				deleted: false,
+				"invites.token": token,
+			},
+			null,
+			{ session },
+		);
+		if (!org) return null;
+		const invite = org.invites?.find((i) => i.token === token);
+		if (!invite || invite.expiresAt < new Date()) return null;
+		const already = org.members?.some(
+			(m) => m.memberId.toString() === memberId.toString(),
+		);
+		if (!already) {
+			org.members = [
+				...(org.members ?? []),
+				{ memberId, permission: invite.role },
+			];
+		}
+		org.invites = (org.invites ?? []).filter((i) => i.token !== token);
+		await org.save({ session });
+		timer({
+			operation: IOperationType.Update,
+			collection: collectionName,
+			method: "consumeInviteAndAddMemberDB",
+			success: "true",
+		});
+		return org;
+	} catch {
+		timer({
+			operation: IOperationType.Update,
+			collection: collectionName,
+			method: "consumeInviteAndAddMemberDB",
+			success: "false",
+		});
+		return null;
+	}
+}
+
+export async function revokeInviteDB({
+	orgId,
+	token,
+	session,
+}: {
+	orgId: string;
+	token: string;
+	session?: ClientSession;
+}): Promise<boolean> {
+	try {
+		const result = await Organization.findOneAndUpdate(
+			{ _id: new mongoose.Types.ObjectId(orgId) },
+			{ $pull: { invites: { token } } },
+			{ session },
+		);
+		return !!result;
+	} catch {
+		return false;
+	}
+}
+
+export async function setMemberRoleDB({
+	orgId,
+	memberId,
+	role,
+	session,
+}: {
+	orgId: string;
+	memberId: string;
+	role: IOrganizationRole;
+	session?: ClientSession;
+}): Promise<IOrganization | null> {
+	try {
+		const result = await Organization.findOneAndUpdate(
+			{
+				_id: new mongoose.Types.ObjectId(orgId),
+				"members.memberId": new mongoose.Types.ObjectId(memberId),
+			},
+			{ $set: { "members.$.permission": role } },
+			{ new: true, session },
+		);
+		return result;
+	} catch {
+		return null;
+	}
+}
+
+export async function removeMemberDB({
+	orgId,
+	memberId,
+	session,
+}: {
+	orgId: string;
+	memberId: string;
+	session?: ClientSession;
+}): Promise<IOrganization | null> {
+	try {
+		const result = await Organization.findOneAndUpdate(
+			{ _id: new mongoose.Types.ObjectId(orgId) },
+			{
+				$pull: {
+					members: {
+						memberId: new mongoose.Types.ObjectId(memberId),
+					},
+				},
+			},
+			{ new: true, session },
+		);
+		return result;
+	} catch {
+		return null;
 	}
 }
 

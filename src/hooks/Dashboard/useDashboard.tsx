@@ -34,6 +34,9 @@ interface IRawDashboardStats {
 	totalUnits?: number;
 	occupiedUnits?: number;
 	vacantUnits?: number;
+	monthlyCollected?: number;
+	monthlyExpected?: number;
+	dueTodayCount?: number;
 	urgentActions?: {
 		dueToday?: IRawDashboardUrgentAction[];
 		overdue?: IRawDashboardUrgentAction[];
@@ -192,6 +195,22 @@ export default function useDashboardData() {
 		];
 	}, []);
 
+	const monthlyOverview = useMemo(() => {
+		const collected = dashboardStats?.monthlyCollected ?? 0;
+		const expected = dashboardStats?.monthlyExpected ?? 0;
+		const percentage =
+			expected > 0 ? Math.round((collected / expected) * 100) : 0;
+		const dueTodayCount = dashboardStats?.dueTodayCount ?? dueToday.length;
+		return {
+			collected,
+			expected,
+			percentage,
+			dueTodayCount,
+			collectedFormatted: formatNaira(collected),
+			expectedFormatted: formatNaira(expected),
+		};
+	}, [dashboardStats, dueToday.length]);
+
 	return {
 		stats,
 		dueToday,
@@ -200,5 +219,6 @@ export default function useDashboardData() {
 		transactions,
 		listedProperties,
 		quickActions,
+		monthlyOverview,
 	};
 }

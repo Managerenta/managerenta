@@ -24,6 +24,13 @@ export const getPropertiesQuerySchema = zod
 	.object({
 		limit: zod.coerce.number().int().min(1).max(100).optional(),
 		offset: zod.coerce.number().int().min(0).optional(),
+		search: zod.string().optional(),
+		type: zod
+			.union([zod.enum(propertyTypes), zod.literal("all")])
+			.optional(),
+		sort: zod
+			.enum(["name", "occupancy", "revenue", "units", "createdAt"])
+			.optional(),
 	})
 	.strict();
 

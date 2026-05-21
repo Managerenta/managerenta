@@ -12,11 +12,20 @@ export interface IOrganizationMemberPermission {
 	permission: IOrganizationRole;
 }
 
+export interface IOrganizationInvite {
+	email: string;
+	token: string;
+	role: IOrganizationRole;
+	invitedById: mongoose.Types.ObjectId;
+	expiresAt: Date;
+	createdAt: Date;
+}
+
 export interface IOrganizationCreateInput {
 	ownerId: mongoose.Types.ObjectId;
 	name: string;
 	description: string;
-	logo: string;
+	logo?: string;
 	website?: string;
 	x?: string;
 	instagram?: string;
@@ -28,5 +37,6 @@ export interface IOrganization extends IOrganizationCreateInput {
 	createdAt: Date;
 	updatedAt: Date;
 	members: IOrganizationMemberPermission[];
+	invites?: IOrganizationInvite[];
 	deleted: boolean;
 }

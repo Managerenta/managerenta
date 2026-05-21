@@ -1,6 +1,12 @@
 import { ErrInvalidFields, ErrTenantNotFound } from "@/server/constants";
-import { handleError, ok, withApiHandler, withAuth } from "@/server/lib";
-import { getTenantById } from "@/server/services";
+import {
+	assertWriteRole,
+	handleError,
+	ok,
+	withApiHandler,
+	withAuth,
+} from "@/server/lib";
+import { sendRentReminder } from "@/server/services";
 import { tenantParamsSchema } from "@/server/validators/tenants/validate";
 
 export const runtime = "nodejs";
@@ -11,16 +17,24 @@ export const POST = withApiHandler<RouteContext>(
 	{ route: "/api/tenants/[id]/send-reminder" },
 	withAuth<RouteContext>(async ({ auth, context }) => {
 		try {
+			assertWriteRole(auth);
 			const { id } = await context.params;
 			const params = tenantParamsSchema.safeParse({ id });
 			if (!params.success) throw ErrInvalidFields;
 
-			const tenant = await getTenantById({
-				id: params.data.id,
-				userId: auth.userId,
+			const result = await sendRentReminder({
+				tenantId: params.data.id,
+				userId: auth.effectiveOwnerId,
 			});
-			if (!tenant) throw ErrTenantNotFound;
-			return ok(null, "Reminder sent");
+			if (!result) throw ErrTenantNotFound;
+			return ok(
+				{
+					sent: result.sent,
+					failed: result.failed,
+					tenant: result.tenant,
+				},
+				`Reminder dispatched (${result.sent} sent, ${result.failed} failed)`,
+			);
 		} catch (error) {
 			return handleError(error);
 		}

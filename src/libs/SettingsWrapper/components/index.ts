@@ -1,5 +1,9 @@
+export { default as NotificationsSettings } from "./NotificationsSettings";
+export { default as OrganizationsSettings } from "./OrganizationsSettings";
 export { default as Preferences } from "./Preferences";
+export { default as PrivacySettings } from "./PrivacySettings";
 export { default as ProfileInformation } from "./ProfileInformation";
+export { default as RemindersSettings } from "./RemindersSettings";
 export { default as Security } from "./Security";
 export { default as SettingsFooter } from "./SettingsFooter";
 export { default as SettingsHeader } from "./SettingsHeader";

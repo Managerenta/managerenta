@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { memo, useCallback, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { Box } from "@/components";
 import { usePropertyDetail } from "@/hooks";
 import type { TenantModalMode } from "@/layouts";
@@ -71,6 +72,55 @@ function PropertyDetailWrapper({ propertyId }: IProps) {
 		await mutate();
 	}, [mutate]);
 
+	const handleExportReport = useCallback(() => {
+		if (!propertyDetail) return;
+		if (units.length === 0) {
+			toast.info("No units to export");
+			return;
+		}
+		const escapeCell = (cell: string) => {
+			const needs = /[",\n]/.test(cell);
+			const out = cell.replace(/"/g, '""');
+			return needs ? `"${out}"` : out;
+		};
+		const header = [
+			"Unit",
+			"Status",
+			"Tenant",
+			"Monthly Rent",
+			"Payment Status",
+			"Due Date",
+			"Vacant Days",
+		];
+		const body = units.map((u) => [
+			u.name,
+			u.status,
+			u.tenantName ?? "",
+			u.rent,
+			u.paymentStatus ?? "",
+			u.dueDate ?? "",
+			u.vacantDays !== undefined ? String(u.vacantDays) : "",
+		]);
+		const csv = [header, ...body]
+			.map((r) => r.map(escapeCell).join(","))
+			.join("\n");
+		const blob = new Blob([`﻿${csv}`], {
+			type: "text/csv;charset=utf-8;",
+		});
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a");
+		a.href = url;
+		const safe = propertyDetail.name
+			.replace(/[^a-z0-9]+/gi, "-")
+			.toLowerCase();
+		a.download = `${safe || "property"}-report.csv`;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+		toast.success("Report downloaded");
+	}, [propertyDetail, units]);
+
 	if (!propertyDetail) return null;
 
 	return (
@@ -112,7 +162,10 @@ function PropertyDetailWrapper({ propertyId }: IProps) {
 					)}
 				</>
 			)}
-			<PropertyOverview propertyDetail={propertyDetail} />
+			<PropertyOverview
+				propertyDetail={propertyDetail}
+				onExport={handleExportReport}
+			/>
 
 			<Box className="bottom-grid">
 				<Box className="left-grid">
@@ -124,9 +177,12 @@ function PropertyDetailWrapper({ propertyId }: IProps) {
 				</Box>
 				<Box className="right-grid">
 					<PropertySidebar
+						propertyName={propertyDetail.name}
+						units={units}
 						topTenants={topTenants}
 						averageVacancyDays={averageVacancyDays}
 						rentCollectedThisYear={rentCollectedThisYear}
+						onAddUnit={openAddUnitModal}
 					/>
 				</Box>
 			</Box>

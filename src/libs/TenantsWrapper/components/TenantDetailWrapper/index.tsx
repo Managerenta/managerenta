@@ -91,7 +91,13 @@ function TenantDetailWrapper({ tenantId: selectedTenantId }: IProps) {
 					/>
 				</Box>
 				<Box className="right-grid">
-					<TenantQuickActions tenantId={selectedTenantId} />
+					<TenantQuickActions
+						tenantId={selectedTenantId}
+						propertyId={tenantDetail.propertyId}
+						tenantName={tenantDetail.name}
+						transactions={transactions}
+						onSendReminder={handleSendReminder}
+					/>
 					<PaymentStatistics stats={paymentStats} />
 					<RecentActivity activities={recentActivity} />
 				</Box>

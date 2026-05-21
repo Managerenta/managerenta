@@ -11,6 +11,52 @@ export const TransactionHistoryStyled = styled(Box)`
 	flex-direction: column;
 	gap: 20px;
 
+	.preview-overlay {
+		position: fixed;
+		inset: 0;
+		background: rgba(15, 23, 42, 0.45);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 1000;
+	}
+
+	.preview-modal {
+		width: 100%;
+		max-width: 420px;
+		background: var(--Surface-Card);
+		border-radius: 12px;
+		padding: 20px;
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	.preview-title {
+		font-size: 16px;
+		font-weight: 700;
+		color: var(--Black);
+	}
+
+	.preview-grid {
+		display: grid;
+		grid-template-columns: 140px 1fr;
+		row-gap: 6px;
+		column-gap: 12px;
+		font-size: 13px;
+		color: #475569;
+	}
+
+	.preview-close {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: 4px;
+
+		button {
+			padding: 8px 16px;
+		}
+	}
+
 	.section-title {
 		font-size: 16px;
 		font-weight: 700;

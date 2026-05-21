@@ -20,29 +20,44 @@ export function getQueryKey({
 	userId,
 	limit,
 	offset,
+	search,
+	type,
+	sort,
 }: {
 	userId: string;
 	limit: string;
 	offset: string;
+	search: string;
+	type: string;
+	sort: string;
 }): string {
-	return `services:properties:getProperties:${userId}:${limit}:${offset}`;
+	return `services:properties:getProperties:${userId}:${limit}:${offset}:${search}:${type}:${sort}`;
 }
 
 export default async function getProperties({
 	userId,
 	limit,
 	offset,
+	search,
+	type,
+	sort,
 	refreshCache,
 }: {
 	userId: string;
 	limit?: number;
 	offset?: number;
+	search?: string;
+	type?: string;
+	sort?: "name" | "occupancy" | "revenue" | "units" | "createdAt";
 	refreshCache?: boolean;
 }): Promise<GetPropertiesResult> {
 	const query = getQueryKey({
 		userId,
 		limit: limit?.toString() ?? "default",
 		offset: offset?.toString() ?? "0",
+		search: search ?? "",
+		type: type ?? "all",
+		sort: sort ?? "createdAt",
 	});
 
 	if (!refreshCache) {
@@ -51,7 +66,7 @@ export default async function getProperties({
 	}
 
 	const [{ properties, total }, stats, unitStats] = await Promise.all([
-		getPropertiesDB({ userId, limit, offset }),
+		getPropertiesDB({ userId, limit, offset, search, type, sort }),
 		getPropertyStatsDB({ userId }),
 		getUnitStatsDB({ userId }),
 	]);

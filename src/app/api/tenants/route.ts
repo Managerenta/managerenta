@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { ErrInvalidFields, ErrTenantNotFound } from "@/server/constants";
 import {
+	assertWriteRole,
 	created,
 	handleError,
 	parseMultipart,
@@ -27,7 +28,7 @@ export const GET = withApiHandler(
 			if (!query.success) throw ErrInvalidFields;
 
 			const result = await getTenants({
-				userId: auth.userId,
+				userId: auth.effectiveOwnerId,
 				limit: query.data.limit,
 				offset: query.data.offset,
 				status: query.data.status,
@@ -53,6 +54,7 @@ export const POST = withApiHandler(
 	{ route: "/api/tenants" },
 	withAuth(async ({ req, auth }) => {
 		try {
+			assertWriteRole(auth);
 			const parsed = await parseMultipart(req as NextRequest);
 			const body = addTenantBodySchema.safeParse(parsed.fields);
 			if (!body.success) throw ErrInvalidFields;
@@ -60,7 +62,7 @@ export const POST = withApiHandler(
 			const avatar = singleFileBuffer(parsed, "avatar");
 			const result = await addTenant({
 				...body.data,
-				userId: auth.userId,
+				userId: auth.effectiveOwnerId,
 				avatar,
 			});
 			if (!result) throw ErrTenantNotFound;

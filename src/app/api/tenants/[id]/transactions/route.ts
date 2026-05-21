@@ -1,5 +1,11 @@
 import { ErrInvalidFields, ErrTenantNotFound } from "@/server/constants";
-import { created, handleError, withApiHandler, withAuth } from "@/server/lib";
+import {
+	assertWriteRole,
+	created,
+	handleError,
+	withApiHandler,
+	withAuth,
+} from "@/server/lib";
 import { addTransaction } from "@/server/services";
 import {
 	addTransactionBodySchema,
@@ -14,6 +20,7 @@ export const POST = withApiHandler<RouteContext>(
 	{ route: "/api/tenants/[id]/transactions" },
 	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
+			assertWriteRole(auth);
 			const { id } = await context.params;
 			const params = tenantParamsSchema.safeParse({ id });
 			if (!params.success) throw ErrInvalidFields;
@@ -29,7 +36,7 @@ export const POST = withApiHandler<RouteContext>(
 
 			const result = await addTransaction({
 				tenantId: params.data.id,
-				userId: auth.userId,
+				userId: auth.effectiveOwnerId,
 				...body.data,
 			});
 			if (!result) throw ErrTenantNotFound;
