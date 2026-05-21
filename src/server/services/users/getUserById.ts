@@ -12,8 +12,8 @@ type CacheEntry = {
 };
 const inProcessCache = new Map<string, CacheEntry>();
 
-export function clearInProcessCache(id?: string): void {
-	if (id) inProcessCache.delete(id);
+export function clearInProcessCache(id?: string | object): void {
+	if (id) inProcessCache.delete(String(id));
 	else inProcessCache.clear();
 }
 

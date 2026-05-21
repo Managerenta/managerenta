@@ -273,7 +273,7 @@ export async function updatePropertyDB({
 		const result = await Property.findOneAndUpdate(
 			{ _id: new mongoose.Types.ObjectId(id), userId, deleted: false },
 			{ $set: payload },
-			{ new: true, session },
+			{ returnDocument: "after", session },
 		);
 
 		if (!result) throw ErrPropertyNotFound;

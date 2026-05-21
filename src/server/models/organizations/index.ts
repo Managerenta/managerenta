@@ -628,7 +628,7 @@ export async function addOrganizationInviteDB({
 					invites: { ...invite, createdAt: new Date() },
 				},
 			},
-			{ new: true, session },
+			{ returnDocument: "after", session },
 		);
 		timer({
 			operation: IOperationType.Update,
@@ -741,7 +741,7 @@ export async function setMemberRoleDB({
 				"members.memberId": new mongoose.Types.ObjectId(memberId),
 			},
 			{ $set: { "members.$.permission": role } },
-			{ new: true, session },
+			{ returnDocument: "after", session },
 		);
 		return result;
 	} catch {
@@ -768,7 +768,7 @@ export async function removeMemberDB({
 					},
 				},
 			},
-			{ new: true, session },
+			{ returnDocument: "after", session },
 		);
 		return result;
 	} catch {

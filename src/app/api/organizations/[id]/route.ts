@@ -58,7 +58,7 @@ export const PATCH = withApiHandler<RouteContext>(
 			const updated = await Organization.findByIdAndUpdate(
 				id,
 				parsed.data,
-				{ new: true },
+				{ returnDocument: "after" },
 			);
 			if (!updated) throw ErrResourceNotFound;
 			return ok(updated, "Organization updated");
