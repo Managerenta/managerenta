@@ -2,12 +2,13 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useState } from "react";
-import { toast } from "react-toastify";
 import { Box, Button, Input, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
+import { useToast } from "@/hooks";
 import { AuthPageStyled } from "../(auth-pages)/styled";
 
 function ResetPasswordInner() {
+	const toast = useToast();
 	const router = useRouter();
 	const search = useSearchParams();
 	const token = search.get("token") ?? "";
@@ -17,15 +18,17 @@ function ResetPasswordInner() {
 
 	const submit = useCallback(async () => {
 		if (!token) {
-			toast.error("Missing or invalid token");
+			toast.push("Missing or invalid token", { type: "warn" });
 			return;
 		}
 		if (password.length < 6) {
-			toast.error("Password must be at least 6 characters");
+			toast.push("Password must be at least 6 characters", {
+				type: "warn",
+			});
 			return;
 		}
 		if (password !== confirm) {
-			toast.error("Passwords do not match");
+			toast.push("Passwords do not match", { type: "warn" });
 			return;
 		}
 		setSubmitting(true);
@@ -35,14 +38,18 @@ function ResetPasswordInner() {
 				{ token, newPassword: password },
 				{ baseURL: "" },
 			);
-			toast.success("Password updated. Please sign in.");
+			toast.push("Password updated. Please sign in.", {
+				type: "success",
+			});
 			router.push("/login");
 		} catch (err) {
-			toast.error(getErrorMessage(err, "Failed to reset password"));
+			toast.push(getErrorMessage(err, "Failed to reset password"), {
+				type: "warn",
+			});
 		} finally {
 			setSubmitting(false);
 		}
-	}, [token, password, confirm, router]);
+	}, [token, password, confirm, router, toast]);
 
 	return (
 		<AuthPageStyled>

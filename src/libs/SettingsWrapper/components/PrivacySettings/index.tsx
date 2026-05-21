@@ -1,12 +1,13 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { memo, useCallback, useState } from "react";
-import { toast } from "react-toastify";
 import { Box, Button, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
+import { useToast } from "@/hooks";
 import { PrivacySettingsStyled } from "./styled";
 
 function PrivacySettings() {
+	const toast = useToast();
 	const router = useRouter();
 	const [exporting, setExporting] = useState(false);
 	const [deleting, setDeleting] = useState(false);
@@ -31,27 +32,31 @@ function PrivacySettings() {
 			a.click();
 			document.body.removeChild(a);
 			URL.revokeObjectURL(url);
-			toast.success("Data exported");
+			toast.push("Data exported", { type: "success" });
 		} catch (err) {
-			toast.error(getErrorMessage(err, "Failed to export data"));
+			toast.push(getErrorMessage(err, "Failed to export data"), {
+				type: "warn",
+			});
 		} finally {
 			setExporting(false);
 		}
-	}, []);
+	}, [toast]);
 
 	const handleDelete = useCallback(async () => {
 		setDeleting(true);
 		try {
 			await api().delete("/api/users", { baseURL: "" });
 			await api().delete("/api/auth/logout", { baseURL: "" });
-			toast.success("Account scheduled for deletion");
+			toast.push("Account scheduled for deletion", { type: "success" });
 			router.push("/login");
 		} catch (err) {
-			toast.error(getErrorMessage(err, "Failed to delete account"));
+			toast.push(getErrorMessage(err, "Failed to delete account"), {
+				type: "warn",
+			});
 		} finally {
 			setDeleting(false);
 		}
-	}, [router]);
+	}, [router, toast]);
 
 	return (
 		<PrivacySettingsStyled>

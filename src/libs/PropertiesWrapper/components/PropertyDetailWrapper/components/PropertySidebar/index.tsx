@@ -2,9 +2,9 @@
 import { useRouter } from "next/navigation";
 import { memo, useCallback, useMemo, useState } from "react";
 import { FiBell, FiDownload, FiFileText, FiPlus } from "react-icons/fi";
-import { toast } from "react-toastify";
 import { Box, Button, Image, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
+import { useToast } from "@/hooks";
 import type { IPropertyUnit, ITopTenant } from "@/types";
 import { PropertySidebarStyled } from "./styled";
 
@@ -45,6 +45,7 @@ function PropertySidebar({
 	rentCollectedThisYear,
 	onAddUnit,
 }: IProps) {
+	const toast = useToast();
 	const router = useRouter();
 	const [isSendingAll, setIsSendingAll] = useState(false);
 
@@ -63,7 +64,7 @@ function PropertySidebar({
 	const handleSendReminderToAll = useCallback(async () => {
 		if (isSendingAll) return;
 		if (occupiedTenantIds.length === 0) {
-			toast.info("No occupied units to remind");
+			toast.push("No occupied units to remind");
 			return;
 		}
 		setIsSendingAll(true);
@@ -77,26 +78,30 @@ function PropertySidebar({
 				(r) => r.status === "rejected",
 			).length;
 			if (failures === 0) {
-				toast.success(
+				toast.push(
 					`Reminder sent to ${occupiedTenantIds.length} tenant${
 						occupiedTenantIds.length !== 1 ? "s" : ""
 					}`,
+					{ type: "success" },
 				);
 			} else {
-				toast.warn(
+				toast.push(
 					`Sent ${occupiedTenantIds.length - failures}/${occupiedTenantIds.length}; ${failures} failed`,
+					{ type: "warn" },
 				);
 			}
 		} catch (err) {
-			toast.error(getErrorMessage(err, "Failed to send reminders"));
+			toast.push(getErrorMessage(err, "Failed to send reminders"), {
+				type: "warn",
+			});
 		} finally {
 			setIsSendingAll(false);
 		}
-	}, [occupiedTenantIds, isSendingAll]);
+	}, [occupiedTenantIds, isSendingAll, toast]);
 
 	const handleExportReport = useCallback(() => {
 		if (units.length === 0) {
-			toast.info("No units to export");
+			toast.push("No units to export");
 			return;
 		}
 		const header = [
@@ -121,8 +126,8 @@ function PropertySidebar({
 			.replace(/[^a-z0-9]+/gi, "-")
 			.toLowerCase();
 		downloadCsv(`${safeName || "property"}-report.csv`, [header, ...body]);
-		toast.success("Property report downloaded");
-	}, [units, propertyName]);
+		toast.push("Property report downloaded", { type: "success" });
+	}, [units, propertyName, toast]);
 
 	const secondaryActions = useMemo(
 		() => [

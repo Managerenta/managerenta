@@ -1,9 +1,8 @@
 "use client";
 import { memo, useCallback, useEffect, useState } from "react";
-import { toast } from "react-toastify";
 import { Box } from "@/components";
 import { api } from "@/constants";
-import { useTenantDetail } from "@/hooks";
+import { useTenantDetail, useToast } from "@/hooks";
 import { TenantModal } from "@/layouts";
 import {
 	ContactInfo,
@@ -21,6 +20,7 @@ interface IProps {
 }
 
 function TenantDetailWrapper({ tenantId: selectedTenantId }: IProps) {
+	const toast = useToast();
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 	const [mounted, setMounted] = useState(false);
 
@@ -47,11 +47,11 @@ function TenantDetailWrapper({ tenantId: selectedTenantId }: IProps) {
 		if (!selectedTenantId) return;
 		try {
 			await api().post(`/api/tenants/${selectedTenantId}/send-reminder`);
-			toast.success("Reminder sent successfully");
+			toast.push("Reminder sent successfully", { type: "success" });
 		} catch {
-			toast.error("Failed to send reminder");
+			toast.push("Failed to send reminder", { type: "warn" });
 		}
-	}, [selectedTenantId]);
+	}, [selectedTenantId, toast]);
 
 	if (!tenantDetail) return null;
 

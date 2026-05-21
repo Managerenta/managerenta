@@ -11,10 +11,9 @@ import {
 } from "react";
 import { FaLock, FaShieldAlt, FaUser } from "react-icons/fa";
 import { GrSecure } from "react-icons/gr";
-import { toast } from "react-toastify";
 import { Box, Button, Input, Loader, Text } from "@/components";
 import { api, getErrorMessage, safeRedirect } from "@/constants";
-import { AppContextProvider } from "@/hooks";
+import { AppContextProvider, useToast } from "@/hooks";
 import AlternativeSeparator from "@/layouts/AlternativeSeparator";
 import Header from "../Header";
 import { LoginStyled } from "./styled";
@@ -60,6 +59,7 @@ function loginReducer(state: LoginState, action: LoginAction): LoginState {
 }
 
 function Login() {
+	const toast = useToast();
 	const [state, dispatch] = useReducer(loginReducer, initialState);
 	const [isLoading, setIsLoading] = useState(false);
 	const [isRedirecting, setIsRedirecting] = useState(false);
@@ -82,7 +82,7 @@ function Login() {
 		e.preventDefault();
 
 		if (!state.email || !state.password) {
-			toast.error("Please fill in all fields");
+			toast.push("Please fill in all fields", { type: "warn" });
 			return;
 		}
 
@@ -105,7 +105,9 @@ function Login() {
 
 			await completeLogin();
 		} catch (err: unknown) {
-			toast.error(getErrorMessage(err, "Invalid username or password"));
+			toast.push(getErrorMessage(err, "Invalid username or password"), {
+				type: "warn",
+			});
 			setIsLoading(false);
 		}
 	};
@@ -114,17 +116,20 @@ function Login() {
 		e.preventDefault();
 
 		if (!twoFactorTicket) {
-			toast.error("Session expired — please sign in again.");
+			toast.push("Session expired — please sign in again.", {
+				type: "warn",
+			});
 			setStep("credentials");
 			return;
 		}
 
 		const trimmed = state.code.trim();
 		if (!trimmed) {
-			toast.error(
+			toast.push(
 				state.useRecovery
 					? "Enter a recovery code"
 					: "Enter the 6-digit code from your authenticator",
+				{ type: "warn" },
 			);
 			return;
 		}
@@ -138,7 +143,7 @@ function Login() {
 			await api().post("/api/auth/login/2fa", body, { baseURL: "" });
 			await completeLogin();
 		} catch (err: unknown) {
-			toast.error(getErrorMessage(err, "Invalid code"));
+			toast.push(getErrorMessage(err, "Invalid code"), { type: "warn" });
 			setIsLoading(false);
 		}
 	};

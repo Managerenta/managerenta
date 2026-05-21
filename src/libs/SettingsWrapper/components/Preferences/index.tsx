@@ -7,17 +7,18 @@ import {
 	useMemo,
 	useState,
 } from "react";
-import { toast } from "react-toastify";
 import { Box, Text } from "@/components";
 import {
 	type Theme,
 	ThemeContextProvider,
 	useSettingsData,
+	useToast,
 	useUserPreferences,
 } from "@/hooks";
 import { PreferencesStyled } from "./styled";
 
 function Preferences() {
+	const toast = useToast();
 	const { preferences, update, isLoading: swrLoading } = useUserPreferences();
 	const { theme, setTheme } = useContext(ThemeContextProvider);
 	const [mounted, setMounted] = useState(false);
@@ -41,14 +42,15 @@ function Preferences() {
 		): Promise<void> => {
 			try {
 				await update({ [field]: value });
-				toast.success("Preference saved");
+				toast.push("Preference saved", { type: "success" });
 			} catch (err) {
-				toast.error(
+				toast.push(
 					err instanceof Error ? err.message : "Failed to save",
+					{ type: "warn" },
 				);
 			}
 		},
-		[update],
+		[update, toast],
 	);
 
 	const renderedCurrencyOptions = useMemo(

@@ -1,8 +1,8 @@
 "use client";
 import { useCallback, useMemo } from "react";
-import { toast } from "react-toastify";
 import useSWR from "swr";
 import { api, fetcher, getErrorMessage } from "@/constants";
+import { useToast } from "../useToast";
 
 export interface IOrgListItem {
 	_id: string;
@@ -23,6 +23,7 @@ interface ListResponse {
 }
 
 export default function useOrganizations() {
+	const toast = useToast();
 	const { data, mutate, isLoading } = useSWR<ListResponse>(
 		"/api/organizations",
 		fetcher,
@@ -54,18 +55,21 @@ export default function useOrganizations() {
 					organizationId,
 				});
 				await mutate();
-				toast.success(
+				toast.push(
 					organizationId
 						? "Switched organization"
 						: "Switched to personal workspace",
+					{ type: "success" },
 				);
 				return true;
 			} catch (err) {
-				toast.error(getErrorMessage(err, "Failed to switch"));
+				toast.push(getErrorMessage(err, "Failed to switch"), {
+					type: "warn",
+				});
 				return false;
 			}
 		},
-		[mutate],
+		[mutate, toast],
 	);
 
 	const create = useCallback(
@@ -77,14 +81,16 @@ export default function useOrganizations() {
 				if (payload.logo) fd.append("logo", payload.logo);
 				await api().post("/api/organizations", fd);
 				await mutate();
-				toast.success("Organization created");
+				toast.push("Organization created", { type: "success" });
 				return true;
 			} catch (err) {
-				toast.error(getErrorMessage(err, "Failed to create"));
+				toast.push(getErrorMessage(err, "Failed to create"), {
+					type: "warn",
+				});
 				return false;
 			}
 		},
-		[mutate],
+		[mutate, toast],
 	);
 
 	return {

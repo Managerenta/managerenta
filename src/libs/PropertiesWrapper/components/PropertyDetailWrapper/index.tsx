@@ -1,9 +1,8 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { memo, useCallback, useEffect, useState } from "react";
-import { toast } from "react-toastify";
 import { Box } from "@/components";
-import { usePropertyDetail } from "@/hooks";
+import { usePropertyDetail, useToast } from "@/hooks";
 import { PropertyModal } from "@/layouts";
 import type { IPropertyUnit } from "@/types";
 import {
@@ -19,6 +18,7 @@ interface IProps {
 }
 
 function PropertyDetailWrapper({ propertyId }: IProps) {
+	const toast = useToast();
 	const router = useRouter();
 	const {
 		propertyDetail,
@@ -69,7 +69,7 @@ function PropertyDetailWrapper({ propertyId }: IProps) {
 	const handleExportReport = useCallback(() => {
 		if (!propertyDetail) return;
 		if (units.length === 0) {
-			toast.info("No units to export");
+			toast.push("No units to export");
 			return;
 		}
 		const escapeCell = (cell: string) => {
@@ -112,8 +112,8 @@ function PropertyDetailWrapper({ propertyId }: IProps) {
 		a.click();
 		document.body.removeChild(a);
 		URL.revokeObjectURL(url);
-		toast.success("Report downloaded");
-	}, [propertyDetail, units]);
+		toast.push("Report downloaded", { type: "success" });
+	}, [propertyDetail, units, toast]);
 
 	if (!propertyDetail) return null;
 

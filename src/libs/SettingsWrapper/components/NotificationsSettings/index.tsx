@@ -1,9 +1,9 @@
 "use client";
 import { memo, useCallback, useEffect, useState } from "react";
-import { toast } from "react-toastify";
 import useSWR from "swr";
 import { Box, Text } from "@/components";
 import { api, fetcher, getErrorMessage } from "@/constants";
+import { useToast } from "@/hooks";
 import { NotificationsSettingsStyled } from "./styled";
 
 interface NotificationsState {
@@ -80,6 +80,7 @@ const EVENTS: { key: keyof NotificationsState; label: string; desc: string }[] =
 	];
 
 function NotificationsSettings() {
+	const toast = useToast();
 	const { data, mutate, isLoading } = useSWR<{
 		data?: { notifications?: NotificationsState };
 	}>("/api/users/user-profile", fetcher, { revalidateOnMount: true });
@@ -104,13 +105,15 @@ function NotificationsSettings() {
 				});
 				await mutate();
 			} catch (err) {
-				toast.error(getErrorMessage(err, "Failed to save"));
+				toast.push(getErrorMessage(err, "Failed to save"), {
+					type: "warn",
+				});
 				setState(state);
 			} finally {
 				setSaving(null);
 			}
 		},
-		[state, mutate],
+		[state, mutate, toast],
 	);
 
 	const Toggle = ({ k }: { k: keyof NotificationsState }) => (

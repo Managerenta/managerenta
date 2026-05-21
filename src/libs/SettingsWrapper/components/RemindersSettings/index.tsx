@@ -1,9 +1,9 @@
 "use client";
 import { memo, useCallback, useEffect, useState } from "react";
-import { toast } from "react-toastify";
 import useSWR from "swr";
 import { Box, Button, Input, Text } from "@/components";
 import { api, fetcher, getErrorMessage } from "@/constants";
+import { useToast } from "@/hooks";
 import { RemindersSettingsStyled } from "./styled";
 
 interface RemindersState {
@@ -23,6 +23,7 @@ const DEFAULTS: RemindersState = {
 };
 
 function RemindersSettings() {
+	const toast = useToast();
 	const { data, mutate, isLoading } = useSWR<{
 		data?: { reminders?: RemindersState };
 	}>("/api/users/user-profile", fetcher, { revalidateOnMount: true });
@@ -41,13 +42,15 @@ function RemindersSettings() {
 		try {
 			await api().patch("/api/users/reminders", state);
 			await mutate();
-			toast.success("Reminders saved");
+			toast.push("Reminders saved", { type: "success" });
 		} catch (err) {
-			toast.error(getErrorMessage(err, "Failed to save"));
+			toast.push(getErrorMessage(err, "Failed to save"), {
+				type: "warn",
+			});
 		} finally {
 			setSaving(false);
 		}
-	}, [state, mutate]);
+	}, [state, mutate, toast]);
 
 	const toggle = useCallback(
 		(key: "autoSendOnDueDay" | "autoSendForOverdue") =>

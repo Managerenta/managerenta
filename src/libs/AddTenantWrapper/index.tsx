@@ -3,10 +3,10 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { FiX } from "react-icons/fi";
-import { toast } from "react-toastify";
 import useSWR from "swr";
 import { Box, Button, Text } from "@/components";
 import { api, fetcher, getErrorMessage } from "@/constants";
+import { useToast } from "@/hooks";
 import { AddTenantWrapperStyled } from "./styled";
 
 interface IRawUnit {
@@ -33,6 +33,7 @@ const EMPTY_FORM = {
 };
 
 function AddTenantWrapper() {
+	const toast = useToast();
 	const router = useRouter();
 	const searchParams = useSearchParams();
 
@@ -123,7 +124,7 @@ function AddTenantWrapper() {
 
 	const handleSubmit = useCallback(async () => {
 		if (!form.unitId) {
-			toast.error("Please select a unit");
+			toast.push("Please select a unit", { type: "warn" });
 			return;
 		}
 		if (
@@ -132,7 +133,7 @@ function AddTenantWrapper() {
 			!form.email.trim() ||
 			!form.moveInDate
 		) {
-			toast.error("Please fill in all required fields");
+			toast.push("Please fill in all required fields", { type: "warn" });
 			return;
 		}
 
@@ -150,15 +151,15 @@ function AddTenantWrapper() {
 			if (avatarFile) formData.append("avatar", avatarFile);
 
 			await api().post("/api/tenants", formData);
-			toast.success("Tenant added successfully");
+			toast.push("Tenant added successfully", { type: "success" });
 			router.push("/tenants");
 			router.refresh();
 		} catch (err: unknown) {
-			toast.error(getErrorMessage(err));
+			toast.push(getErrorMessage(err), { type: "warn" });
 		} finally {
 			setIsSubmitting(false);
 		}
-	}, [form, avatarFile, router]);
+	}, [form, avatarFile, router, toast]);
 
 	return (
 		<AddTenantWrapperStyled>

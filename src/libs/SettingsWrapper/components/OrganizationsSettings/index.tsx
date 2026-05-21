@@ -1,11 +1,10 @@
 "use client";
 import { memo, useCallback, useMemo, useState } from "react";
 import { FiCheck, FiPlus, FiTrash2, FiUsers, FiX } from "react-icons/fi";
-import { toast } from "react-toastify";
 import useSWR from "swr";
 import { Box, Button, Input, Text } from "@/components";
 import { api, fetcher, getErrorMessage } from "@/constants";
-import { useOrganizations } from "@/hooks";
+import { useOrganizations, useToast } from "@/hooks";
 import { OrganizationsSettingsStyled } from "./styled";
 
 interface MemberRow {
@@ -31,6 +30,7 @@ interface MembersResponse {
 }
 
 function OrganizationsSettings() {
+	const toast = useToast();
 	const {
 		organizations,
 		currentOrganizationId,
@@ -64,7 +64,7 @@ function OrganizationsSettings() {
 
 	const handleCreate = useCallback(async () => {
 		if (!newName.trim() || !newDesc.trim()) {
-			toast.error("Name and description are required");
+			toast.push("Name and description are required", { type: "warn" });
 			return;
 		}
 		setCreating(true);
@@ -80,7 +80,7 @@ function OrganizationsSettings() {
 		} finally {
 			setCreating(false);
 		}
-	}, [newName, newDesc, create]);
+	}, [newName, newDesc, create, toast]);
 
 	const handleInvite = useCallback(async () => {
 		if (!orgIdForMembers || !inviteEmail.trim()) return;
@@ -92,13 +92,15 @@ function OrganizationsSettings() {
 			});
 			setInviteEmail("");
 			await refreshMembers();
-			toast.success("Invitation sent");
+			toast.push("Invitation sent", { type: "success" });
 		} catch (err) {
-			toast.error(getErrorMessage(err, "Failed to invite"));
+			toast.push(getErrorMessage(err, "Failed to invite"), {
+				type: "warn",
+			});
 		} finally {
 			setInviting(false);
 		}
-	}, [orgIdForMembers, inviteEmail, inviteRole, refreshMembers]);
+	}, [orgIdForMembers, inviteEmail, inviteRole, refreshMembers, toast]);
 
 	const handleRevokeInvite = useCallback(
 		async (token: string) => {
@@ -108,12 +110,14 @@ function OrganizationsSettings() {
 					`/api/organizations/${orgIdForMembers}/invites/${token}`,
 				);
 				await refreshMembers();
-				toast.success("Invitation revoked");
+				toast.push("Invitation revoked", { type: "success" });
 			} catch (err) {
-				toast.error(getErrorMessage(err, "Failed to revoke"));
+				toast.push(getErrorMessage(err, "Failed to revoke"), {
+					type: "warn",
+				});
 			}
 		},
-		[orgIdForMembers, refreshMembers],
+		[orgIdForMembers, refreshMembers, toast],
 	);
 
 	const handleRemoveMember = useCallback(
@@ -124,12 +128,14 @@ function OrganizationsSettings() {
 					`/api/organizations/${orgIdForMembers}/members/${memberId}`,
 				);
 				await refreshMembers();
-				toast.success("Member removed");
+				toast.push("Member removed", { type: "success" });
 			} catch (err) {
-				toast.error(getErrorMessage(err, "Failed to remove member"));
+				toast.push(getErrorMessage(err, "Failed to remove member"), {
+					type: "warn",
+				});
 			}
 		},
-		[orgIdForMembers, refreshMembers],
+		[orgIdForMembers, refreshMembers, toast],
 	);
 
 	const handleRoleChange = useCallback(
@@ -141,12 +147,14 @@ function OrganizationsSettings() {
 					{ role: next },
 				);
 				await refreshMembers();
-				toast.success("Role updated");
+				toast.push("Role updated", { type: "success" });
 			} catch (err) {
-				toast.error(getErrorMessage(err, "Failed to update role"));
+				toast.push(getErrorMessage(err, "Failed to update role"), {
+					type: "warn",
+				});
 			}
 		},
-		[orgIdForMembers, refreshMembers],
+		[orgIdForMembers, refreshMembers, toast],
 	);
 
 	const isAdmin = role === "admin" || !currentOrganizationId;

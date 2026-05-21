@@ -1,9 +1,9 @@
 "use client";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { toast } from "react-toastify";
 import useSWR from "swr";
 import { Box, Button, Input, Text } from "@/components";
 import { api, fetcher, getErrorMessage } from "@/constants";
+import { useToast } from "@/hooks";
 import { SecurityStyled } from "./styled";
 
 function getStrengthInfo(password: string): {
@@ -30,6 +30,7 @@ function getStrengthInfo(password: string): {
 }
 
 function Security() {
+	const toast = useToast();
 	const [currentPassword, setCurrentPassword] = useState("");
 	const [newPassword, setNewPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
@@ -75,15 +76,17 @@ function Security() {
 
 	const handleUpdatePassword = useCallback(async () => {
 		if (!currentPassword || !newPassword || !confirmPassword) {
-			toast.error("Please fill in all password fields");
+			toast.push("Please fill in all password fields", { type: "warn" });
 			return;
 		}
 		if (newPassword !== confirmPassword) {
-			toast.error("New passwords do not match");
+			toast.push("New passwords do not match", { type: "warn" });
 			return;
 		}
 		if (newPassword.length < 6) {
-			toast.error("New password must be at least 6 characters");
+			toast.push("New password must be at least 6 characters", {
+				type: "warn",
+			});
 			return;
 		}
 		setIsUpdating(true);
@@ -92,16 +95,18 @@ function Security() {
 				currentPassword,
 				newPassword,
 			});
-			toast.success("Password updated successfully");
+			toast.push("Password updated successfully", { type: "success" });
 			setCurrentPassword("");
 			setNewPassword("");
 			setConfirmPassword("");
 		} catch (err) {
-			toast.error(getErrorMessage(err, "Failed to update password"));
+			toast.push(getErrorMessage(err, "Failed to update password"), {
+				type: "warn",
+			});
 		} finally {
 			setIsUpdating(false);
 		}
-	}, [currentPassword, newPassword, confirmPassword]);
+	}, [currentPassword, newPassword, confirmPassword, toast]);
 
 	const startSetup = useCallback(async () => {
 		setSetupLoading(true);
@@ -114,15 +119,19 @@ function Security() {
 			setSetupSecret(res.data?.data?.secret ?? null);
 			setSetupUri(res.data?.data?.otpauthUrl ?? null);
 		} catch (err) {
-			toast.error(getErrorMessage(err, "Failed to start 2FA setup"));
+			toast.push(getErrorMessage(err, "Failed to start 2FA setup"), {
+				type: "warn",
+			});
 		} finally {
 			setSetupLoading(false);
 		}
-	}, []);
+	}, [toast]);
 
 	const confirmEnable = useCallback(async () => {
 		if (totpCode.length !== 6) {
-			toast.error("Enter the 6-digit code from your authenticator");
+			toast.push("Enter the 6-digit code from your authenticator", {
+				type: "warn",
+			});
 			return;
 		}
 		setEnableLoading(true);
@@ -137,17 +146,19 @@ function Security() {
 			setSetupUri(null);
 			setTotpCode("");
 			await mutate();
-			toast.success("Two-factor authentication enabled");
+			toast.push("Two-factor authentication enabled", {
+				type: "success",
+			});
 		} catch (err) {
-			toast.error(getErrorMessage(err, "Invalid code"));
+			toast.push(getErrorMessage(err, "Invalid code"), { type: "warn" });
 		} finally {
 			setEnableLoading(false);
 		}
-	}, [totpCode, mutate]);
+	}, [totpCode, mutate, toast]);
 
 	const handleDisable = useCallback(async () => {
 		if (!disablePassword) {
-			toast.error("Enter your password to disable 2FA");
+			toast.push("Enter your password to disable 2FA", { type: "warn" });
 			return;
 		}
 		setDisableLoading(true);
@@ -159,13 +170,17 @@ function Security() {
 			);
 			await mutate();
 			setDisablePassword("");
-			toast.success("Two-factor authentication disabled");
+			toast.push("Two-factor authentication disabled", {
+				type: "success",
+			});
 		} catch (err) {
-			toast.error(getErrorMessage(err, "Failed to disable 2FA"));
+			toast.push(getErrorMessage(err, "Failed to disable 2FA"), {
+				type: "warn",
+			});
 		} finally {
 			setDisableLoading(false);
 		}
-	}, [disablePassword, mutate]);
+	}, [disablePassword, mutate, toast]);
 
 	// Reset recovery codes view after a navigation away
 	useEffect(() => () => setRecoveryCodes(null), []);

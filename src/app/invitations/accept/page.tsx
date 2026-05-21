@@ -2,12 +2,13 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useMemo, useState } from "react";
-import { toast } from "react-toastify";
 import { Box, Button, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
+import { useToast } from "@/hooks";
 import { AuthPageStyled } from "../../(auth-pages)/styled";
 
 function AcceptInviteInner() {
+	const toast = useToast();
 	const router = useRouter();
 	const search = useSearchParams();
 	const token = search.get("token") ?? "";
@@ -24,7 +25,7 @@ function AcceptInviteInner() {
 
 	const submit = useCallback(async () => {
 		if (!token) {
-			toast.error("Missing invitation token");
+			toast.push("Missing invitation token", { type: "warn" });
 			return;
 		}
 		setSubmitting(true);
@@ -34,16 +35,19 @@ function AcceptInviteInner() {
 				{ token },
 				{ baseURL: "" },
 			);
-			toast.success(
+			toast.push(
 				`Joined ${res.data?.data?.name ?? "organization"} — switching workspace`,
+				{ type: "success" },
 			);
 			router.push("/dashboard");
 		} catch (err) {
-			toast.error(getErrorMessage(err, "Could not accept invitation"));
+			toast.push(getErrorMessage(err, "Could not accept invitation"), {
+				type: "warn",
+			});
 		} finally {
 			setSubmitting(false);
 		}
-	}, [token, router]);
+	}, [token, router, toast]);
 
 	return (
 		<AuthPageStyled>

@@ -2,10 +2,9 @@
 import { useRouter } from "next/navigation";
 import { memo, useCallback, useMemo, useState } from "react";
 import { FiBell, FiDownload, FiFileText, FiPlus } from "react-icons/fi";
-import { toast } from "react-toastify";
 import { Box, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
-import { useDashboardData } from "@/hooks";
+import { useDashboardData, useToast } from "@/hooks";
 import { QuickActionsStyled } from "./styled";
 
 function downloadCsv(filename: string, rows: string[][]) {
@@ -29,6 +28,7 @@ function downloadCsv(filename: string, rows: string[][]) {
 }
 
 function QuickActions() {
+	const toast = useToast();
 	const router = useRouter();
 	const { dueToday, overdue, transactions } = useDashboardData();
 	const [isSendingReminders, setIsSendingReminders] = useState(false);
@@ -50,7 +50,7 @@ function QuickActions() {
 			]),
 		);
 		if (tenantIds.length === 0) {
-			toast.info("No tenants need reminders right now");
+			toast.push("No tenants need reminders right now");
 			return;
 		}
 		setIsSendingReminders(true);
@@ -64,24 +64,28 @@ function QuickActions() {
 				(r) => r.status === "rejected",
 			).length;
 			if (failures === 0) {
-				toast.success(
+				toast.push(
 					`Reminder sent to ${tenantIds.length} tenant${tenantIds.length !== 1 ? "s" : ""}`,
+					{ type: "success" },
 				);
 			} else {
-				toast.warn(
+				toast.push(
 					`Sent ${tenantIds.length - failures}/${tenantIds.length}; ${failures} failed`,
+					{ type: "warn" },
 				);
 			}
 		} catch (err) {
-			toast.error(getErrorMessage(err, "Failed to send reminders"));
+			toast.push(getErrorMessage(err, "Failed to send reminders"), {
+				type: "warn",
+			});
 		} finally {
 			setIsSendingReminders(false);
 		}
-	}, [dueToday, overdue, isSendingReminders]);
+	}, [dueToday, overdue, isSendingReminders, toast]);
 
 	const handleExportReport = useCallback(() => {
 		if (transactions.length === 0) {
-			toast.info("No recent transactions to export");
+			toast.push("No recent transactions to export");
 			return;
 		}
 		const header = ["Date", "Tenant", "Unit", "Amount", "Direction"];
@@ -94,8 +98,8 @@ function QuickActions() {
 		]);
 		const today = new Date().toISOString().split("T")[0];
 		downloadCsv(`dashboard-transactions-${today}.csv`, [header, ...body]);
-		toast.success("Report downloaded");
-	}, [transactions]);
+		toast.push("Report downloaded", { type: "success" });
+	}, [transactions, toast]);
 
 	const actions = useMemo(
 		() => [
