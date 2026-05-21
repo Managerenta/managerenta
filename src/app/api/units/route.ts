@@ -15,7 +15,7 @@ export const GET = withApiHandler(
 			if (!query.success) throw ErrInvalidFields;
 
 			const result = await getVacantUnits({
-				userId: auth.userId,
+				userId: auth.effectiveOwnerId,
 				status: query.data.status,
 				limit: query.data.limit,
 			});

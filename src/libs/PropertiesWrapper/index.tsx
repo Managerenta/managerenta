@@ -4,7 +4,6 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Box } from "@/components";
 import { usePropertiesData } from "@/hooks";
 import { Pagination, PropertyModal } from "@/layouts";
-import type { IPropertyList } from "@/types";
 import {
 	PropertiesFilter,
 	PropertiesGrid,
@@ -20,7 +19,7 @@ function PropertiesWrapper() {
 	const [mounted, setMounted] = useState(false);
 	const [search, setSearch] = useState("");
 	const [filterType, setFilterType] = useState("all");
-	const [sortBy, setSortBy] = useState("name");
+	const [sortBy, setSortBy] = useState<string>("name");
 	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
 	const handleViewModeChange = useCallback((mode: "grid" | "list") => {
@@ -32,6 +31,9 @@ function PropertiesWrapper() {
 	const { properties, stats, isLoading, mutate, total } = usePropertiesData(
 		pageSize,
 		offset,
+		search,
+		filterType,
+		sortBy,
 	);
 
 	const openModal = useCallback(() => setIsModalOpen(true), []);
@@ -46,57 +48,18 @@ function PropertiesWrapper() {
 		setSearch(value);
 		setOffset(0);
 	}, []);
-
 	const handleFilterChange = useCallback((value: string) => {
 		setFilterType(value);
 		setOffset(0);
 	}, []);
-
 	const handleSortChange = useCallback((value: string) => {
 		setSortBy(value);
 		setOffset(0);
 	}, []);
 
-	const filteredProperties = useMemo<IPropertyList[]>(() => {
-		let result = properties;
-
-		if (filterType !== "all") {
-			result = result.filter(
-				(p) => p.type.toLowerCase() === filterType.toLowerCase(),
-			);
-		}
-
-		if (search.trim()) {
-			const q = search.trim().toLowerCase();
-			result = result.filter(
-				(p) =>
-					p.name.toLowerCase().includes(q) ||
-					p.address.toLowerCase().includes(q),
-			);
-		}
-
-		result = [...result].sort((a, b) => {
-			switch (sortBy) {
-				case "occupancy":
-					return (
-						b.occupied / b.totalUnits - a.occupied / a.totalUnits
-					);
-				case "revenue":
-					return b.occupied - a.occupied;
-				case "units":
-					return b.totalUnits - a.totalUnits;
-				default:
-					return a.name.localeCompare(b.name);
-			}
-		});
-
-		return result;
-	}, [properties, search, filterType, sortBy]);
-
-	const filteredTotal = filteredProperties.length;
 	const totalPages = useMemo<number>(() => {
-		return Math.ceil((filteredTotal || 1) / pageSize);
-	}, [filteredTotal, pageSize]);
+		return Math.ceil((total || 1) / pageSize);
+	}, [total, pageSize]);
 
 	return (
 		<PropertiesWrapperStyled>
@@ -124,7 +87,7 @@ function PropertiesWrapper() {
 				onViewModeChange={handleViewModeChange}
 			/>
 			<PropertiesGrid
-				properties={filteredProperties}
+				properties={properties}
 				isLoading={isLoading}
 				viewMode={viewMode}
 			/>
@@ -153,12 +116,8 @@ function PropertiesWrapper() {
 				/>
 
 				<Box className="showing-info">
-					Showing {Math.min(offset + 1, filteredTotal)}-
-					{Math.min(offset + pageSize, filteredTotal)} of{" "}
-					{filteredTotal}{" "}
-					{filteredTotal !== total
-						? `(filtered from ${total})`
-						: "properties"}
+					Showing {Math.min(offset + 1, total)}-
+					{Math.min(offset + pageSize, total)} of {total} properties
 				</Box>
 			</Box>
 		</PropertiesWrapperStyled>

@@ -167,6 +167,72 @@ async function getUrgentActions(userId: string): Promise<{
 	return { dueToday, overdue };
 }
 
+async function getMonthlyCollection(userId: string): Promise<{
+	monthlyCollected: number;
+	monthlyExpected: number;
+}> {
+	const Tenant = mongoose.models.tenants;
+	const Unit = mongoose.models.units;
+	const Transaction = mongoose.models.transactions;
+
+	if (!Tenant || !Unit || !Transaction) {
+		return { monthlyCollected: 0, monthlyExpected: 0 };
+	}
+
+	const now = new Date();
+	const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+	const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+	const activeTenants = await Tenant.find({
+		userId,
+		deleted: false,
+		status: "Active",
+	}).lean();
+
+	const unitOids = (activeTenants as any[])
+		.map((t) => toObjectIdSafe(t.unitId))
+		.filter((x): x is mongoose.Types.ObjectId => x !== null);
+	const units = await Unit.find({ _id: { $in: unitOids } }).lean();
+	const monthlyExpected = (units as any[]).reduce(
+		(sum, u) => sum + (u.rent ?? 0),
+		0,
+	);
+
+	const rentCredits = (await Transaction.find({
+		userId,
+		type: "rent",
+		amountType: "credit",
+	}).lean()) as any[];
+
+	const monthlyCollected = rentCredits.reduce((sum, c) => {
+		// Period-aware: count the portion of the credit that covers the current month
+		if (c.periodStart && c.periodEnd) {
+			const s = new Date(c.periodStart);
+			const e = new Date(c.periodEnd);
+			if (e < monthStart || s > monthEnd) return sum;
+			// Pro-rate: amount per month over the period
+			const months = Math.max(
+				1,
+				(e.getFullYear() - s.getFullYear()) * 12 +
+					(e.getMonth() - s.getMonth()) +
+					1,
+			);
+			return sum + (c.amount ?? 0) / months;
+		}
+		// Legacy: by transaction date
+		const txDate = new Date(c.date);
+		if (txDate >= monthStart && txDate <= monthEnd) {
+			return sum + (c.amount ?? 0);
+		}
+		return sum;
+	}, 0);
+
+	return {
+		monthlyCollected: Math.round(monthlyCollected),
+		monthlyExpected,
+	};
+}
+
 async function getRecentTransactions(
 	userId: string,
 ): Promise<RecentTransaction[]> {
@@ -235,12 +301,14 @@ export default async function getDashboardStats({
 		tenantStats,
 		urgentActions,
 		recentTransactions,
+		monthlyCollection,
 	] = await Promise.all([
 		getPropertyStatsDB({ userId }),
 		getUnitStatsDB({ userId }),
 		getTenantStatsDB({ userId }),
 		getUrgentActions(userId),
 		getRecentTransactions(userId),
+		getMonthlyCollection(userId),
 	]);
 
 	const result = {
@@ -250,6 +318,9 @@ export default async function getDashboardStats({
 		vacantUnits: unitStats.vacantUnits,
 		totalMonthlyRevenue: propertyStats.totalMonthlyRent,
 		totalTenants: tenantStats.totalTenants,
+		monthlyCollected: monthlyCollection.monthlyCollected,
+		monthlyExpected: monthlyCollection.monthlyExpected,
+		dueTodayCount: urgentActions.dueToday.length,
 		urgentActions,
 		recentTransactions,
 	};

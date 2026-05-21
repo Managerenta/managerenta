@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { ErrInvalidAction, ErrInvalidFields } from "@/server/constants";
 import {
+	assertWriteRole,
 	created,
 	handleError,
 	parseMultipart,
@@ -21,13 +22,14 @@ export const POST = withApiHandler(
 	{ route: "/api/properties" },
 	withAuth(async ({ req, auth }) => {
 		try {
+			assertWriteRole(auth);
 			const parsed = await parseMultipart(req as NextRequest);
 			const body = createPropertyBodySchema.safeParse(parsed.fields);
 			if (!body.success) throw ErrInvalidFields;
 
 			const image = singleFileBuffer(parsed, "image");
 			const result = await createProperty({
-				payload: { ...body.data, image, userId: auth.userId },
+				payload: { ...body.data, image, userId: auth.effectiveOwnerId },
 			});
 			if (!result) throw ErrInvalidAction;
 
@@ -48,9 +50,12 @@ export const GET = withApiHandler(
 			if (!query.success) throw ErrInvalidFields;
 
 			const result = await getProperties({
-				userId: auth.userId,
+				userId: auth.effectiveOwnerId,
 				limit: query.data.limit,
 				offset: query.data.offset,
+				search: query.data.search,
+				type: query.data.type,
+				sort: query.data.sort,
 			});
 			return NextResponse.json(
 				{

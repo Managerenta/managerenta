@@ -1,85 +1,160 @@
 "use client";
-import { memo, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { memo, useCallback, useMemo, useState } from "react";
 import { FiBell, FiDownload, FiFileText, FiPlus } from "react-icons/fi";
+import { toast } from "react-toastify";
 import { Box, Button, Image, Text } from "@/components";
-import type { ITopTenant } from "@/types";
+import { api, getErrorMessage } from "@/constants";
+import type { IPropertyUnit, ITopTenant } from "@/types";
 import { PropertySidebarStyled } from "./styled";
 
 interface IProps {
+	propertyName: string;
+	units: IPropertyUnit[];
 	topTenants: ITopTenant[];
 	averageVacancyDays: string;
 	rentCollectedThisYear: string;
+	onAddUnit: () => void;
 }
 
-interface QuickActionItem {
-	id: string;
-	label: string;
-	icon: React.ReactNode;
+function downloadCsv(filename: string, rows: string[][]) {
+	const escapeCell = (cell: string) => {
+		const needs = /[",\n]/.test(cell);
+		const out = cell.replace(/"/g, '""');
+		return needs ? `"${out}"` : out;
+	};
+	const csv = rows.map((r) => r.map(escapeCell).join(",")).join("\n");
+	const blob = new Blob([`﻿${csv}`], {
+		type: "text/csv;charset=utf-8;",
+	});
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement("a");
+	a.href = url;
+	a.download = filename;
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+	URL.revokeObjectURL(url);
 }
 
 function PropertySidebar({
+	propertyName,
+	units,
 	topTenants,
 	averageVacancyDays,
 	rentCollectedThisYear,
+	onAddUnit,
 }: IProps) {
-	const quickActions = useMemo((): QuickActionItem[] => {
-		return [
-			{ id: "qa-001", label: "Add New Unit", icon: <FiPlus size={16} /> },
+	const router = useRouter();
+	const [isSendingAll, setIsSendingAll] = useState(false);
+
+	const occupiedTenantIds = useMemo(
+		() =>
+			units
+				.filter((u) => u.status === "Occupied" && u.tenantId)
+				.map((u) => u.tenantId as string),
+		[units],
+	);
+
+	const handleViewTransactions = useCallback(() => {
+		router.push("/tenants");
+	}, [router]);
+
+	const handleSendReminderToAll = useCallback(async () => {
+		if (isSendingAll) return;
+		if (occupiedTenantIds.length === 0) {
+			toast.info("No occupied units to remind");
+			return;
+		}
+		setIsSendingAll(true);
+		try {
+			const results = await Promise.allSettled(
+				occupiedTenantIds.map((id) =>
+					api().post(`/api/tenants/${id}/send-reminder`),
+				),
+			);
+			const failures = results.filter(
+				(r) => r.status === "rejected",
+			).length;
+			if (failures === 0) {
+				toast.success(
+					`Reminder sent to ${occupiedTenantIds.length} tenant${
+						occupiedTenantIds.length !== 1 ? "s" : ""
+					}`,
+				);
+			} else {
+				toast.warn(
+					`Sent ${occupiedTenantIds.length - failures}/${occupiedTenantIds.length}; ${failures} failed`,
+				);
+			}
+		} catch (err) {
+			toast.error(getErrorMessage(err, "Failed to send reminders"));
+		} finally {
+			setIsSendingAll(false);
+		}
+	}, [occupiedTenantIds, isSendingAll]);
+
+	const handleExportReport = useCallback(() => {
+		if (units.length === 0) {
+			toast.info("No units to export");
+			return;
+		}
+		const header = [
+			"Unit",
+			"Status",
+			"Tenant",
+			"Monthly Rent",
+			"Payment Status",
+			"Due Date",
+			"Vacant Days",
+		];
+		const body = units.map((u) => [
+			u.name,
+			u.status,
+			u.tenantName ?? "",
+			u.rent,
+			u.paymentStatus ?? "",
+			u.dueDate ?? "",
+			u.vacantDays !== undefined ? String(u.vacantDays) : "",
+		]);
+		const safeName = propertyName
+			.replace(/[^a-z0-9]+/gi, "-")
+			.toLowerCase();
+		downloadCsv(`${safeName || "property"}-report.csv`, [header, ...body]);
+		toast.success("Property report downloaded");
+	}, [units, propertyName]);
+
+	const secondaryActions = useMemo(
+		() => [
 			{
 				id: "qa-002",
 				label: "View All Transactions",
 				icon: <FiFileText size={16} />,
+				onClick: handleViewTransactions,
+				disabled: false,
 			},
 			{
 				id: "qa-003",
-				label: "Send Reminder to All",
+				label: isSendingAll ? "Sending..." : "Send Reminder to All",
 				icon: <FiBell size={16} />,
+				onClick: handleSendReminderToAll,
+				disabled: isSendingAll,
 			},
 			{
 				id: "qa-004",
 				label: "Export Property Report",
 				icon: <FiDownload size={16} />,
+				onClick: handleExportReport,
+				disabled: false,
 			},
-		];
-	}, []);
-
-	const renderedQuickActions = useMemo(() => {
-		return quickActions.map(({ id, label, icon }) => {
-			if (id === "qa-001") {
-				return (
-					<Box key={id} className="add-unit-action">
-						<Button
-							type="button"
-							title={
-								<Box
-									style={{
-										display: "flex",
-										alignItems: "center",
-										gap: "8px",
-										justifyContent: "center",
-									}}
-								>
-									{icon}
-									<span>{label}</span>
-								</Box>
-							}
-							background="var(--Main-Blue)"
-							color="white"
-							borderRadius="8px"
-							width="100%"
-						/>
-					</Box>
-				);
-			}
-
-			return (
-				<Box key={id} className="action-item">
-					<Box className="action-icon">{icon}</Box>
-					<Text className="action-label">{label}</Text>
-				</Box>
-			);
-		});
-	}, [quickActions]);
+		],
+		[
+			handleViewTransactions,
+			handleSendReminderToAll,
+			handleExportReport,
+			isSendingAll,
+		],
+	);
 
 	const renderedTopTenants = useMemo(() => {
 		if (topTenants.length === 0)
@@ -115,18 +190,53 @@ function PropertySidebar({
 		<PropertySidebarStyled>
 			<Box className="quick-actions-card">
 				<Text className="card-title">Quick Actions</Text>
-				<Box className="actions-list">{renderedQuickActions}</Box>
+				<Box className="actions-list">
+					<Box className="add-unit-action">
+						<Button
+							type="button"
+							title={
+								<Box
+									style={{
+										display: "flex",
+										alignItems: "center",
+										gap: "8px",
+										justifyContent: "center",
+									}}
+								>
+									<FiPlus size={16} />
+									<span>Add New Unit</span>
+								</Box>
+							}
+							background="var(--Main-Blue)"
+							color="white"
+							borderRadius="8px"
+							width="100%"
+							handleClick={onAddUnit}
+						/>
+					</Box>
+					{secondaryActions.map(
+						({ id, label, icon, onClick, disabled }) => (
+							<Box
+								key={id}
+								className="action-item"
+								onClick={disabled ? undefined : onClick}
+								style={{
+									cursor: disabled
+										? "not-allowed"
+										: "pointer",
+									opacity: disabled ? 0.6 : 1,
+								}}
+							>
+								<Box className="action-icon">{icon}</Box>
+								<Text className="action-label">{label}</Text>
+							</Box>
+						),
+					)}
+				</Box>
 			</Box>
 
 			<Box className="statistics-card">
 				<Text className="card-title">Property Statistics</Text>
-
-				{/* <Box className="stat-section">
-					<Text className="stat-subtitle">
-						Occupancy Trend (Last 6 Months)
-					</Text>
-					<Box className="chart-placeholder" />
-				</Box> */}
 
 				<Box className="stat-row">
 					<Text className="stat-label">Average Vacancy Duration</Text>

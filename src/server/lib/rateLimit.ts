@@ -4,6 +4,10 @@ import { DB_NAME, isOriginAllowed } from "../constants";
 import { Redis } from "../databases";
 import { getClientIp } from "./clientIp";
 
+const RATE_LIMIT_DISABLED =
+	process.env.DISABLE_RATE_LIMIT === "1" ||
+	process.env.DISABLE_RATE_LIMIT === "true";
+
 interface RateLimitOptions {
 	windowMs: number;
 	maxRequests: number;
@@ -24,6 +28,14 @@ export async function enforceRateLimit(
 	req: NextRequest | Request,
 	options: RateLimitOptions,
 ): Promise<RateLimitResult> {
+	if (RATE_LIMIT_DISABLED) {
+		return {
+			allowed: true,
+			limit: options.maxRequests,
+			remaining: options.maxRequests,
+		};
+	}
+
 	const { windowMs, keyGenerator } = options;
 	let maxRequests = options.maxRequests;
 

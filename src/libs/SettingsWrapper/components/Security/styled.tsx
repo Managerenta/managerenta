@@ -155,7 +155,51 @@ export const SecurityStyled = styled(Box)`
 			padding: 8px 20px;
 			font-size: 13px;
 			font-weight: 500;
-			border: 1px solid var(--Border-Subtle);
+		}
+
+		.setup-card {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+			padding: 12px;
+			background: var(--Surface-Page);
+			border-radius: 10px;
+		}
+
+		.setup-step {
+			font-size: 13px;
+			color: var(--Black);
+		}
+
+		.setup-secret {
+			font-family: monospace;
+			font-size: 13px;
+			padding: 6px 10px;
+			background: var(--Surface-Card);
+			border-radius: 6px;
+			word-break: break-all;
+			align-self: flex-start;
+		}
+
+		.setup-link {
+			color: var(--Main-Blue);
+			font-size: 12px;
+			text-decoration: underline;
+		}
+
+		.recovery-list {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 6px;
+
+			code {
+				font-family: monospace;
+				font-size: 12px;
+				padding: 4px 6px;
+				background: var(--Surface-Card);
+				border-radius: 4px;
+				text-align: center;
+			}
 		}
 	}
 

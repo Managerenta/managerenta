@@ -2,8 +2,12 @@
 import { memo } from "react";
 import { useSettingsNavigation } from "@/hooks";
 import {
+	NotificationsSettings,
+	OrganizationsSettings,
 	Preferences,
+	PrivacySettings,
 	ProfileInformation,
+	RemindersSettings,
 	Security,
 	SettingsFooter,
 	SettingsHeader,
@@ -25,9 +29,10 @@ function SettingsWrapper() {
 				</>
 			)}
 
-			{activeTab === "notifications" && null}
-			{activeTab === "reminders" && null}
-			{activeTab === "privacy" && null}
+			{activeTab === "organizations" && <OrganizationsSettings />}
+			{activeTab === "notifications" && <NotificationsSettings />}
+			{activeTab === "reminders" && <RemindersSettings />}
+			{activeTab === "privacy" && <PrivacySettings />}
 
 			<SettingsFooter />
 		</SettingsWrapperStyled>

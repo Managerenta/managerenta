@@ -54,8 +54,20 @@ function computeTypeBadgeColor(type: string): string {
 	return map[type] ?? "#64748b";
 }
 
-export default function usePropertiesData(limit = 20, offset = 0) {
-	const url = `/api/properties?limit=${limit}&offset=${offset}`;
+export default function usePropertiesData(
+	limit = 20,
+	offset = 0,
+	search?: string,
+	type?: string,
+	sort?: string,
+) {
+	const params = new URLSearchParams();
+	params.set("limit", String(limit));
+	params.set("offset", String(offset));
+	if (search?.trim()) params.set("search", search.trim());
+	if (type && type !== "all") params.set("type", type);
+	if (sort) params.set("sort", sort);
+	const url = `/api/properties?${params.toString()}`;
 
 	const {
 		data: rawResponse,

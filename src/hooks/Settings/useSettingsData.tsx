@@ -1,6 +1,6 @@
 "use client";
 import { useMemo } from "react";
-import { FiBell, FiClock, FiShield, FiUser } from "react-icons/fi";
+import { FiBell, FiBriefcase, FiClock, FiShield, FiUser } from "react-icons/fi";
 import type {
 	ILanguageOption,
 	ISettingsTab,
@@ -16,6 +16,12 @@ export default function useSettingsData() {
 				label: "Account",
 				value: "account",
 				icon: <FiUser size={16} />,
+			},
+			{
+				id: "tab-005",
+				label: "Organizations",
+				value: "organizations",
+				icon: <FiBriefcase size={16} />,
 			},
 			{
 				id: "tab-002",

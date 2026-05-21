@@ -11,7 +11,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { Box } from "../../../../components";
-import { AppContextProvider, useDragZone } from "../../../../hooks";
+import { AppContextProvider } from "../../../../hooks";
 import { Header } from "./components";
 import { ModalStyled } from "./styled";
 
@@ -42,7 +42,6 @@ function Modal({
 }: IProps) {
 	const { navHeight, isBrowser } = useContext(AppContextProvider);
 	const modalRef = useRef<HTMLDivElement>(null);
-	const { clearPreviousFiles } = useDragZone();
 
 	const handleClickOutside = useCallback(
 		(event: MouseEvent) => {
@@ -54,8 +53,6 @@ function Modal({
 		},
 		[close],
 	);
-
-	useEffect(() => clearPreviousFiles(), [clearPreviousFiles]);
 
 	useEffect(() => {
 		if (!autoCloseOnClickOutside || !isBrowser) return;

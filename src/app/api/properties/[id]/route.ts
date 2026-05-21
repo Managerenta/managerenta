@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { ErrInvalidFields, ErrPropertyNotFound } from "@/server/constants";
 import {
+	assertWriteRole,
 	handleError,
 	ok,
 	parseMultipart,
@@ -29,7 +30,7 @@ export const GET = withApiHandler<RouteContext>(
 
 			const result = await getPropertyById({
 				id: params.data.id,
-				userId: auth.userId,
+				userId: auth.effectiveOwnerId,
 			});
 			if (!result) throw ErrPropertyNotFound;
 			return ok(result);
@@ -43,6 +44,7 @@ export const PATCH = withApiHandler<RouteContext>(
 	{ route: "/api/properties/[id]" },
 	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
+			assertWriteRole(auth);
 			const { id } = await context.params;
 			const params = updatePropertyParamsSchema.safeParse({ id });
 			if (!params.success) throw ErrInvalidFields;
@@ -54,7 +56,7 @@ export const PATCH = withApiHandler<RouteContext>(
 			const image = singleFileBuffer(parsed, "image");
 			const result = await updateProperty({
 				id: params.data.id,
-				userId: auth.userId,
+				userId: auth.effectiveOwnerId,
 				payload: { ...body.data, image },
 			});
 			if (!result) throw ErrPropertyNotFound;

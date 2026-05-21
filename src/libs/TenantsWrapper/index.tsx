@@ -8,7 +8,7 @@ import { TenantsWrapperStyled } from "./styled";
 
 function TenantsWrapper() {
 	const [offset, setOffset] = useState<number>(0);
-	const [pageSize] = useState<number>(12);
+	const [pageSize, setPageSize] = useState<number>(12);
 	const [search, setSearch] = useState("");
 	const [filterStatus, setFilterStatus] = useState("all");
 	const [sortBy, setSortBy] = useState("name");
@@ -82,7 +82,13 @@ function TenantsWrapper() {
 			<Box className="pagination-footer">
 				<Box className="items-per-page">
 					<span>Items per page:</span>
-					<select defaultValue={pageSize}>
+					<select
+						value={pageSize}
+						onChange={(e) => {
+							setPageSize(Number(e.target.value));
+							setOffset(0);
+						}}
+					>
 						<option value={6}>6</option>
 						<option value={12}>12</option>
 						<option value={24}>24</option>

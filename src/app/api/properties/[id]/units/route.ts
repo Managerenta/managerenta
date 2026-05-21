@@ -1,5 +1,11 @@
 import { ErrInvalidFields, ErrUnitNotFound } from "@/server/constants";
-import { created, handleError, withApiHandler, withAuth } from "@/server/lib";
+import {
+	assertWriteRole,
+	created,
+	handleError,
+	withApiHandler,
+	withAuth,
+} from "@/server/lib";
 import { addUnit } from "@/server/services";
 import {
 	addUnitBodySchema,
@@ -14,6 +20,7 @@ export const POST = withApiHandler<RouteContext>(
 	{ route: "/api/properties/[id]/units" },
 	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
+			assertWriteRole(auth);
 			const { id } = await context.params;
 			const params = addUnitParamsSchema.safeParse({ propertyId: id });
 			if (!params.success) throw ErrInvalidFields;
@@ -31,7 +38,7 @@ export const POST = withApiHandler<RouteContext>(
 				name: body.data.name,
 				rent: body.data.rent,
 				propertyId: params.data.propertyId,
-				userId: auth.userId,
+				userId: auth.effectiveOwnerId,
 			});
 			if (!result) throw ErrUnitNotFound;
 			return created(result, "Unit added");

@@ -1,17 +1,25 @@
 "use client";
-import { memo, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { memo, useCallback, useMemo } from "react";
+import { toast } from "react-toastify";
 import { Box, Text } from "@/components";
 import type { IPropertyDetail } from "@/types";
 import { PropertyOverviewStyled } from "./styled";
 
 interface IProps {
 	propertyDetail: IPropertyDetail;
+	onExport: () => void;
 }
 
-function PropertyOverview({ propertyDetail }: IProps) {
+function PropertyOverview({ propertyDetail, onExport }: IProps) {
+	const router = useRouter();
 	const { occupancyRate, monthlyRentTotal, dateAdded } = propertyDetail;
-
 	const percentage = useMemo<number>(() => occupancyRate, [occupancyRate]);
+
+	const handleViewTransactions = useCallback(() => {
+		router.push("/tenants");
+		toast.info(`Showing tenants in ${propertyDetail.name}`);
+	}, [router, propertyDetail.name]);
 
 	return (
 		<PropertyOverviewStyled>
@@ -40,8 +48,12 @@ function PropertyOverview({ propertyDetail }: IProps) {
 
 			<Box className="quick-actions-section">
 				<Text className="section-title">Quick Actions</Text>
-				<Text className="action-link">View All Transactions</Text>
-				<Text className="action-link">Export Property Report</Text>
+				<Text className="action-link" onClick={handleViewTransactions}>
+					View All Transactions
+				</Text>
+				<Text className="action-link" onClick={onExport}>
+					Export Property Report
+				</Text>
 			</Box>
 		</PropertyOverviewStyled>
 	);

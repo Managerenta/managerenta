@@ -101,29 +101,60 @@ export async function getPropertiesDB({
 	userId,
 	limit = 20,
 	offset = 0,
+	search,
+	type,
+	sort,
 	session,
 }: {
 	userId: string;
 	limit?: number;
 	offset?: number;
+	search?: string;
+	type?: string;
+	sort?: "name" | "occupancy" | "revenue" | "units" | "createdAt";
 	session?: ClientSession;
 }): Promise<{ properties: IProperty[]; total: number }> {
 	const timer = databaseResponseTimeHistogram.startTimer();
 	try {
 		const safeLimit = Math.min(limit, MAX_LIMIT);
 
+		const match: Record<string, unknown> = { userId };
+		if (type && type !== "all") match.type = type;
+		if (search?.trim()) {
+			const safe = search.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+			match.$or = [
+				{ name: { $regex: safe, $options: "i" } },
+				{ address: { $regex: safe, $options: "i" } },
+			];
+		}
+
+		let sortStage: Record<string, 1 | -1> = { createdAt: -1 };
+		switch (sort) {
+			case "name":
+				sortStage = { name: 1 };
+				break;
+			case "units":
+				sortStage = { totalUnits: -1 };
+				break;
+			case "revenue":
+				sortStage = { monthlyRent: -1 };
+				break;
+			default:
+				break;
+		}
+
 		const [propertiesResult, countResult] = await Promise.allSettled([
 			Property.aggregate<IProperty>(
 				[
-					{ $match: { userId } },
-					{ $sort: { createdAt: -1 } },
+					{ $match: match },
+					{ $sort: sortStage },
 					{ $skip: offset },
 					{ $limit: safeLimit },
 				],
 				{ session },
 			),
 			Property.aggregate<{ total: number }>(
-				[{ $match: { userId } }, { $count: "total" }],
+				[{ $match: match }, { $count: "total" }],
 				{ session },
 			),
 		]);

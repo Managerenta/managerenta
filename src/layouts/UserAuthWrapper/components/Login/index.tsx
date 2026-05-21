@@ -158,7 +158,7 @@ function Login() {
 					<label htmlFor="rememberMe">Remember me</label>
 				</Box>
 				<Box className="forgot-password">
-					<Link href="#">Forgot password?</Link>
+					<Link href="/forgot-password">Forgot password?</Link>
 				</Box>
 			</Box>
 

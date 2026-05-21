@@ -12,7 +12,14 @@ export default async function invalidateCacheKeys({
 }): Promise<void> {
 	await Promise.all([
 		redisDeleteKeys(
-			getQueryKeyProperties({ userId, limit: "*", offset: "*" }),
+			getQueryKeyProperties({
+				userId,
+				limit: "*",
+				offset: "*",
+				search: "*",
+				type: "*",
+				sort: "*",
+			}),
 			...(id ? [getQueryKeyPropertyById({ userId, id })] : []),
 		),
 		invalidateDashboardCacheKeys({ userId }),
