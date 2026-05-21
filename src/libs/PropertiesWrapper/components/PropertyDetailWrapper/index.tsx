@@ -4,8 +4,7 @@ import { memo, useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Box } from "@/components";
 import { usePropertyDetail } from "@/hooks";
-import type { TenantModalMode } from "@/layouts";
-import { PropertyModal, TenantModal } from "@/layouts";
+import { PropertyModal } from "@/layouts";
 import type { IPropertyUnit } from "@/types";
 import {
 	PropertyDetailHeader,
@@ -32,8 +31,6 @@ function PropertyDetailWrapper({ propertyId }: IProps) {
 	} = usePropertyDetail(propertyId);
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 	const [isAddUnitModalOpen, setIsAddUnitModalOpen] = useState(false);
-	const [tenantModalMode, setTenantModalMode] =
-		useState<TenantModalMode | null>(null);
 	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => setMounted(true), []);
@@ -45,22 +42,19 @@ function PropertyDetailWrapper({ propertyId }: IProps) {
 		() => setIsAddUnitModalOpen(false),
 		[],
 	);
-	const closeTenantModal = useCallback(() => setTenantModalMode(null), []);
 
 	const handleAddTenantToUnit = useCallback(
 		(unit: IPropertyUnit) => {
 			if (!propertyDetail) return;
-			setTenantModalMode({
-				type: "add-tenant",
-				preselectedUnit: {
-					id: unit.id,
-					name: unit.name,
-					rent: unit.rentAmount,
-					propertyName: propertyDetail.name,
-				},
+			const params = new URLSearchParams({
+				unitId: unit.id,
+				unitName: unit.name,
+				rent: String(unit.rentAmount),
+				propertyName: propertyDetail.name,
 			});
+			router.push(`/tenants/new?${params.toString()}`);
 		},
-		[propertyDetail],
+		[propertyDetail, router],
 	);
 
 	const handlePropertyUpdated = useCallback(async () => {
@@ -152,14 +146,6 @@ function PropertyDetailWrapper({ propertyId }: IProps) {
 						}}
 						onSuccess={handleUnitAdded}
 					/>
-					{tenantModalMode && (
-						<TenantModal
-							open={!!tenantModalMode}
-							close={closeTenantModal}
-							mode={tenantModalMode}
-							onSuccess={mutate}
-						/>
-					)}
 				</>
 			)}
 			<PropertyOverview

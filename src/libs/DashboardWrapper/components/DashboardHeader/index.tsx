@@ -11,7 +11,7 @@ function DashboardHeader() {
 	const router = useRouter();
 
 	const handleAddProperty = useCallback(() => {
-		router.push("/properties");
+		router.push("/properties/new");
 	}, [router]);
 
 	const formattedDate = useMemo(() => {

@@ -34,7 +34,7 @@ function QuickActions() {
 	const [isSendingReminders, setIsSendingReminders] = useState(false);
 
 	const handleAddProperty = useCallback(() => {
-		router.push("/properties");
+		router.push("/properties/new");
 	}, [router]);
 
 	const handleRecordTransaction = useCallback(() => {

@@ -1,9 +1,9 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { Box } from "@/components";
 import { usePropertiesData } from "@/hooks";
-import { Pagination, PropertyModal } from "@/layouts";
+import { Pagination } from "@/layouts";
 import {
 	PropertiesFilter,
 	PropertiesGrid,
@@ -15,8 +15,6 @@ function PropertiesWrapper() {
 	const router = useRouter();
 	const [offset, setOffset] = useState<number>(0);
 	const [pageSize, setPageSize] = useState<number>(12);
-	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [mounted, setMounted] = useState(false);
 	const [search, setSearch] = useState("");
 	const [filterType, setFilterType] = useState("all");
 	const [sortBy, setSortBy] = useState<string>("name");
@@ -26,9 +24,7 @@ function PropertiesWrapper() {
 		setViewMode(mode);
 	}, []);
 
-	useEffect(() => setMounted(true), []);
-
-	const { properties, stats, isLoading, mutate, total } = usePropertiesData(
+	const { properties, stats, isLoading, total } = usePropertiesData(
 		pageSize,
 		offset,
 		search,
@@ -36,13 +32,9 @@ function PropertiesWrapper() {
 		sortBy,
 	);
 
-	const openModal = useCallback(() => setIsModalOpen(true), []);
-	const closeModal = useCallback(() => setIsModalOpen(false), []);
-
-	const handlePropertyAdded = useCallback(async () => {
-		await mutate();
-		router.refresh();
-	}, [mutate, router]);
+	const handleAddProperty = useCallback(() => {
+		router.push("/properties/new");
+	}, [router]);
 
 	const handleSearchChange = useCallback((value: string) => {
 		setSearch(value);
@@ -66,16 +58,8 @@ function PropertiesWrapper() {
 			<PropertiesHeader
 				stats={stats}
 				isLoading={isLoading}
-				onAddProperty={openModal}
+				onAddProperty={handleAddProperty}
 			/>
-			{mounted && (
-				<PropertyModal
-					open={isModalOpen}
-					close={closeModal}
-					mode={{ type: "add-property" }}
-					onSuccess={handlePropertyAdded}
-				/>
-			)}
 			<PropertiesFilter
 				search={search}
 				onSearchChange={handleSearchChange}

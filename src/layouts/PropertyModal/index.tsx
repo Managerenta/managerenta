@@ -19,7 +19,6 @@ const PROPERTY_TYPES = [
 ];
 
 export type PropertyModalMode =
-	| { type: "add-property" }
 	| { type: "edit-property"; property: IPropertyDetail }
 	| { type: "add-unit"; propertyId: string; existingUnitCount: number };
 
@@ -55,8 +54,6 @@ function PropertyModal({ open, close, mode, onSuccess }: IProps) {
 				monthlyRent: String(mode.property.monthlyRent),
 				description: "",
 			});
-		} else if (mode.type === "add-property") {
-			setPropertyForm(EMPTY_PROPERTY_FORM);
 		} else {
 			setUnitForm({ name: "", rent: "" });
 		}
@@ -94,32 +91,7 @@ function PropertyModal({ open, close, mode, onSuccess }: IProps) {
 	const handleSubmit = useCallback(async () => {
 		setIsSubmitting(true);
 		try {
-			if (mode.type === "add-property") {
-				if (
-					!propertyForm.name.trim() ||
-					!propertyForm.address.trim() ||
-					!propertyForm.type
-				) {
-					toast.error("Please fill in all required fields");
-					return;
-				}
-				const formData = new FormData();
-				formData.append("name", propertyForm.name.trim());
-				formData.append("address", propertyForm.address.trim());
-				formData.append("type", propertyForm.type);
-				if (propertyForm.monthlyRent)
-					formData.append("monthlyRent", propertyForm.monthlyRent);
-				if (propertyForm.description.trim())
-					formData.append(
-						"description",
-						propertyForm.description.trim(),
-					);
-				if (imageFile) formData.append("image", imageFile);
-				await api().post("/api/properties", formData);
-				toast.success("Property added successfully");
-				setPropertyForm(EMPTY_PROPERTY_FORM);
-				setImageFile(null);
-			} else if (mode.type === "edit-property") {
+			if (mode.type === "edit-property") {
 				if (
 					!propertyForm.name.trim() ||
 					!propertyForm.address.trim() ||
@@ -175,25 +147,15 @@ function PropertyModal({ open, close, mode, onSuccess }: IProps) {
 	}, [mode, propertyForm, unitForm, imageFile, close, onSuccess]);
 
 	const title =
-		mode.type === "add-property"
-			? "Add New Property"
-			: mode.type === "edit-property"
-				? "Edit Property"
-				: "Add New Unit";
+		mode.type === "edit-property" ? "Edit Property" : "Add New Unit";
 
 	const subtitle =
-		mode.type === "add-property"
-			? "Fill in the details for your new property"
-			: mode.type === "edit-property"
-				? `Update the details for ${mode.property.name}`
-				: `This will be unit ${(mode as { type: "add-unit"; existingUnitCount: number }).existingUnitCount + 1}`;
+		mode.type === "edit-property"
+			? `Update the details for ${mode.property.name}`
+			: `This will be unit ${mode.existingUnitCount + 1}`;
 
 	const submitLabel =
-		mode.type === "add-property"
-			? "Add Property"
-			: mode.type === "edit-property"
-				? "Save Changes"
-				: "Add Unit";
+		mode.type === "edit-property" ? "Save Changes" : "Add Unit";
 
 	const unitNamePlaceholder =
 		mode.type === "add-unit"
@@ -256,25 +218,21 @@ function PropertyModal({ open, close, mode, onSuccess }: IProps) {
 								</select>
 							</Box>
 
-							{mode.type === "edit-property" && (
-								<Box className="form-field">
-									<Text className="field-label">
-										Total Units{" "}
-										<span className="optional">
-											(optional)
-										</span>
-									</Text>
-									<input
-										type="number"
-										min="1"
-										placeholder="e.g. 10"
-										value={propertyForm.totalUnits}
-										onChange={handlePropertyChange(
-											"totalUnits",
-										)}
-									/>
-								</Box>
-							)}
+							<Box className="form-field">
+								<Text className="field-label">
+									Total Units{" "}
+									<span className="optional">(optional)</span>
+								</Text>
+								<input
+									type="number"
+									min="1"
+									placeholder="e.g. 10"
+									value={propertyForm.totalUnits}
+									onChange={handlePropertyChange(
+										"totalUnits",
+									)}
+								/>
+							</Box>
 
 							<Box className="form-field full">
 								<Text className="field-label">
@@ -311,9 +269,7 @@ function PropertyModal({ open, close, mode, onSuccess }: IProps) {
 								<Text className="field-label">
 									Property Image{" "}
 									<span className="optional">
-										{mode.type === "edit-property"
-											? "(leave empty to keep current)"
-											: "(optional)"}
+										(leave empty to keep current)
 									</span>
 								</Text>
 								<input
