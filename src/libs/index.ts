@@ -2,6 +2,8 @@ export { default as AddPropertyWrapper } from "./AddPropertyWrapper";
 export { default as AddTenantWrapper } from "./AddTenantWrapper";
 export { default as AddTransactionWrapper } from "./AddTransactionWrapper";
 export { default as DashboardWrapper } from "./DashboardWrapper";
+export { default as EditPropertyWrapper } from "./EditPropertyWrapper";
+export { default as EditTenantWrapper } from "./EditTenantWrapper";
 export { default as LoginWrapper } from "./LoginWrapper";
 export { default as NotificationsWrapper } from "./NotificationsWrapper";
 export { default as PropertiesWrapper } from "./PropertiesWrapper";

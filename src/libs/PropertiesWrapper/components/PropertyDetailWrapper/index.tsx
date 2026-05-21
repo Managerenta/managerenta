@@ -29,14 +29,14 @@ function PropertyDetailWrapper({ propertyId }: IProps) {
 		rentCollectedThisYear,
 		mutate,
 	} = usePropertyDetail(propertyId);
-	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 	const [isAddUnitModalOpen, setIsAddUnitModalOpen] = useState(false);
 	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => setMounted(true), []);
 
-	const openEditModal = useCallback(() => setIsEditModalOpen(true), []);
-	const closeEditModal = useCallback(() => setIsEditModalOpen(false), []);
+	const handleEditProperty = useCallback(() => {
+		router.push(`/properties/${propertyId}/edit`);
+	}, [router, propertyId]);
 	const openAddUnitModal = useCallback(() => setIsAddUnitModalOpen(true), []);
 	const closeAddUnitModal = useCallback(
 		() => setIsAddUnitModalOpen(false),
@@ -56,11 +56,6 @@ function PropertyDetailWrapper({ propertyId }: IProps) {
 		},
 		[propertyDetail, router],
 	);
-
-	const handlePropertyUpdated = useCallback(async () => {
-		await mutate();
-		router.refresh();
-	}, [mutate, router]);
 
 	const handleUnitAdded = useCallback(async () => {
 		await mutate();
@@ -122,31 +117,20 @@ function PropertyDetailWrapper({ propertyId }: IProps) {
 			<PropertyDetailHeader
 				propertyDetail={propertyDetail}
 				stats={detailStats}
-				onEditProperty={openEditModal}
+				onEditProperty={handleEditProperty}
 				onAddUnit={openAddUnitModal}
 			/>
 			{mounted && (
-				<>
-					<PropertyModal
-						open={isEditModalOpen}
-						close={closeEditModal}
-						mode={{
-							type: "edit-property",
-							property: propertyDetail,
-						}}
-						onSuccess={handlePropertyUpdated}
-					/>
-					<PropertyModal
-						open={isAddUnitModalOpen}
-						close={closeAddUnitModal}
-						mode={{
-							type: "add-unit",
-							propertyId: propertyDetail.id,
-							existingUnitCount: units.length,
-						}}
-						onSuccess={handleUnitAdded}
-					/>
-				</>
+				<PropertyModal
+					open={isAddUnitModalOpen}
+					close={closeAddUnitModal}
+					mode={{
+						type: "add-unit",
+						propertyId: propertyDetail.id,
+						existingUnitCount: units.length,
+					}}
+					onSuccess={handleUnitAdded}
+				/>
 			)}
 			<PropertyOverview
 				propertyDetail={propertyDetail}
