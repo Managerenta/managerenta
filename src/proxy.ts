@@ -6,6 +6,8 @@ const PROTECTED_ROUTES = [
 	"/settings",
 	"/add-transaction",
 	"/tenants",
+	"/notifications",
+	"/invitations",
 ];
 
 const AUTH_ROUTES = ["/login", "/signup", "/"];
