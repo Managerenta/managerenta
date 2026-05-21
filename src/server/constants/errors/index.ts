@@ -1,8 +1,11 @@
 export * from "./errorMessages";
 
 import {
+	Err2faCodeInvalid,
+	Err2faTicketInvalid,
 	ErrAccountCreationFailed,
 	ErrAccountRestricted,
+	ErrCannotRemoveOwner,
 	ErrGetFileLink,
 	ErrInternalServerError,
 	ErrInvalidAction,
@@ -14,10 +17,12 @@ import {
 	ErrInvalidRole,
 	ErrInvalidURL,
 	ErrMissingFile,
+	ErrMustKeepOneAdmin,
 	ErrPropertyNotFound,
 	ErrResourceAlreadyExist,
 	ErrResourceNotFound,
 	ErrTenantNotFound,
+	ErrTooManyRequests,
 	ErrTryAgain,
 	ErrUnauthorized,
 	ErrUnitNotFound,
@@ -57,7 +62,14 @@ export function getErrorResponse(error: Error): IErrorResponse {
 		case ErrInvalidCorsOrigin:
 		case ErrAccountCreationFailed:
 		case ErrInvalidCredentials:
+		case Err2faTicketInvalid:
+		case Err2faCodeInvalid:
 			code = 401;
+			break;
+
+		case ErrCannotRemoveOwner:
+		case ErrMustKeepOneAdmin:
+			code = 403;
 			break;
 
 		case ErrGetFileLink:
@@ -72,6 +84,10 @@ export function getErrorResponse(error: Error): IErrorResponse {
 		case ErrResourceAlreadyExist:
 		case ErrUsernameAlreadyExists:
 			code = 409;
+			break;
+
+		case ErrTooManyRequests:
+			code = 429;
 			break;
 
 		case ErrInternalServerError:

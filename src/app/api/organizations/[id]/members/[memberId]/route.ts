@@ -1,9 +1,17 @@
 import { z as zod } from "zod";
-import { ErrInvalidAction, ErrInvalidFields } from "@/server/constants";
+import {
+	ErrCannotRemoveOwner,
+	ErrInvalidAction,
+	ErrInvalidFields,
+	ErrMustKeepOneAdmin,
+	ErrResourceNotFound,
+} from "@/server/constants";
 import { handleError, ok, withApiHandler, withAuth } from "@/server/lib";
 import { assertOrganizationAdmin } from "@/server/middleware/organizations";
 import { removeMemberDB, setMemberRoleDB } from "@/server/models";
 import { IOrganizationRole } from "@/server/models/organizations/types";
+import { getOrganizationById } from "@/server/services";
+import { invalidateCacheKeys as invalidateOrgCache } from "@/server/services/organizations/utils";
 
 export const runtime = "nodejs";
 
@@ -18,6 +26,46 @@ const patchBodySchema = zod
 		]),
 	})
 	.strict();
+
+// SECURITY: an org admin can otherwise demote / kick the owner, or demote
+// the last remaining admin and lock the org out of admin operations.
+// Both invariants are enforced here. See SECURITY_REVIEW.md S6 / S7.
+async function assertOwnerInvariants({
+	organizationId,
+	memberId,
+	nextRole,
+}: {
+	organizationId: string;
+	memberId: string;
+	nextRole: IOrganizationRole | null;
+}): Promise<void> {
+	// Bypass Redis: an authorization decision can never run against stale
+	// membership data (the cache is invalidated AFTER the write so two
+	// concurrent admin-demotion requests could both see the pre-write state
+	// and both succeed if we trusted the cache).
+	const org = await getOrganizationById({
+		organizationId,
+		refreshCache: true,
+	});
+	if (!org) throw ErrResourceNotFound;
+
+	if (org.ownerId?.toString() === memberId) throw ErrCannotRemoveOwner;
+
+	// Removal (nextRole === null) and demotion-from-admin both shrink the
+	// admin set. Refuse if the target is currently the only admin.
+	const target = org.members?.find((m) => m.memberId.toString() === memberId);
+	if (!target) throw ErrInvalidAction;
+
+	const isAdminRemoval =
+		target.permission === IOrganizationRole.ADMIN &&
+		nextRole !== IOrganizationRole.ADMIN;
+	if (!isAdminRemoval) return;
+
+	const adminCount = (org.members ?? []).filter(
+		(m) => m.permission === IOrganizationRole.ADMIN,
+	).length;
+	if (adminCount <= 1) throw ErrMustKeepOneAdmin;
+}
 
 export const PATCH = withApiHandler<RouteContext>(
 	{ route: "/api/organizations/[id]/members/[memberId]" },
@@ -37,12 +85,19 @@ export const PATCH = withApiHandler<RouteContext>(
 			const parsed = patchBodySchema.safeParse(body);
 			if (!parsed.success) throw ErrInvalidFields;
 
+			await assertOwnerInvariants({
+				organizationId: id,
+				memberId,
+				nextRole: parsed.data.role,
+			});
+
 			const result = await setMemberRoleDB({
 				orgId: id,
 				memberId,
 				role: parsed.data.role,
 			});
 			if (!result) throw ErrInvalidAction;
+			await invalidateOrgCache({ organizationId: id });
 			return ok(result, "Role updated");
 		} catch (error) {
 			return handleError(error);
@@ -59,8 +114,14 @@ export const DELETE = withApiHandler<RouteContext>(
 				userId: auth.userId,
 				organizationId: id,
 			});
+			await assertOwnerInvariants({
+				organizationId: id,
+				memberId,
+				nextRole: null,
+			});
 			const result = await removeMemberDB({ orgId: id, memberId });
 			if (!result) throw ErrInvalidAction;
+			await invalidateOrgCache({ organizationId: id });
 			return ok(null, "Member removed");
 		} catch (error) {
 			return handleError(error);

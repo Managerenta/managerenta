@@ -474,9 +474,13 @@ export async function changePasswordDB({
 }): Promise<boolean> {
 	const timer = databaseResponseTimeHistogram.startTimer();
 	try {
+		// SECURITY: clear ALL refresh tokens on password change so a stolen
+		// refresh token cannot outlive the password it was issued under.
+		// See SECURITY_REVIEW.md H7 / S4. The new password goes through the
+		// pre-findOneAndUpdate hook which bcrypt-hashes it before write.
 		const result = await User.findByIdAndUpdate(
 			new mongoose.Types.ObjectId(id),
-			{ password },
+			{ $set: { password, refreshTokens: [] } },
 			{ session },
 		);
 		if (!result) throw ErrUserNotFound;

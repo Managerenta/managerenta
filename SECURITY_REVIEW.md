@@ -322,3 +322,147 @@ nit; leaving as-is.
 | M11 | Medium | Tokens in notification records | ⚠️ See H6 |
 | M12 | Medium | Notification ownership filter | ⚠️ Audit follow-up |
 | M13 | Medium | Rate-limit header mutation | ℹ️ Won't fix |
+
+---
+
+## Second pass (2026-05-21) — auth-gate audit fixes
+
+The first pass focused on infrastructure / dependency hardening. A follow-up
+audit of how the `/app` routes and `/api/*` routes are token-gated turned up
+the issues below. All marked ✅ are fixed on this branch.
+
+### S1 — 🔴 2FA was never enforced on login
+
+`src/server/services/auth/login.ts` did password compare only. The
+`/api/users/2fa/enable` flow enrolled the user, the settings UI showed
+"Enabled", but `/api/auth/login` returned a session on password alone.
+Anyone with the password walked past 2FA. The toggle was decorative.
+
+**Status:** ✅ Fixed — login is now a two-step flow:
+
+1. `POST /api/auth/login` validates email+password. When `twoFactorEnabled`
+   is true on the account, the response is `{ twoFactorRequired: true,
+   ticket }` with NO session cookies set. The ticket is a 5-minute,
+   audience-scoped JWT signed with a secret derived from
+   `JWT_ACCESS_TOKEN_SECRET` (see `src/server/constants/twoFactorTicket.ts`).
+2. `POST /api/auth/login/2fa` accepts `{ ticket, totpToken | recoveryCode }`.
+   It verifies the ticket, checks the TOTP code against the stored secret
+   (or a stored recovery code, which is consumed atomically), then issues
+   the session.
+
+Rate limits: the password step is keyed by `IP+email` at 10/15 min; the 2FA
+step is keyed by `userId+IP` at 10/5 min — both per-bucket counters that an
+attacker can't blow through by rotating addresses or accounts. The
+LoginWrapper UI shows the TOTP input when it sees `twoFactorRequired`, with
+a "use a recovery code" toggle for the fallback.
+
+### S2 — 🔴 `TRUSTED_PROXY=0` collapsed rate limiting to one global bucket
+
+`src/server/lib/clientIp.ts` returned the literal string `"unknown"` for
+every request when `TRUSTED_PROXY` was not set. The rate limiter's default
+keyGenerator is the client IP, so every limited endpoint became one global
+counter. Combined with the login rate limit, an attacker could exhaust the
+global bucket for everyone with 10 requests.
+
+**Status:** ✅ Fixed — `getClientIp` now extracts a per-client IP even
+without TRUSTED_PROXY. In trusted-proxy mode it still prefers
+`cf-connecting-ip` / `x-real-ip` and falls back to the LAST hop of
+`x-forwarded-for` (closest to the edge). Outside trusted-proxy mode it
+takes the FIRST hop (attacker-controlled, but at least non-degenerate),
+logs a one-time warning in production so operators see the
+misconfiguration, and relies on composite rate-limit keys (IP+email,
+IP+userId) to raise the cost of spoofing on sensitive endpoints.
+
+### S3 — 🟠 Login rate limit was not "IP + email" as documented
+
+`src/app/api/auth/login/route.ts` passed no `keyGenerator` to the rate
+limiter, so the documented `IP + email` composite key (SECURITY_REVIEW.md
+H4) was actually `IP`-only — and IP was `"unknown"` for everyone (see S2).
+
+**Status:** ✅ Fixed — login parses the body first, then enforces the rate
+limit with `keyGenerator: () => \`login:${ip}:${email}\``. `withApiHandler`
+gained support for `rateLimit: false` so routes can run the limiter inside
+the handler when the key needs request data.
+
+### S4 — 🟠 Password change / 2FA toggle did not invalidate refresh tokens
+
+`changePasswordDB`, `/api/users/2fa/enable`, `/api/users/2fa/disable`, and
+the reset-password flow each updated the relevant fields but left
+`refreshTokens` intact. A stolen refresh token outlived the password it was
+issued under (and outlived the 2FA toggle) for the full 30-day window.
+
+**Status:** ✅ Fixed — all four code paths now set `refreshTokens: []` in
+the same write that changes the credential or 2FA state. Every device must
+re-authenticate.
+
+### S5 — 🟡 Proxy gate was cookie-presence only
+
+`src/proxy.ts` only checked `request.cookies.has("accessToken")`. An
+attacker could set any value to defeat the redirect. Impact was limited by
+client-rendered pages (no SSR data was leaked), but the gate offered zero
+real protection — every "logged in" check at the edge was trustless.
+
+**Status:** ✅ Fixed — proxy now verifies the JWT signature with `jose`
+(edge-compatible). Junk cookies fail and redirect to /login. When only a
+refresh cookie is present the request is allowed through as "may-refresh"
+so the page's bootstrap can rotate via `/api/auth/verify`. The redirect to
+`/login` now preserves the original path as `?next=…` (sanitized client
+side by `safeRedirect` so it can never become an open redirect).
+
+### S6 — 🟠 Org admin could demote / remove the org owner
+
+`src/app/api/organizations/[id]/members/[memberId]/route.ts` PATCH/DELETE
+called `assertOrganizationAdmin` but never checked whether `memberId` was
+the org's `ownerId`. A malicious admin could `PATCH { role: VIEWER }` on
+the owner or `DELETE` them from the members list.
+
+**Status:** ✅ Fixed — both routes now call `assertOwnerInvariants` which:
+- rejects any operation targeting the owner (`ErrCannotRemoveOwner`)
+- rejects the operation if it would remove the org's last admin
+  (`ErrMustKeepOneAdmin`)
+
+The check reads through `getOrganizationById({ refreshCache: true })` to
+avoid making authorization decisions against stale Redis state, and the
+PATCH/DELETE handlers now invalidate the org cache after a successful
+write.
+
+### S7 — 🟡 `/api/auth/verify` was un-rate-limited and re-issued cookies on every call
+
+Every successful call set new auth cookies (effectively extending the
+refresh-token window). Combined with the global-bucket bug (S2), anyone
+holding any valid token could hammer this endpoint to extend session
+lifetime forever or to amplify load.
+
+**Status:** ✅ Fixed — added a `30 req / min` limit per IP.
+
+### S8 — 🟡 Accept-invite link lost its token across the auth redirect
+
+`/invitations/accept` is in the page proxy's PROTECTED_ROUTES. An
+unauthenticated invitee hitting the link was bounced to `/login` and lost
+the `?token=…` query — UX bug that pushed users toward re-requesting
+invites.
+
+**Status:** ✅ Fixed — `proxy.ts` redirects to `/login?next=<original>` and
+LoginWrapper navigates to the `next` path after auth (via `safeRedirect` to
+prevent open redirect). The invite page's "Need to sign in first?" link
+also round-trips the token through `?next=`.
+
+### S9 — 🟢 `/add-transaction` orphan in PROTECTED_ROUTES
+
+The path `/add-transaction` was in `PROTECTED_ROUTES` but no such page
+exists. The real route is `/tenants/[id]/add-transaction`, already covered
+by the `/tenants` prefix.
+
+**Status:** ✅ Fixed — removed from the list.
+
+| ID | Severity | Title | Status |
+|----|----------|-------|--------|
+| S1 | Critical | 2FA not enforced on login | ✅ Fixed |
+| S2 | Critical | `TRUSTED_PROXY=0` collapsed rate limiting | ✅ Fixed |
+| S3 | High | Login rate limit was IP-only | ✅ Fixed |
+| S4 | High | Password change / 2FA toggle left refresh tokens | ✅ Fixed |
+| S5 | Medium | Proxy gate was cookie-presence only | ✅ Fixed |
+| S6 | High | Org admin could demote / remove owner | ✅ Fixed |
+| S7 | Medium | `/api/auth/verify` un-rate-limited | ✅ Fixed |
+| S8 | Medium | Invite token lost across login redirect | ✅ Fixed |
+| S9 | Low | Dead `/add-transaction` in PROTECTED_ROUTES | ✅ Fixed |

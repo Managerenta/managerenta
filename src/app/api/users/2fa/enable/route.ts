@@ -36,6 +36,9 @@ export const POST = withApiHandler(
 			}
 
 			const recoveryCodes = generateRecoveryCodes();
+			// SECURITY: enabling 2FA must terminate every existing session so
+			// any pre-2FA token cannot bypass the new requirement.
+			// See SECURITY_REVIEW.md H7 / S4.
 			await updateUserRawDB({
 				id: auth.userId,
 				update: {
@@ -43,6 +46,7 @@ export const POST = withApiHandler(
 						"security.twoFactorEnabled": true,
 						"security.totpSecret": pending,
 						"security.recoveryCodes": recoveryCodes,
+						refreshTokens: [],
 					},
 					$unset: { "security.pendingTotpSecret": 1 },
 				},

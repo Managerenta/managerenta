@@ -1,7 +1,6 @@
-import type { loginUserDB } from "../../models";
+import { loginUserDB } from "../../models";
 import type { IUserCreateInput } from "../../models/users/types";
 import { createUser } from "../users";
-import login from "./login";
 
 export default async function signup({
 	payload,
@@ -14,13 +13,10 @@ export default async function signup({
 	ip?: string;
 }): Promise<ReturnType<typeof loginUserDB>> {
 	const user = await createUser({ payload });
-	if (!user) return null;
+	if (!user?._id) return null;
 
-	const result = await login({
-		email: user.email,
-		password: payload.password,
-		ip,
-	});
-	if (!result) return null;
-	return result;
+	// Issue the session directly. New accounts never have 2FA enabled, so
+	// routing through `login()` would just force TypeScript to unwrap a
+	// branch that can never fire here.
+	return loginUserDB({ id: user._id.toString(), ip });
 }

@@ -31,10 +31,14 @@ export const POST = withApiHandler(
 			}
 
 			const hashed = await hash(parsed.data.newPassword, 12);
+			// SECURITY: clear refresh tokens — see SECURITY_REVIEW.md H7 / S4.
+			// A password reset implies the original password may be
+			// compromised; any session that survived from before this reset
+			// must die.
 			await updateUserRawDB({
 				id: user._id,
 				update: {
-					$set: { password: hashed },
+					$set: { password: hashed, refreshTokens: [] },
 					$unset: {
 						"security.passwordResetToken": 1,
 						"security.passwordResetExpires": 1,
