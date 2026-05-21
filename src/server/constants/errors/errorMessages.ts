@@ -22,6 +22,23 @@ export const ErrAccountRestricted: Error = new Error("Account is restricted");
 export const ErrInvalidCorsOrigin: Error = new Error(
 	"Not allowed by CORS - Origin header required",
 );
+export const Err2faTicketInvalid: Error = new Error(
+	"Two-factor challenge expired. Please sign in again.",
+);
+export const Err2faCodeInvalid: Error = new Error("Invalid two-factor code");
+
+// 403 error codes
+export const ErrCannotRemoveOwner: Error = new Error(
+	"The organization owner cannot be removed or demoted",
+);
+export const ErrMustKeepOneAdmin: Error = new Error(
+	"An organization must keep at least one admin",
+);
+
+// 429 error codes
+export const ErrTooManyRequests: Error = new Error(
+	"Too many requests, please try again later.",
+);
 
 // 404 error codes
 export const ErrResourceNotFound: Error = new Error("Resource not found");

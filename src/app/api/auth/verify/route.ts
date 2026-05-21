@@ -11,7 +11,14 @@ import {
 export const runtime = "nodejs";
 
 export const POST = withApiHandler(
-	{ route: "/api/auth/verify" },
+	{
+		route: "/api/auth/verify",
+		// This endpoint re-issues cookies on every successful call (effectively
+		// extending the refresh-token window). Cap the rate so anyone holding
+		// a valid token cannot loop on it to extend session lifetime forever
+		// or to amplify load. See SECURITY_REVIEW.md S+M.
+		rateLimit: { windowMs: 60_000, maxRequests: 30 },
+	},
 	async ({ req }) => {
 		try {
 			const auth = await verifyAuthToken(req);

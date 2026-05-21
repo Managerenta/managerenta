@@ -11,5 +11,6 @@ export * from "./formatters";
 export { default as getAuthCookieOptions } from "./getAuthCookieOptions";
 export { default as getErrorMessage } from "./getErrorMessage";
 export { default as getSeoMetadata } from "./getSeoMetadata";
+export { default as safeRedirect } from "./safeRedirect";
 export { default as supportedImageMimeTypes } from "./supportedImageMimeTypes";
 export { default as verifyUserLogin } from "./verifyUserLogin";

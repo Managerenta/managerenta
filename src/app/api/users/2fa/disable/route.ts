@@ -34,10 +34,17 @@ export const POST = withApiHandler(
 			const passOk = await compare(parsed.data.password, user.password);
 			if (!passOk) throw ErrInvalidCredentials;
 
+			// SECURITY: disabling 2FA reduces the auth bar; force re-login on
+			// every device so a stolen session that quietly waited out the
+			// 2FA-enabled period cannot resurface.
+			// See SECURITY_REVIEW.md H7 / S4.
 			await updateUserRawDB({
 				id: auth.userId,
 				update: {
-					$set: { "security.twoFactorEnabled": false },
+					$set: {
+						"security.twoFactorEnabled": false,
+						refreshTokens: [],
+					},
 					$unset: {
 						"security.totpSecret": 1,
 						"security.pendingTotpSecret": 1,

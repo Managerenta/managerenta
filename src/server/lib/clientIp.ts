@@ -1,39 +1,69 @@
 import "server-only";
 import type { NextRequest } from "next/server";
-import { TRUSTED_PROXY } from "../constants/environments";
+import { NODE_ENV, TRUSTED_PROXY } from "../constants/environments";
 
 /**
  * Resolve the originating client IP from request headers.
  *
- * SECURITY — see SECURITY_REVIEW.md H5.
+ * SECURITY — see SECURITY_REVIEW.md H5 / S2.
  *
- * Forwarded-IP headers are *client-supplied* by default. The first hop in
- * `X-Forwarded-For` can be anything the attacker writes, and most edge
- * proxies will append (not replace), so it remains attacker-controlled even
- * behind one. We therefore only honour these headers when `TRUSTED_PROXY=1`
- * is set, signalling that the deployment fronts the app with an
- * IP-rewriting edge (ALB, CloudFront, Cloudflare).
+ * Forwarded-IP headers (X-Forwarded-For, X-Real-IP, CF-Connecting-IP) are
+ * *client-supplied* unless an upstream edge overwrites them. There are two
+ * deployment modes:
  *
- * When trusted, we prefer single-value headers (`x-real-ip`,
- * `cf-connecting-ip`) which a properly configured edge overwrites; we read
- * the *last* hop of `x-forwarded-for` (closest to the edge) instead of the
- * first (closest to the attacker) only as a fallback.
+ *   1. `TRUSTED_PROXY=1` — the app is behind ALB / CloudFront / Cloudflare
+ *      that overwrites the forwarding headers. We prefer single-value
+ *      headers (`cf-connecting-ip`, `x-real-ip`) which a properly configured
+ *      edge sets, and fall back to the *last* hop of `x-forwarded-for`
+ *      (closest to the edge), never the first (closest to the attacker).
+ *
+ *   2. `TRUSTED_PROXY=0` (default) — we still extract the *first* XFF hop
+ *      so that legitimate clients land in distinct rate-limit buckets, but
+ *      this value is attacker-controlled. Composite rate-limit keys (e.g.
+ *      `IP + email` for login) substantially raise the cost of evasion.
+ *      In production we warn once on boot so the misconfiguration is
+ *      visible in logs.
+ *
+ * Never returns an empty string — the fallback `"unknown"` is preserved so
+ * Redis keys remain valid, but it now indicates "no headers at all" rather
+ * than "we refuse to extract".
  */
-export function getClientIp(req: NextRequest | Request): string {
-	if (!TRUSTED_PROXY) {
-		return "unknown";
+let warnedAboutUntrustedProxy = false;
+function warnIfUntrustedProxy(): void {
+	if (warnedAboutUntrustedProxy) return;
+	warnedAboutUntrustedProxy = true;
+	if (NODE_ENV === "production" && !TRUSTED_PROXY) {
+		console.warn(
+			"[clientIp] TRUSTED_PROXY is not set. Forwarded-IP headers are being honored without trust verification — rate limits and IP binding can be spoofed. Set TRUSTED_PROXY=1 once the deployment is behind an edge that overwrites x-real-ip / x-forwarded-for.",
+		);
 	}
+}
 
+export function getClientIp(req: NextRequest | Request): string {
 	const headers = req.headers;
-	const cf = headers.get("cf-connecting-ip");
-	if (cf) return cf.trim();
-	const realIp = headers.get("x-real-ip");
-	if (realIp) return realIp.trim();
+	const cf = headers.get("cf-connecting-ip")?.trim();
+	if (cf) return cf;
+	const realIp = headers.get("x-real-ip")?.trim();
+	if (realIp) return realIp;
+
 	const xff = headers.get("x-forwarded-for");
 	if (xff) {
-		const parts = xff.split(",");
-		const last = parts[parts.length - 1]?.trim();
-		if (last) return last;
+		const parts = xff
+			.split(",")
+			.map((p) => p.trim())
+			.filter(Boolean);
+		if (parts.length > 0) {
+			if (TRUSTED_PROXY) {
+				// Edge appends; the last hop is the most recent (closest to us)
+				// and the only one we can attribute to a trusted source.
+				return parts[parts.length - 1] ?? "unknown";
+			}
+			warnIfUntrustedProxy();
+			// First hop is the most distant (client-side). Spoofable, but
+			// gives us a non-degenerate bucket per attacker IP.
+			return parts[0] ?? "unknown";
+		}
 	}
+
 	return "unknown";
 }

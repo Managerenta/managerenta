@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useState } from "react";
+import { Suspense, useCallback, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { Box, Button, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
@@ -12,6 +12,15 @@ function AcceptInviteInner() {
 	const search = useSearchParams();
 	const token = search.get("token") ?? "";
 	const [submitting, setSubmitting] = useState(false);
+
+	// If the proxy bounced us to /login (and back), the original `?token=…`
+	// would have been lost. Build a sign-in link that round-trips the token
+	// so the invitee lands back here with the token intact after auth.
+	const signInLink = useMemo(() => {
+		if (!token) return "/login";
+		const here = `/invitations/accept?token=${encodeURIComponent(token)}`;
+		return `/login?next=${encodeURIComponent(here)}`;
+	}, [token]);
 
 	const submit = useCallback(async () => {
 		if (!token) {
@@ -55,7 +64,7 @@ function AcceptInviteInner() {
 					width="100%"
 				/>
 				<Box className="footer-link">
-					<Link href="/login">Need to sign in first?</Link>
+					<Link href={signInLink}>Need to sign in first?</Link>
 				</Box>
 			</Box>
 		</AuthPageStyled>

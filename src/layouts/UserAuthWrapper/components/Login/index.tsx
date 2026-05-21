@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
 	memo,
 	type ReactNode,
@@ -9,28 +9,37 @@ import {
 	useReducer,
 	useState,
 } from "react";
-import { FaLock, FaUser } from "react-icons/fa";
+import { FaLock, FaShieldAlt, FaUser } from "react-icons/fa";
 import { GrSecure } from "react-icons/gr";
 import { toast } from "react-toastify";
 import { Box, Button, Input, Loader, Text } from "@/components";
-import { api, getErrorMessage } from "@/constants";
+import { api, getErrorMessage, safeRedirect } from "@/constants";
 import { AppContextProvider } from "@/hooks";
 import AlternativeSeparator from "@/layouts/AlternativeSeparator";
 import Header from "../Header";
 import { LoginStyled } from "./styled";
 
+type Step = "credentials" | "two-factor";
+
 interface LoginState {
 	email: string;
 	password: string;
+	code: string;
+	useRecovery: boolean;
 }
 
 type LoginAction =
 	| { type: "SET_EMAIL"; payload: string }
-	| { type: "SET_PASSWORD"; payload: string };
+	| { type: "SET_PASSWORD"; payload: string }
+	| { type: "SET_CODE"; payload: string }
+	| { type: "TOGGLE_RECOVERY" }
+	| { type: "RESET_TWO_FACTOR" };
 
 const initialState: LoginState = {
 	email: "",
 	password: "",
+	code: "",
+	useRecovery: false,
 };
 
 function loginReducer(state: LoginState, action: LoginAction): LoginState {
@@ -39,6 +48,12 @@ function loginReducer(state: LoginState, action: LoginAction): LoginState {
 			return { ...state, email: action.payload };
 		case "SET_PASSWORD":
 			return { ...state, password: action.payload };
+		case "SET_CODE":
+			return { ...state, code: action.payload };
+		case "TOGGLE_RECOVERY":
+			return { ...state, useRecovery: !state.useRecovery, code: "" };
+		case "RESET_TWO_FACTOR":
+			return { ...state, code: "", useRecovery: false };
 		default:
 			return state;
 	}
@@ -48,11 +63,22 @@ function Login() {
 	const [state, dispatch] = useReducer(loginReducer, initialState);
 	const [isLoading, setIsLoading] = useState(false);
 	const [isRedirecting, setIsRedirecting] = useState(false);
+	const [step, setStep] = useState<Step>("credentials");
+	const [twoFactorTicket, setTwoFactorTicket] = useState<string | null>(null);
 
 	const { reAuthenticateUserSession } = useContext(AppContextProvider);
 	const router = useRouter();
+	const searchParams = useSearchParams();
+	const nextDestination = safeRedirect(searchParams.get("next"));
 
-	const handleSubmit = async (e: React.FormEvent) => {
+	const completeLogin = async () => {
+		setIsRedirecting(true);
+		await reAuthenticateUserSession();
+		router.replace(nextDestination);
+		router.refresh();
+	};
+
+	const handleCredentialsSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 
 		if (!state.email || !state.password) {
@@ -63,20 +89,64 @@ function Login() {
 		setIsLoading(true);
 
 		try {
-			await api().post(
+			const res = await api().post(
 				"/api/auth/login",
 				{ email: state.email, password: state.password },
 				{ baseURL: "" },
 			);
 
-			setIsRedirecting(true);
-			await reAuthenticateUserSession();
-			router.replace("/dashboard");
-			router.refresh();
+			const data = res.data?.data;
+			if (data?.twoFactorRequired && data?.ticket) {
+				setTwoFactorTicket(data.ticket);
+				setStep("two-factor");
+				setIsLoading(false);
+				return;
+			}
+
+			await completeLogin();
 		} catch (err: unknown) {
 			toast.error(getErrorMessage(err, "Invalid username or password"));
 			setIsLoading(false);
 		}
+	};
+
+	const handleTwoFactorSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+
+		if (!twoFactorTicket) {
+			toast.error("Session expired — please sign in again.");
+			setStep("credentials");
+			return;
+		}
+
+		const trimmed = state.code.trim();
+		if (!trimmed) {
+			toast.error(
+				state.useRecovery
+					? "Enter a recovery code"
+					: "Enter the 6-digit code from your authenticator",
+			);
+			return;
+		}
+
+		setIsLoading(true);
+		try {
+			const body: Record<string, string> = { ticket: twoFactorTicket };
+			if (state.useRecovery) body.recoveryCode = trimmed;
+			else body.totpToken = trimmed;
+
+			await api().post("/api/auth/login/2fa", body, { baseURL: "" });
+			await completeLogin();
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err, "Invalid code"));
+			setIsLoading(false);
+		}
+	};
+
+	const handleCancelTwoFactor = () => {
+		setTwoFactorTicket(null);
+		setStep("credentials");
+		dispatch({ type: "RESET_TWO_FACTOR" });
 	};
 
 	const renderedInputFields = useMemo(() => {
@@ -146,11 +216,86 @@ function Login() {
 		);
 	}
 
+	if (step === "two-factor") {
+		return (
+			<LoginStyled>
+				<Header
+					title="Two-factor authentication"
+					subtext={
+						state.useRecovery
+							? "Enter one of the recovery codes you saved when you enabled 2FA."
+							: "Enter the 6-digit code from your authenticator app."
+					}
+				/>
+
+				<form onSubmit={handleTwoFactorSubmit}>
+					<Box className="form-field">
+						<label htmlFor="code">
+							{state.useRecovery
+								? "Recovery code"
+								: "Authenticator code"}
+						</label>
+						<section>
+							<FaShieldAlt />
+							<Input
+								type="text"
+								inputMode={
+									state.useRecovery ? "text" : "numeric"
+								}
+								autoComplete="one-time-code"
+								placeholder={
+									state.useRecovery ? "xxxxx-xxxxx" : "123456"
+								}
+								value={state.code}
+								onChange={(e) =>
+									dispatch({
+										type: "SET_CODE",
+										payload: e.target.value,
+									})
+								}
+							/>
+						</section>
+					</Box>
+
+					<Button
+						title={isLoading ? "Verifying..." : "Verify"}
+						type="submit"
+						handleClick={handleTwoFactorSubmit}
+						disabled={isLoading}
+					/>
+				</form>
+
+				<Box className="options">
+					<Box
+						className="forgot-password"
+						onClick={() => dispatch({ type: "TOGGLE_RECOVERY" })}
+						style={{ cursor: "pointer" }}
+					>
+						<Text>
+							{state.useRecovery
+								? "Use authenticator code instead"
+								: "Use a recovery code"}
+						</Text>
+					</Box>
+					<Box
+						className="forgot-password"
+						onClick={handleCancelTwoFactor}
+						style={{ cursor: "pointer" }}
+					>
+						<Text>Back</Text>
+					</Box>
+				</Box>
+			</LoginStyled>
+		);
+	}
+
 	return (
 		<LoginStyled>
 			<Header title="Welcome Back" subtext="Sign in to your account" />
 
-			<form onSubmit={handleSubmit}>{renderedInputFields}</form>
+			<form onSubmit={handleCredentialsSubmit}>
+				{renderedInputFields}
+			</form>
 
 			<Box className="options">
 				<Box className="remember-me">
@@ -165,7 +310,7 @@ function Login() {
 			<Button
 				title={isLoading ? "Signing in..." : "Sign In"}
 				type="submit"
-				handleClick={handleSubmit}
+				handleClick={handleCredentialsSubmit}
 				disabled={isLoading}
 			/>
 

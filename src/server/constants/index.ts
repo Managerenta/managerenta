@@ -11,4 +11,5 @@ export { default as hash } from "./hash";
 export { default as hexToString } from "./hexToString";
 export { default as isOriginAllowed } from "./isOriginAllowed";
 export { default as supportedImageMimeTypes } from "./supportedImageMimeTypes";
+export * from "./twoFactorTicket";
 export { default as wait } from "./wait";
