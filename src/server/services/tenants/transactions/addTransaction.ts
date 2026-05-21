@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { ErrTenantNotFound } from "../../../constants";
 import { createTransactionDB, getTenantByIdDB } from "../../../models";
 import type {
@@ -5,6 +6,7 @@ import type {
 	IPaymentMethod,
 	ITransactionType,
 } from "../../../models/tenants/transactions/types";
+import { notifyPaymentReceived } from "../../notifications";
 import { invalidateCacheKeys } from "./utils";
 
 export default async function addTransaction({
@@ -76,6 +78,23 @@ export default async function addTransaction({
 
 	if (result) {
 		await invalidateCacheKeys({ userId, tenantId });
+
+		if (type === "rent" && amountType === "credit") {
+			const Unit = mongoose.models.units;
+			const unit = Unit
+				? await Unit.findById(
+						new mongoose.Types.ObjectId(tenant.unitId),
+					).lean()
+				: null;
+			void notifyPaymentReceived({
+				userId,
+				tenantId,
+				tenantName: tenant.name,
+				unitName: (unit as { name?: string } | null)?.name,
+				amount,
+				paymentMethod,
+			});
+		}
 	}
 
 	return result;
