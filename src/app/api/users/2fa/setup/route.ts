@@ -1,5 +1,9 @@
 import { ErrUserNotFound } from "@/server/constants";
-import { buildOtpAuthUrl, generateTotpSecret } from "@/server/constants/totp";
+import {
+	buildOtpAuthUrl,
+	generateOtpAuthQrCode,
+	generateTotpSecret,
+} from "@/server/constants/totp";
 import { handleError, ok, withApiHandler, withAuth } from "@/server/lib";
 import { updateUserRawDB } from "@/server/models";
 import { getUserById } from "@/server/services";
@@ -29,9 +33,10 @@ export const POST = withApiHandler(
 				account: user.email,
 				issuer: "manageRenta",
 			});
+			const qrCodeDataUrl = await generateOtpAuthQrCode(otpauthUrl);
 
 			return ok(
-				{ secret, otpauthUrl },
+				{ secret, otpauthUrl, qrCodeDataUrl },
 				"Scan the QR with your authenticator and verify the code",
 			);
 		} catch (error) {

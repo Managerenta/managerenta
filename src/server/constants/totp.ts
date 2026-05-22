@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import QRCode from "qrcode";
 
 // RFC 4648 base32 alphabet (no padding for secrets)
 const BASE32_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
@@ -84,6 +85,16 @@ export function buildOtpAuthUrl({
 		period: String(STEP_SECONDS),
 	});
 	return `otpauth://totp/${label}?${params.toString()}`;
+}
+
+export async function generateOtpAuthQrCode(
+	otpauthUrl: string,
+): Promise<string> {
+	return QRCode.toDataURL(otpauthUrl, {
+		errorCorrectionLevel: "M",
+		margin: 1,
+		width: 240,
+	});
 }
 
 export function generateRecoveryCodes(count = 8): string[] {

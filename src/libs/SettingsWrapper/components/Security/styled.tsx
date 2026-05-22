@@ -171,6 +171,19 @@ export const SecurityStyled = styled(Box)`
 			color: var(--Black);
 		}
 
+		.setup-qr {
+			align-self: center;
+			padding: 8px;
+			background: #ffffff;
+			border-radius: 8px;
+			border: 1px solid var(--Border-Subtle);
+			line-height: 0;
+
+			img {
+				display: block;
+			}
+		}
+
 		.setup-secret {
 			font-family: monospace;
 			font-size: 13px;
