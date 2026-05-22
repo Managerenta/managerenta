@@ -1,13 +1,7 @@
 "use client";
 import Link from "next/link";
-import {
-	// ComponentProps,
-	type CSSProperties,
-	// MouseEventHandler,
-	type ReactNode,
-	useMemo,
-} from "react";
-import { ButtonStyled } from "./styled";
+import { type CSSProperties, type ReactNode, useMemo } from "react";
+import { type ButtonSize, ButtonStyled, type ButtonVariant } from "./styled";
 
 interface IProps {
 	style?: CSSProperties;
@@ -19,24 +13,15 @@ interface IProps {
 	height?: string;
 	border?: string;
 	borderRadius?: string;
-	// handleClick?: MouseEventHandler<HTMLButtonElement>;
+	variant?: ButtonVariant;
+	size?: ButtonSize;
+	fullWidth?: boolean;
+	leadingIcon?: ReactNode;
+	trailingIcon?: ReactNode;
 	handleClick?: any;
 	disabled?: boolean;
 	url?: string;
 }
-
-// type IProps = ComponentProps<"button"> & {
-// 	title?: ReactNode;
-// 	color?: string;
-// 	background?: string;
-// 	width?: string;
-// 	height?: string;
-// 	border?: string;
-// 	borderRadius?: string;
-// 	handleClick?: any;
-// 	disabled?: boolean;
-// 	url?: string;
-// };
 
 export default function Button({
 	style,
@@ -48,6 +33,11 @@ export default function Button({
 	width,
 	height,
 	borderRadius,
+	variant,
+	size,
+	fullWidth,
+	leadingIcon,
+	trailingIcon,
 	handleClick,
 	disabled,
 	url,
@@ -61,14 +51,17 @@ export default function Button({
 				$background={background}
 				$border={border}
 				$color={color}
+				$variant={variant}
+				$size={size}
+				$fullWidth={fullWidth}
 				type={type ?? "button"}
-				style={{
-					...style,
-				}}
+				style={style}
 				onClick={handleClick}
 				disabled={disabled}
 			>
+				{leadingIcon}
 				{title}
+				{trailingIcon}
 			</ButtonStyled>
 		);
 	}, [
@@ -81,6 +74,11 @@ export default function Button({
 		background,
 		color,
 		border,
+		variant,
+		size,
+		fullWidth,
+		leadingIcon,
+		trailingIcon,
 		handleClick,
 		disabled,
 	]);
@@ -89,9 +87,9 @@ export default function Button({
 		<>
 			{url ? (
 				<Link
-					href={url as string}
+					href={url}
 					target="_blank"
-					style={{ color: "inherit", width: "100%", height: "auto" }}
+					style={{ color: "inherit", display: "inline-flex" }}
 				>
 					{btn}
 				</Link>

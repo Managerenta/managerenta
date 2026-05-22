@@ -9,18 +9,18 @@ export const MainStyled = styled(Box)<{
 }>`
 	width: 100%;
 	height: auto;
-	font-family: roboto;
+	font-family: var(--mr-font-sans);
 
 	.body-wrapper {
 		height: auto;
 		min-height: 100vh;
-		color: ${(props) => props.$color || "var(--White)"};
-		background: ${({ $background }) => $background || "var(--dark)"};
+		color: ${(props) => props.$color || "var(--mr-color-text)"};
+		background: ${({ $background }) =>
+			$background || "var(--mr-color-page)"};
 
 		.body-container-max-width {
 			width: 100%;
 			height: 100%;
-			/* max-width: 2560px; */
 			margin: 0 auto;
 			min-height: calc(100vh - ${({ $navHeight }) => $navHeight});
 		}
