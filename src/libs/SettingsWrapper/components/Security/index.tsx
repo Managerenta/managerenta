@@ -1,10 +1,19 @@
 "use client";
+import { startRegistration } from "@simplewebauthn/browser";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import { Box, Button, Input, Text } from "@/components";
 import { api, fetcher, getErrorMessage } from "@/constants";
 import { useToast } from "@/hooks";
 import { SecurityStyled } from "./styled";
+
+interface PasskeyRow {
+	credentialId: string;
+	label: string;
+	transports?: string[];
+	createdAt?: string;
+	lastUsedAt?: string;
+}
 
 function getStrengthInfo(password: string): {
 	label: string;
@@ -48,9 +57,21 @@ function Security() {
 	const [disablePassword, setDisablePassword] = useState("");
 	const [disableLoading, setDisableLoading] = useState(false);
 
+	// Passkey state
+	const [passkeyLabel, setPasskeyLabel] = useState("");
+	const [passkeyAddLoading, setPasskeyAddLoading] = useState(false);
+	const [passkeyRemovingId, setPasskeyRemovingId] = useState<string | null>(
+		null,
+	);
+
 	const { data: profile, mutate } = useSWR<{
 		data?: { security?: { twoFactorEnabled?: boolean } };
 	}>("/api/users/user-profile", fetcher, { revalidateOnMount: true });
+
+	const { data: passkeysData, mutate: mutatePasskeys } = useSWR<{
+		data?: { passkeys?: PasskeyRow[] };
+	}>("/api/users/passkeys", fetcher, { revalidateOnMount: true });
+	const passkeys = passkeysData?.data?.passkeys ?? [];
 
 	const twoFactorEnabled = profile?.data?.security?.twoFactorEnabled ?? false;
 
@@ -187,6 +208,82 @@ function Security() {
 
 	// Reset recovery codes view after a navigation away
 	useEffect(() => () => setRecoveryCodes(null), []);
+
+	const handleAddPasskey = useCallback(async () => {
+		// Browsers without WebAuthn (very old, or some embedded views) — fail
+		// fast with a useful message instead of letting the lib throw a
+		// cryptic "credentials.create is not a function".
+		if (
+			typeof window === "undefined" ||
+			!window.PublicKeyCredential ||
+			typeof navigator.credentials?.create !== "function"
+		) {
+			toast.push("Passkeys aren't supported in this browser", {
+				type: "warn",
+			});
+			return;
+		}
+		setPasskeyAddLoading(true);
+		try {
+			const trimmedLabel = passkeyLabel.trim();
+			const optsRes = await api().post(
+				"/api/users/passkeys/register/options",
+				trimmedLabel ? { label: trimmedLabel } : {},
+				{ baseURL: "" },
+			);
+			const optionsJSON = optsRes.data?.data;
+			if (!optionsJSON) throw new Error("Bad response from server");
+
+			// startRegistration prompts the browser/OS for the user gesture
+			// and returns the attestation we forward to /verify.
+			const attestation = await startRegistration({ optionsJSON });
+
+			await api().post(
+				"/api/users/passkeys/register/verify",
+				{
+					response: attestation,
+					...(trimmedLabel ? { label: trimmedLabel } : {}),
+				},
+				{ baseURL: "" },
+			);
+			setPasskeyLabel("");
+			await mutatePasskeys();
+			toast.push("Passkey added", { type: "success" });
+		} catch (err) {
+			// User-cancelled is a DOMException with name 'NotAllowedError' —
+			// it's expected and shouldn't surface as a scary error.
+			if (err instanceof DOMException && err.name === "NotAllowedError") {
+				toast.push("Passkey setup cancelled", { type: "warn" });
+			} else {
+				toast.push(getErrorMessage(err, "Failed to add passkey"), {
+					type: "warn",
+				});
+			}
+		} finally {
+			setPasskeyAddLoading(false);
+		}
+	}, [passkeyLabel, mutatePasskeys, toast]);
+
+	const handleRemovePasskey = useCallback(
+		async (credentialId: string) => {
+			setPasskeyRemovingId(credentialId);
+			try {
+				await api().delete(
+					`/api/users/passkeys/${encodeURIComponent(credentialId)}`,
+					{ baseURL: "" },
+				);
+				await mutatePasskeys();
+				toast.push("Passkey removed", { type: "success" });
+			} catch (err) {
+				toast.push(getErrorMessage(err, "Failed to remove passkey"), {
+					type: "warn",
+				});
+			} finally {
+				setPasskeyRemovingId(null);
+			}
+		},
+		[mutatePasskeys, toast],
+	);
 
 	return (
 		<SecurityStyled>
@@ -393,6 +490,92 @@ function Security() {
 							</Box>
 						</Box>
 					)}
+
+					<Box className="passkey-section">
+						<Text className="sub-title">Passkeys</Text>
+						<Text className="setup-step">
+							Use a passkey (Face ID, Touch ID, Windows Hello, or
+							a hardware key) to sign in without a password, or as
+							your second factor.
+						</Text>
+
+						{passkeys.length > 0 && (
+							<Box className="passkey-list">
+								{passkeys.map((pk) => (
+									<Box
+										key={pk.credentialId}
+										className="passkey-row"
+									>
+										<Box className="passkey-info">
+											<Text className="passkey-name">
+												{pk.label}
+											</Text>
+											{pk.lastUsedAt && (
+												<Text className="passkey-meta">
+													Last used{" "}
+													{new Date(
+														pk.lastUsedAt,
+													).toLocaleDateString()}
+												</Text>
+											)}
+										</Box>
+										<Button
+											type="button"
+											title={
+												passkeyRemovingId ===
+												pk.credentialId
+													? "Removing…"
+													: "Remove"
+											}
+											handleClick={() =>
+												handleRemovePasskey(
+													pk.credentialId,
+												)
+											}
+											disabled={
+												passkeyRemovingId ===
+												pk.credentialId
+											}
+											background="transparent"
+											color="#ef4444"
+											border="1px solid #ef4444"
+											borderRadius="6px"
+										/>
+									</Box>
+								))}
+							</Box>
+						)}
+
+						<Box className="form-field">
+							<Text className="field-label">
+								Name this passkey (optional)
+							</Text>
+							<Input
+								type="text"
+								value={passkeyLabel}
+								placeholder="e.g. MacBook Touch ID"
+								onChange={(e) =>
+									setPasskeyLabel(e.target.value)
+								}
+							/>
+						</Box>
+
+						<Box className="setup-btn">
+							<Button
+								type="button"
+								title={
+									passkeyAddLoading
+										? "Waiting for authenticator…"
+										: "Add a passkey"
+								}
+								handleClick={handleAddPasskey}
+								disabled={passkeyAddLoading}
+								background="var(--Main-Blue)"
+								color="white"
+								borderRadius="8px"
+							/>
+						</Box>
+					</Box>
 				</Box>
 			</Box>
 		</SecurityStyled>

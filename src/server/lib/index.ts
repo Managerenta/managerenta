@@ -7,3 +7,4 @@ export * from "./handler";
 export * from "./rateLimit";
 export * from "./response";
 export * from "./upload";
+export * from "./webauthn";

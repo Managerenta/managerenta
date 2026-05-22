@@ -200,6 +200,54 @@ export const SecurityStyled = styled(Box)`
 			text-decoration: underline;
 		}
 
+		.passkey-section {
+			display: flex;
+			flex-direction: column;
+			gap: 12px;
+			padding: 14px;
+			background: var(--Surface-Page);
+			border-radius: 10px;
+		}
+
+		.passkey-list {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+
+		.passkey-row {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 10px 12px;
+			background: var(--Surface-Card);
+			border-radius: 8px;
+			border: 1px solid var(--Border-Subtle);
+		}
+
+		.passkey-info {
+			display: flex;
+			flex-direction: column;
+			gap: 2px;
+		}
+
+		.passkey-name {
+			font-size: 13px;
+			font-weight: 600;
+			color: var(--Black);
+		}
+
+		.passkey-meta {
+			font-size: 11px;
+			color: #94a3b8;
+		}
+
+		.passkey-row button {
+			padding: 6px 14px;
+			font-size: 12px;
+			font-weight: 500;
+		}
+
 		.recovery-list {
 			display: grid;
 			grid-template-columns: 1fr 1fr;

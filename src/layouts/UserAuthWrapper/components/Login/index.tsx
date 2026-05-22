@@ -1,4 +1,5 @@
 "use client";
+import { startAuthentication } from "@simplewebauthn/browser";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -9,7 +10,7 @@ import {
 	useReducer,
 	useState,
 } from "react";
-import { FaLock, FaShieldAlt, FaUser } from "react-icons/fa";
+import { FaFingerprint, FaLock, FaShieldAlt, FaUser } from "react-icons/fa";
 import { GrSecure } from "react-icons/gr";
 import { Box, Button, Input, Loader, Text } from "@/components";
 import { api, getErrorMessage, safeRedirect } from "@/constants";
@@ -17,6 +18,14 @@ import { AppContextProvider, useToast } from "@/hooks";
 import AlternativeSeparator from "@/layouts/AlternativeSeparator";
 import Header from "../Header";
 import { LoginStyled } from "./styled";
+
+function isPasskeySupported(): boolean {
+	return (
+		typeof window !== "undefined" &&
+		!!window.PublicKeyCredential &&
+		typeof navigator.credentials?.get === "function"
+	);
+}
 
 type Step = "credentials" | "two-factor";
 
@@ -154,6 +163,111 @@ function Login() {
 		dispatch({ type: "RESET_TWO_FACTOR" });
 	};
 
+	// === Passwordless passkey sign-in ===================================
+	// Browser provides the userHandle via the credential — we never send
+	// the email up front (no enumeration). The server looks the user up
+	// by credentialId on /verify.
+	const handlePasskeyLogin = async () => {
+		if (!isPasskeySupported()) {
+			toast.push("Passkeys aren't supported in this browser", {
+				type: "warn",
+			});
+			return;
+		}
+		setIsLoading(true);
+		try {
+			const optsRes = await api().post(
+				"/api/auth/login/passkey/options",
+				// Optional: pass the email if the user has typed it. Both
+				// modes work; this just produces a more targeted browser
+				// prompt when we know who's signing in.
+				state.email ? { email: state.email } : {},
+				{ baseURL: "" },
+			);
+			const data = optsRes.data?.data;
+			if (!data?.options || !data?.challengeId) {
+				throw new Error("Bad response from server");
+			}
+			const assertion = await startAuthentication({
+				optionsJSON: data.options,
+			});
+			await api().post(
+				"/api/auth/login/passkey/verify",
+				{ challengeId: data.challengeId, response: assertion },
+				{ baseURL: "" },
+			);
+			await completeLogin();
+		} catch (err) {
+			if (err instanceof DOMException && err.name === "NotAllowedError") {
+				toast.push("Passkey sign-in cancelled", { type: "warn" });
+			} else {
+				toast.push(getErrorMessage(err, "Passkey sign-in failed"), {
+					type: "warn",
+				});
+			}
+			setIsLoading(false);
+		}
+	};
+
+	// === Passkey at the 2FA step ========================================
+	// User has already proved their password; the server pinned them via
+	// the ticket. We mint a fresh challenge scoped to that ticket and
+	// submit the assertion through the existing /2fa endpoint.
+	const handlePasskeyTwoFactor = async () => {
+		if (!twoFactorTicket) {
+			toast.push("Session expired — please sign in again.", {
+				type: "warn",
+			});
+			setStep("credentials");
+			return;
+		}
+		if (!isPasskeySupported()) {
+			toast.push("Passkeys aren't supported in this browser", {
+				type: "warn",
+			});
+			return;
+		}
+		setIsLoading(true);
+		try {
+			const optsRes = await api().post(
+				"/api/auth/login/2fa/passkey/options",
+				{ ticket: twoFactorTicket },
+				{ baseURL: "" },
+			);
+			const options = optsRes.data?.data?.options;
+			if (!options) throw new Error("Bad response from server");
+			if (!options.allowCredentials?.length) {
+				toast.push(
+					"No passkeys registered. Use your authenticator code instead.",
+					{ type: "warn" },
+				);
+				setIsLoading(false);
+				return;
+			}
+			const assertion = await startAuthentication({
+				optionsJSON: options,
+			});
+			await api().post(
+				"/api/auth/login/2fa",
+				{ ticket: twoFactorTicket, passkeyResponse: assertion },
+				{ baseURL: "" },
+			);
+			await completeLogin();
+		} catch (err) {
+			if (err instanceof DOMException && err.name === "NotAllowedError") {
+				toast.push("Passkey verification cancelled", { type: "warn" });
+			} else {
+				toast.push(
+					getErrorMessage(err, "Passkey verification failed"),
+					{
+						type: "warn",
+					},
+				);
+			}
+			setIsLoading(false);
+		}
+	};
+
 	const renderedInputFields = useMemo(() => {
 		const inputs: {
 			label: string;
@@ -270,6 +384,17 @@ function Login() {
 					/>
 				</form>
 
+				<Button
+					type="button"
+					title="Use a passkey instead"
+					handleClick={handlePasskeyTwoFactor}
+					disabled={isLoading}
+					background="transparent"
+					color="var(--Main-Blue)"
+					border="1px solid var(--Main-Blue)"
+					borderRadius="8px"
+				/>
+
 				<Box className="options">
 					<Box
 						className="forgot-password"
@@ -317,6 +442,18 @@ function Login() {
 				type="submit"
 				handleClick={handleCredentialsSubmit}
 				disabled={isLoading}
+			/>
+
+			<Button
+				type="button"
+				title="Sign in with a passkey"
+				handleClick={handlePasskeyLogin}
+				disabled={isLoading}
+				background="transparent"
+				color="var(--Main-Blue)"
+				border="1px solid var(--Main-Blue)"
+				borderRadius="8px"
+				leadingIcon={<FaFingerprint />}
 			/>
 
 			<AlternativeSeparator />

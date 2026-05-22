@@ -27,11 +27,39 @@ export interface IUserReminderSettings {
 	leaseExpiryLeadDays: number;
 }
 
+export interface IUserPasskey {
+	// base64url-encoded credentialId returned by the authenticator. Indexed
+	// because passwordless login looks up the user by this value.
+	credentialId: string;
+	// base64url-encoded COSE public key the server stores once and uses on
+	// every subsequent assertion.
+	publicKey: string;
+	// Authenticator-reported signature counter. Strictly increasing per spec
+	// — a non-increase signals a cloned credential.
+	counter: number;
+	// Transport hints the browser returned at registration. Echoed back in
+	// allowCredentials so the next ceremony filters out e.g. USB when the
+	// user only has the platform authenticator.
+	transports?: string[];
+	// User-facing label so multiple passkeys can be distinguished in the UI.
+	label: string;
+	// AAGUID identifies the authenticator make/model (when attestation is
+	// available). Not used for auth — purely informational.
+	aaguid?: string;
+	// Marks whether the credential is "discoverable" / "resident" — i.e.
+	// usable in a username-less / autofill ceremony.
+	backupEligible?: boolean;
+	backupState?: boolean;
+	createdAt: Date;
+	lastUsedAt?: Date;
+}
+
 export interface IUserSecurity {
 	twoFactorEnabled: boolean;
 	totpSecret?: string;
 	pendingTotpSecret?: string;
 	recoveryCodes?: string[];
+	passkeys?: IUserPasskey[];
 	emailVerified: boolean;
 	emailVerificationToken?: string;
 	emailVerificationExpires?: Date;

@@ -18,6 +18,9 @@ import {
 	ErrInvalidURL,
 	ErrMissingFile,
 	ErrMustKeepOneAdmin,
+	ErrPasskeyChallengeExpired,
+	ErrPasskeyNotFound,
+	ErrPasskeyVerificationFailed,
 	ErrPropertyNotFound,
 	ErrResourceAlreadyExist,
 	ErrResourceNotFound,
@@ -64,6 +67,8 @@ export function getErrorResponse(error: Error): IErrorResponse {
 		case ErrInvalidCredentials:
 		case Err2faTicketInvalid:
 		case Err2faCodeInvalid:
+		case ErrPasskeyChallengeExpired:
+		case ErrPasskeyVerificationFailed:
 			code = 401;
 			break;
 
@@ -75,6 +80,7 @@ export function getErrorResponse(error: Error): IErrorResponse {
 		case ErrGetFileLink:
 		case ErrResourceNotFound:
 		case ErrUserNotFound:
+		case ErrPasskeyNotFound:
 		case ErrPropertyNotFound:
 		case ErrUnitNotFound:
 		case ErrTenantNotFound:

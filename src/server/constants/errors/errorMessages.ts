@@ -26,6 +26,13 @@ export const Err2faTicketInvalid: Error = new Error(
 	"Two-factor challenge expired. Please sign in again.",
 );
 export const Err2faCodeInvalid: Error = new Error("Invalid two-factor code");
+export const ErrPasskeyChallengeExpired: Error = new Error(
+	"Passkey challenge expired. Please try again.",
+);
+export const ErrPasskeyVerificationFailed: Error = new Error(
+	"Passkey verification failed",
+);
+export const ErrPasskeyNotFound: Error = new Error("Passkey not found");
 
 // 403 error codes
 export const ErrCannotRemoveOwner: Error = new Error(
