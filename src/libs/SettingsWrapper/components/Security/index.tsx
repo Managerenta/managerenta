@@ -39,6 +39,7 @@ function Security() {
 	// 2FA setup state
 	const [setupSecret, setSetupSecret] = useState<string | null>(null);
 	const [setupUri, setSetupUri] = useState<string | null>(null);
+	const [setupQrCode, setSetupQrCode] = useState<string | null>(null);
 	const [totpCode, setTotpCode] = useState("");
 	const [recoveryCodes, setRecoveryCodes] = useState<string[] | null>(null);
 	const [setupLoading, setSetupLoading] = useState(false);
@@ -118,6 +119,7 @@ function Security() {
 			);
 			setSetupSecret(res.data?.data?.secret ?? null);
 			setSetupUri(res.data?.data?.otpauthUrl ?? null);
+			setSetupQrCode(res.data?.data?.qrCodeDataUrl ?? null);
 		} catch (err) {
 			toast.push(getErrorMessage(err, "Failed to start 2FA setup"), {
 				type: "warn",
@@ -144,6 +146,7 @@ function Security() {
 			setRecoveryCodes(res.data?.data?.recoveryCodes ?? []);
 			setSetupSecret(null);
 			setSetupUri(null);
+			setSetupQrCode(null);
 			setTotpCode("");
 			await mutate();
 			toast.push("Two-factor authentication enabled", {
@@ -289,8 +292,20 @@ function Security() {
 								1Password, Authy).
 							</Text>
 							<Text className="setup-step">
-								2. Scan or paste:
+								2. Scan the QR code, or enter the secret
+								manually:
 							</Text>
+							{setupQrCode && (
+								<Box className="setup-qr">
+									{/** biome-ignore lint/performance/noImgElement: data URL, not a remote asset */}
+									<img
+										src={setupQrCode}
+										alt="Two-factor authentication QR code"
+										width={200}
+										height={200}
+									/>
+								</Box>
+							)}
 							<code className="setup-secret">{setupSecret}</code>
 							{setupUri && (
 								<a
