@@ -42,6 +42,7 @@ yarn-error.log*
 /playwright-report/
 /playwright/.cache/
 .design-snaps
+tmp-playwright
 
 # typescript
 *.tsbuildinfo

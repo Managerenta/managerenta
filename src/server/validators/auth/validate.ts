@@ -11,6 +11,17 @@ export const loginBodySchema = zod
 	})
 	.strict();
 
+const passkeyAssertionSchema = zod
+	.object({
+		id: zod.string().min(1),
+		rawId: zod.string().min(1),
+		response: zod.unknown(),
+		type: zod.literal("public-key"),
+		clientExtensionResults: zod.unknown().optional(),
+		authenticatorAttachment: zod.string().optional(),
+	})
+	.passthrough();
+
 export const loginTwoFactorBodySchema = zod
 	.object({
 		ticket: zod.string().min(20).max(2048),
@@ -19,8 +30,10 @@ export const loginTwoFactorBodySchema = zod
 			.regex(/^\d{6}$/)
 			.optional(),
 		recoveryCode: zod.string().min(8).max(64).optional(),
+		passkeyResponse: passkeyAssertionSchema.optional(),
 	})
 	.strict()
-	.refine((d) => !!d.totpToken || !!d.recoveryCode, {
-		message: "Provide either a TOTP token or a recovery code.",
+	.refine((d) => !!d.totpToken || !!d.recoveryCode || !!d.passkeyResponse, {
+		message:
+			"Provide a TOTP token, a recovery code, or a passkey response.",
 	});

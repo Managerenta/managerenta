@@ -1,17 +1,23 @@
+import { verifyAuthenticationResponse } from "@simplewebauthn/server";
 import {
 	Err2faCodeInvalid,
 	Err2faTicketInvalid,
 	ErrInvalidAction,
 	ErrInvalidFields,
+	ErrPasskeyChallengeExpired,
+	ErrPasskeyVerificationFailed,
 	verifyTwoFactorTicket,
 } from "@/server/constants";
 import { verifyTotpToken } from "@/server/constants/totp";
 import {
 	applyRateLimitHeaders,
+	consumeChallenge,
 	created,
 	enforceRateLimit,
 	fail,
 	getClientIp,
+	getExpectedOrigins,
+	getRpId,
 	handleError,
 	setAuthCookies,
 	withApiHandler,
@@ -22,6 +28,14 @@ import {
 	updateUserRawDB,
 } from "@/server/models";
 import { loginTwoFactorBodySchema } from "@/server/validators/auth/validate";
+
+function base64UrlToUint8(s: string): Uint8Array<ArrayBuffer> {
+	const buf = Buffer.from(s, "base64url");
+	const ab = new ArrayBuffer(buf.byteLength);
+	const out = new Uint8Array(ab);
+	out.set(buf);
+	return out;
+}
 
 export const runtime = "nodejs";
 
@@ -64,12 +78,19 @@ export const POST = withApiHandler(
 			}
 
 			const secrets = await getUserSecretsDB({ id: ticket.userId });
-			if (!secrets?.totpSecret) throw Err2faTicketInvalid;
+			// The user must have *some* 2FA material registered. Either a
+			// TOTP secret (the traditional flow) or at least one passkey is
+			// enough — the password step already proved the account.
+			if (!secrets?.totpSecret && !(secrets?.passkeys?.length ?? 0)) {
+				throw Err2faTicketInvalid;
+			}
 
 			let consumedRecoveryIndex = -1;
+			let usedPasskeyCredentialId: string | null = null;
+			let newPasskeyCounter = 0;
 			let isValid = false;
 
-			if (parsed.data.totpToken) {
+			if (parsed.data.totpToken && secrets?.totpSecret) {
 				isValid = verifyTotpToken(
 					secrets.totpSecret,
 					parsed.data.totpToken,
@@ -78,11 +99,60 @@ export const POST = withApiHandler(
 
 			if (!isValid && parsed.data.recoveryCode) {
 				const candidate = parsed.data.recoveryCode.trim().toLowerCase();
-				const codes = secrets.recoveryCodes ?? [];
+				const codes = secrets?.recoveryCodes ?? [];
 				consumedRecoveryIndex = codes.findIndex(
 					(c) => c.toLowerCase() === candidate,
 				);
 				if (consumedRecoveryIndex >= 0) isValid = true;
+			}
+
+			// Passkey path — verify the assertion against the challenge we
+			// stashed in the matching /2fa/passkey/options call. The ticket
+			// keys the challenge so a client that skipped that step (or
+			// whose challenge has expired) fails closed.
+			if (!isValid && parsed.data.passkeyResponse) {
+				const credentialId = parsed.data.passkeyResponse.id;
+				const passkey = (secrets?.passkeys ?? []).find(
+					(p) => p.credentialId === credentialId,
+				);
+				if (!passkey) throw ErrPasskeyVerificationFailed;
+
+				const stored = await consumeChallenge(
+					"2fa",
+					parsed.data.ticket,
+				);
+				if (!stored) throw ErrPasskeyChallengeExpired;
+
+				const verification = await verifyAuthenticationResponse({
+					// biome-ignore lint/suspicious/noExplicitAny: SimpleWebAuthn
+					// re-validates the inner JSON shape itself.
+					response: parsed.data.passkeyResponse as any,
+					expectedChallenge: stored.challenge,
+					expectedOrigin: getExpectedOrigins(req),
+					expectedRPID: getRpId(),
+					credential: {
+						id: passkey.credentialId,
+						publicKey: base64UrlToUint8(passkey.publicKey),
+						counter: passkey.counter,
+						transports:
+							(passkey.transports as AuthenticatorTransport[]) ??
+							undefined,
+					},
+					requireUserVerification: false,
+				});
+				if (!verification.verified) {
+					throw ErrPasskeyVerificationFailed;
+				}
+				newPasskeyCounter = verification.authenticationInfo.newCounter;
+				// Same clone-detection guardrail as the passwordless verify.
+				if (
+					newPasskeyCounter < passkey.counter &&
+					newPasskeyCounter !== 0
+				) {
+					throw ErrPasskeyVerificationFailed;
+				}
+				usedPasskeyCredentialId = credentialId;
+				isValid = true;
 			}
 
 			if (!isValid) throw Err2faCodeInvalid;
@@ -90,13 +160,30 @@ export const POST = withApiHandler(
 			// Recovery codes are single-use — burn it before issuing the
 			// session so a race cannot redeem the same code twice.
 			if (consumedRecoveryIndex >= 0) {
-				const remaining = [...(secrets.recoveryCodes ?? [])];
+				const remaining = [...(secrets?.recoveryCodes ?? [])];
 				remaining.splice(consumedRecoveryIndex, 1);
 				await updateUserRawDB({
 					id: ticket.userId,
 					update: {
 						$set: { "security.recoveryCodes": remaining },
 					},
+				});
+			}
+
+			// Persist passkey counter so the next ceremony sees the bumped
+			// value. Same guardrail as the passwordless flow.
+			if (usedPasskeyCredentialId) {
+				await updateUserRawDB({
+					id: ticket.userId,
+					update: {
+						$set: {
+							"security.passkeys.$[p].counter": newPasskeyCounter,
+							"security.passkeys.$[p].lastUsedAt": new Date(),
+						},
+					},
+					arrayFilters: [
+						{ "p.credentialId": usedPasskeyCredentialId },
+					],
 				});
 			}
 

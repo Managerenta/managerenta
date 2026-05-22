@@ -164,6 +164,33 @@ const schema = new mongoose.Schema<IUser, UserModel, IUserMethods>(
 			totpSecret: { type: String, select: false },
 			pendingTotpSecret: { type: String, select: false },
 			recoveryCodes: { type: [String], select: false, default: [] },
+			passkeys: {
+				// Public-key material is non-secret (you can think of it as
+				// the credential's "address"), but we hide it from the
+				// default projection anyway because the rest of `security`
+				// is `select: false` and we don't want to leak credentialIds
+				// to clients via aggregations.
+				type: [
+					{
+						_id: false,
+						credentialId: { type: String, required: true },
+						publicKey: { type: String, required: true },
+						counter: { type: Number, default: 0 },
+						transports: { type: [String], default: [] },
+						label: { type: String, required: true },
+						aaguid: { type: String, required: false },
+						backupEligible: {
+							type: Boolean,
+							required: false,
+						},
+						backupState: { type: Boolean, required: false },
+						createdAt: { type: Date, default: () => new Date() },
+						lastUsedAt: { type: Date, required: false },
+					},
+				],
+				select: false,
+				default: [],
+			},
 			emailVerified: {
 				type: Boolean,
 				default: DEFAULT_USER_SECURITY.emailVerified,
@@ -180,6 +207,19 @@ const schema = new mongoose.Schema<IUser, UserModel, IUserMethods>(
 
 schema.index({ username: 1, email: 1 });
 schema.index({ "refreshTokens.deadline": 1 });
+// Passkey lookup-by-credentialId is the hot path on passwordless login.
+// `sparse: true` skips users with no passkeys; partial filter avoids the
+// "duplicate null" pitfall on a unique index over an array field.
+schema.index(
+	{ "security.passkeys.credentialId": 1 },
+	{
+		unique: true,
+		sparse: true,
+		partialFilterExpression: {
+			"security.passkeys.credentialId": { $exists: true },
+		},
+	},
+);
 
 schema.pre("save", async function () {
 	if (this.password && this.isModified("password")) {
@@ -208,6 +248,7 @@ schema.pre("aggregate", function () {
 			"security.totpSecret": 0,
 			"security.pendingTotpSecret": 0,
 			"security.recoveryCodes": 0,
+			"security.passkeys": 0,
 			"security.emailVerificationToken": 0,
 			"security.emailVerificationExpires": 0,
 			"security.passwordResetToken": 0,
@@ -430,10 +471,15 @@ export async function updateUserRawDB({
 	id,
 	update,
 	session,
+	arrayFilters,
 }: {
 	id: string;
 	update: Record<string, unknown>;
 	session?: ClientSession;
+	// Forwarded to MongoDB so callers using positional-filtered operators
+	// like `security.passkeys.$[p].counter` can scope which array element
+	// to touch. The allowlist on `update` still applies to every path.
+	arrayFilters?: Record<string, unknown>[];
 }): Promise<IUser | null> {
 	const timer = databaseResponseTimeHistogram.startTimer();
 	try {
@@ -444,7 +490,7 @@ export async function updateUserRawDB({
 		const result = await User.findByIdAndUpdate(
 			new mongoose.Types.ObjectId(id),
 			update,
-			{ session, returnDocument: "after" },
+			{ session, returnDocument: "after", arrayFilters },
 		);
 		if (!result) throw ErrUserNotFound;
 		timer({
@@ -520,6 +566,7 @@ export async function getUserSecretsDB({
 	totpSecret?: string;
 	pendingTotpSecret?: string;
 	recoveryCodes?: string[];
+	passkeys?: IUser["security"]["passkeys"];
 } | null> {
 	const timer = databaseResponseTimeHistogram.startTimer();
 	try {
@@ -528,7 +575,7 @@ export async function getUserSecretsDB({
 			null,
 			{ session },
 		).select(
-			"+security.totpSecret +security.pendingTotpSecret +security.recoveryCodes",
+			"+security.totpSecret +security.pendingTotpSecret +security.recoveryCodes +security.passkeys",
 		);
 		if (!result) return null;
 		timer({
@@ -542,12 +589,64 @@ export async function getUserSecretsDB({
 			totpSecret: sec?.totpSecret,
 			pendingTotpSecret: sec?.pendingTotpSecret,
 			recoveryCodes: sec?.recoveryCodes,
+			passkeys: sec?.passkeys,
 		};
 	} catch {
 		timer({
 			operation: IOperationType.Read,
 			collection: collectionName,
 			method: "getUserSecretsDB",
+			success: "false",
+		});
+		return null;
+	}
+}
+
+// Look up a user by one of their stored passkey credentialIds. Used by the
+// passwordless login flow: the browser hands us an assertion that names the
+// credentialId, and we have to find which user owns it. Returns the user
+// plus the matching passkey (caller needs the publicKey + counter to verify
+// the assertion).
+export async function getUserByPasskeyCredentialIdDB({
+	credentialId,
+	session,
+}: {
+	credentialId: string;
+	session?: ClientSession;
+}): Promise<{
+	user: IUser;
+	passkey: NonNullable<IUser["security"]["passkeys"]>[number];
+} | null> {
+	const timer = databaseResponseTimeHistogram.startTimer();
+	try {
+		const result = await User.findOne(
+			{
+				"security.passkeys.credentialId": credentialId,
+				deleted: false,
+			},
+			null,
+			{ session },
+		).select("+security.passkeys");
+		if (!result) return null;
+		const passkey = (result as unknown as IUser).security?.passkeys?.find(
+			(p) => p.credentialId === credentialId,
+		);
+		if (!passkey) return null;
+		timer({
+			operation: IOperationType.Read,
+			collection: collectionName,
+			method: "getUserByPasskeyCredentialIdDB",
+			success: "true",
+		});
+		return {
+			user: { ...result.toObject(), id: result.id } as unknown as IUser,
+			passkey,
+		};
+	} catch {
+		timer({
+			operation: IOperationType.Read,
+			collection: collectionName,
+			method: "getUserByPasskeyCredentialIdDB",
 			success: "false",
 		});
 		return null;
