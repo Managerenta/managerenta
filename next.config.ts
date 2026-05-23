@@ -48,8 +48,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
 	/* config options here */
-	output: "standalone",
-	allowedDevOrigins: ["192.168.18.10"],
+	// output: "standalone",
+	// allowedDevOrigins: ["192.168.18.10"],
 	reactStrictMode: true,
 	poweredByHeader: false,
 	productionBrowserSourceMaps: false,
@@ -68,18 +68,18 @@ const nextConfig: NextConfig = {
 		"prom-client",
 		"sharp",
 	],
-	async headers() {
-		return [
-			// {
-			// 	source: "/:path*",
-			// 	headers: securityHeaders,
-			// },
-			{
-				source: "/",
-				headers: [{ key: "cache-control", value: "no-cache" }],
-			},
-		];
-	},
+	// async headers() {
+	// 	return [
+	// 		// {
+	// 		// 	source: "/:path*",
+	// 		// 	headers: securityHeaders,
+	// 		// },
+	// 		{
+	// 			source: "/",
+	// 			headers: [{ key: "cache-control", value: "no-cache" }],
+	// 		},
+	// 	];
+	// },
 };
 
 export default nextConfig;
