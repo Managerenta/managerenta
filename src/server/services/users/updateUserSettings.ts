@@ -1,5 +1,6 @@
 import { updateUserRawDB } from "../../models";
 import type {
+	IUser,
 	IUserNotificationSettings,
 	IUserPreferences,
 	IUserReminderSettings,
@@ -30,6 +31,13 @@ export default async function updateUserSettings({
 	if (!result) return null;
 	const idStr =
 		typeof result._id === "string" ? result._id : String(result._id);
-	await invalidateCacheKeys({ id: idStr, email: result.email });
+	await invalidateCacheKeys({
+		id: idStr,
+		email: result.email,
+		// See invalidateCacheKeys: closes the invalidate-then-stale-write
+		// race that lets a concurrent SWR refetch poison the cache with
+		// pre-update data right after we cleared it.
+		prewarmWith: result as IUser,
+	});
 	return result;
 }

@@ -13,11 +13,34 @@ async function loginAsSeed(
 	await page.getByPlaceholder("Enter your password").fill(SEED_USER.password);
 	await page.getByRole("button", { name: /^sign in$/i }).click();
 	await page.waitForURL(/\/dashboard/, { timeout: 15000 });
+	// Wait for the Navbar's /api/users/user-profile fetch (the one that races
+	// with the test's PATCH) to land. `networkidle` doesn't settle with Next
+	// dev's HMR socket open, so we explicitly wait for the one response we
+	// care about.
+	await page
+		.waitForResponse(
+			(r) =>
+				r.url().includes("/api/users/user-profile") && r.status() < 500,
+			{ timeout: 5000 },
+		)
+		.catch(() => {
+			// Already settled before we attached, or the page chose not to
+			// refetch — either way, the cache pre-warm in updateUserSettings
+			// is the real fix and this is just belt-and-braces.
+		});
 }
 
 test.describe("Settings APIs (server-side)", () => {
 	test.beforeEach(async ({ page }) => {
 		await loginAsSeed(page);
+		// Force the canonical baseline before each test so a previous run that
+		// crashed mid-flight (and never executed its `reset` step) doesn't
+		// poison the next one. The reset itself goes through the same PATCH
+		// path under test, which is intentional — if PATCH is broken the test
+		// fails fast at the first assertion either way.
+		await page.context().request.patch("/api/users/preferences", {
+			data: { currency: "NGN", dateFormat: "DD/MM/YYYY" },
+		});
 	});
 
 	test("PATCH /api/users/preferences persists currency + dateFormat", async ({

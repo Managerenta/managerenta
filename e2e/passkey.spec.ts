@@ -1,4 +1,5 @@
 import { type CDPSession, expect, test } from "@playwright/test";
+import { resetSeedUserToBaseline } from "./support/reset-user";
 
 const SEED_USER = {
 	email: "abdullah@example.com",
@@ -54,6 +55,14 @@ async function clearAllPasskeys(
 }
 
 test.describe("Passkeys", () => {
+	// Mirror the 2FA spec: any failure mid-flow can leave registered passkeys
+	// that pollute later runs (every "passwordless sign-in" attempt would
+	// match a stale credential the test no longer remembers). Reset the user
+	// regardless of outcome.
+	test.afterEach(async () => {
+		await resetSeedUserToBaseline();
+	});
+
 	test("register a passkey, then sign in passwordless with it", async ({
 		page,
 	}) => {

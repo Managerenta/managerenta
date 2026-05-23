@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { resetOrgTestState } from "./support/reset-user";
 
 const SEED_USER = {
 	email: "abdullah@example.com",
@@ -22,6 +23,17 @@ async function login(
 }
 
 test.describe("Organizations", () => {
+	// Both users persist `currentOrganizationId` across runs and any prior
+	// failed run leaves the second user in an org scope, so her
+	// "personal-scope" assertions return the landlord's seeded properties.
+	// Force a clean baseline both before and after each test.
+	test.beforeEach(async () => {
+		await resetOrgTestState();
+	});
+	test.afterEach(async () => {
+		await resetOrgTestState();
+	});
+
 	test("create org, list mine, switch, invite, accept, scoped data", async ({
 		browser,
 	}) => {

@@ -1,4 +1,3 @@
-import { ErrInvalidAction } from "@/server/constants";
 import {
 	clearAuthCookies,
 	handleError,
@@ -21,12 +20,26 @@ export const POST = withApiHandler(
 	},
 	async ({ req }) => {
 		try {
-			const auth = await verifyAuthToken(req);
-			if (!auth.userId || !auth.token) throw ErrInvalidAction;
-			await setAuthCookies(auth.token);
-			return ok({ userId: auth.userId });
+			// "Is the user logged in?" — a question, not an error. Return 200
+			// with the answer in the body so the browser doesn't log a noisy
+			// "Failed to load resource: 400" on every public page load. The
+			// client (verifyUserLogin / AppContext) already reads the body
+			// to decide; the status was never the contract.
+			try {
+				const auth = await verifyAuthToken(req);
+				if (!auth.userId || !auth.token) {
+					return ok({ authenticated: false });
+				}
+				await setAuthCookies(auth.token);
+				return ok({ authenticated: true, userId: auth.userId });
+			} catch {
+				// Missing / invalid / expired tokens — treat as "not logged
+				// in" rather than an error. Clear any stale cookies so the
+				// browser stops sending them.
+				await clearAuthCookies();
+				return ok({ authenticated: false });
+			}
 		} catch (error) {
-			await clearAuthCookies();
 			return handleError(error);
 		}
 	},
