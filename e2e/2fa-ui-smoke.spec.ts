@@ -15,7 +15,7 @@ test.describe("2FA setup UI", () => {
 		await page
 			.getByPlaceholder("Enter your password")
 			.fill(SEED_USER.password);
-		await page.getByRole("button", { name: /sign in/i }).click();
+		await page.getByRole("button", { name: /^sign in$/i }).click();
 		await page.waitForURL(/\/dashboard/, { timeout: 15000 });
 
 		await page.goto("/settings");

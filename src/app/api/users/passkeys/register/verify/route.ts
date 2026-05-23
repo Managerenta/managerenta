@@ -44,11 +44,14 @@ export const POST = withApiHandler(
 			const stored = await consumeChallenge("reg", auth.userId);
 			if (!stored) throw ErrPasskeyChallengeExpired;
 
+			// SimpleWebAuthn re-validates the inner response shape itself, so
+			// we pass the zod-unknown body through as the RegistrationResponseJSON
+			// the lib expects (the zod schema deliberately leaves response fields
+			// opaque to avoid drifting with spec revisions).
 			const verification = await verifyRegistrationResponse({
-				// biome-ignore lint/suspicious/noExplicitAny: SimpleWebAuthn's
-				// RegistrationResponseJSON has narrowly-typed fields the
-				// zod schema deliberately leaves opaque; the lib re-validates.
-				response: parsed.data.response as any,
+				response: parsed.data.response as unknown as Parameters<
+					typeof verifyRegistrationResponse
+				>[0]["response"],
 				expectedChallenge: stored.challenge,
 				expectedOrigin: getExpectedOrigins(req),
 				expectedRPID: getRpId(),

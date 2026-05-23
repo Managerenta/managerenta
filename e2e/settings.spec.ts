@@ -11,7 +11,7 @@ async function loginAsSeed(
 	await page.goto("/login");
 	await page.getByPlaceholder("Enter your email").fill(SEED_USER.email);
 	await page.getByPlaceholder("Enter your password").fill(SEED_USER.password);
-	await page.getByRole("button", { name: /sign in/i }).click();
+	await page.getByRole("button", { name: /^sign in$/i }).click();
 	await page.waitForURL(/\/dashboard/, { timeout: 15000 });
 }
 
@@ -79,11 +79,12 @@ test.describe("Settings APIs (server-side)", () => {
 		const select = page.locator("select.pref-select").first();
 		await select.selectOption("GBP");
 
-		// Toast appears with success
-		await expect(page.locator(".Toastify__toast")).toContainText(
-			/preference saved/i,
-			{ timeout: 5000 },
-		);
+		// Toast appears with success. The toast container is rendered by the
+		// app's own useToast hook (styled-components, hashed classnames), so
+		// match by visible text rather than a brittle class.
+		await expect(page.getByText(/preference saved/i)).toBeVisible({
+			timeout: 5000,
+		});
 
 		// Verify persisted via API
 		const profile = await page

@@ -46,11 +46,9 @@ async function clearAllPasskeys(
 ): Promise<void> {
 	const list = await (await page.request.get("/api/users/passkeys")).json();
 	const items: { credentialId: string }[] = list?.data?.passkeys ?? [];
-	const origin = page.url().split("/").slice(0, 3).join("/");
 	for (const p of items) {
 		await page.request.delete(
 			`/api/users/passkeys/${encodeURIComponent(p.credentialId)}`,
-			{ headers: { Origin: origin } },
 		);
 	}
 }
@@ -93,11 +91,7 @@ test.describe("Passkeys", () => {
 			.toBeGreaterThan(0);
 
 		// Sign out and sign back in via passkey ----------------------
-		const origin = page.url().split("/").slice(0, 3).join("/");
-		await page.request.post("/api/auth/logout", {
-			data: {},
-			headers: { Origin: origin },
-		});
+		await page.request.delete("/api/auth/logout");
 		await page.context().clearCookies();
 
 		await page.goto("/login");
