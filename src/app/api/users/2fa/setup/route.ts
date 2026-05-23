@@ -22,11 +22,14 @@ export const POST = withApiHandler(
 			if (!user) throw ErrUserNotFound;
 
 			const secret = generateTotpSecret();
-			await updateUserRawDB({
+			const updated = await updateUserRawDB({
 				id: auth.userId,
 				update: { $set: { "security.pendingTotpSecret": secret } },
 			});
-			await invalidateCacheKeys({ id: auth.userId });
+			await invalidateCacheKeys({
+				id: auth.userId,
+				prewarmWith: updated ?? undefined,
+			});
 
 			const otpauthUrl = buildOtpAuthUrl({
 				secret,

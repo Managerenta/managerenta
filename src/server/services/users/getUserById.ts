@@ -17,6 +17,31 @@ export function clearInProcessCache(id?: string | object): void {
 	else inProcessCache.clear();
 }
 
+/**
+ * Replace the cached entry for `id` with `value`. Used after a mutation to
+ * pre-warm the cache with the known-good post-update doc, so that an
+ * in-flight read which started BEFORE the mutation can't write its stale
+ * snapshot back into the cache after our invalidation.
+ *
+ * Classic invalidate-then-read race: process A starts a read, snapshots a
+ * stale value; process B updates the row and invalidates; process A's read
+ * completes and writes its stale snapshot to the now-empty cache. By
+ * over-writing with the fresh value here, A's stale write is harmless —
+ * the next reader sees the fresh entry from this set, then A's later set
+ * (if it arrives) is a write of the same row again with what's at worst
+ * also-stale data, but the in-process Map uses last-writer-wins so the
+ * next mutation's set will correct it.
+ */
+export function setInProcessCache(
+	id: string,
+	value: Awaited<ReturnType<typeof getUserByIdDB>>,
+): void {
+	inProcessCache.set(id, {
+		value,
+		expiresAt: Date.now() + IN_PROCESS_TTL_MS,
+	});
+}
+
 export default async function getUserById({
 	id,
 	refreshCache,

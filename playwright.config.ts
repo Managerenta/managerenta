@@ -1,4 +1,29 @@
+import * as fs from "node:fs";
 import { defineConfig, devices } from "@playwright/test";
+
+// Playwright doesn't load `.env` automatically (unlike `next dev`), but some
+// of our test fixtures (e.g. e2e/support/reset-user.ts) need MONGODB_URI to
+// connect directly to MongoDB for state cleanup between tests. Parse the
+// .env file ourselves with minimal logic — we only need string values, no
+// expansion / interpolation.
+try {
+	const raw = fs.readFileSync(".env", "utf8");
+	for (const line of raw.split(/\r?\n/)) {
+		const m = line.match(/^\s*([A-Z_][A-Z0-9_]*)\s*=\s*(.*)\s*$/i);
+		if (!m) continue;
+		const key = m[1];
+		let val = m[2];
+		if (
+			(val.startsWith('"') && val.endsWith('"')) ||
+			(val.startsWith("'") && val.endsWith("'"))
+		) {
+			val = val.slice(1, -1);
+		}
+		if (process.env[key] === undefined) process.env[key] = val;
+	}
+} catch {
+	// .env is optional in CI where env vars come from the environment.
+}
 
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3001";
 

@@ -38,7 +38,7 @@ export const POST = withApiHandler(
 			// every device so a stolen session that quietly waited out the
 			// 2FA-enabled period cannot resurface.
 			// See SECURITY_REVIEW.md H7 / S4.
-			await updateUserRawDB({
+			const updated = await updateUserRawDB({
 				id: auth.userId,
 				update: {
 					$set: {
@@ -52,7 +52,10 @@ export const POST = withApiHandler(
 					},
 				},
 			});
-			await invalidateCacheKeys({ id: auth.userId });
+			await invalidateCacheKeys({
+				id: auth.userId,
+				prewarmWith: updated ?? undefined,
+			});
 
 			return ok(null, "Two-factor authentication disabled");
 		} catch (error) {

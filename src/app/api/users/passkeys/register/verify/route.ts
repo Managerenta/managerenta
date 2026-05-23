@@ -69,7 +69,7 @@ export const POST = withApiHandler(
 				parsed.data.label?.trim() ||
 				defaultLabel(req);
 
-			await updateUserRawDB({
+			const updated = await updateUserRawDB({
 				id: auth.userId,
 				update: {
 					$push: {
@@ -90,7 +90,10 @@ export const POST = withApiHandler(
 					},
 				},
 			});
-			await invalidateCacheKeys({ id: auth.userId });
+			await invalidateCacheKeys({
+				id: auth.userId,
+				prewarmWith: updated ?? undefined,
+			});
 
 			return ok(
 				{ credentialId, label },

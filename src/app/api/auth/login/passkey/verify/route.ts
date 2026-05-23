@@ -118,7 +118,7 @@ export const POST = withApiHandler(
 
 			// Persist updated counter + lastUsedAt. Use arrayFilters so we
 			// only touch the matching credential, not the whole array.
-			await updateUserRawDB({
+			const updated = await updateUserRawDB({
 				id: userId,
 				update: {
 					$set: {
@@ -128,7 +128,10 @@ export const POST = withApiHandler(
 				},
 				arrayFilters: [{ "p.credentialId": credentialId }],
 			});
-			await invalidateCacheKeys({ id: userId });
+			await invalidateCacheKeys({
+				id: userId,
+				prewarmWith: updated ?? undefined,
+			});
 
 			const session = await loginUserDB({ id: userId, ip });
 			if (!session) throw ErrInvalidAction;

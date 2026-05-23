@@ -29,7 +29,7 @@ export const DELETE = withApiHandler<RouteContext>(
 			);
 			if (!exists) throw ErrPasskeyNotFound;
 
-			await updateUserRawDB({
+			const updated = await updateUserRawDB({
 				id: auth.userId,
 				update: {
 					$pull: {
@@ -37,7 +37,10 @@ export const DELETE = withApiHandler<RouteContext>(
 					},
 				},
 			});
-			await invalidateCacheKeys({ id: auth.userId });
+			await invalidateCacheKeys({
+				id: auth.userId,
+				prewarmWith: updated ?? undefined,
+			});
 
 			return ok(null, "Passkey removed");
 		} catch (error) {

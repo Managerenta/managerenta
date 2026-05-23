@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { generateTotpToken } from "../src/server/constants/totp";
+import { resetSeedUserToBaseline } from "./support/reset-user";
 
 const SEED_USER = {
 	email: "abdullah@example.com",
@@ -17,6 +18,15 @@ async function loginAsSeed(
 }
 
 test.describe("2FA TOTP", () => {
+	// If any assertion in the 2FA flow fails after `enable` but before
+	// `disable`, the seed user is left with 2FA on — which then breaks every
+	// other spec because their UI logins land on the 2FA challenge page
+	// instead of /dashboard. Force a clean baseline regardless of test
+	// outcome.
+	test.afterEach(async () => {
+		await resetSeedUserToBaseline();
+	});
+
 	test("setup → enable with valid code → disable", async ({ page }) => {
 		await loginAsSeed(page);
 		const ctx = page.context();

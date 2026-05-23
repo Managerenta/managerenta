@@ -39,7 +39,7 @@ export const POST = withApiHandler(
 			// SECURITY: enabling 2FA must terminate every existing session so
 			// any pre-2FA token cannot bypass the new requirement.
 			// See SECURITY_REVIEW.md H7 / S4.
-			await updateUserRawDB({
+			const updated = await updateUserRawDB({
 				id: auth.userId,
 				update: {
 					$set: {
@@ -51,7 +51,10 @@ export const POST = withApiHandler(
 					$unset: { "security.pendingTotpSecret": 1 },
 				},
 			});
-			await invalidateCacheKeys({ id: auth.userId });
+			await invalidateCacheKeys({
+				id: auth.userId,
+				prewarmWith: updated ?? undefined,
+			});
 
 			return ok(
 				{ recoveryCodes },
