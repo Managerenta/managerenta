@@ -58,16 +58,16 @@ const nextConfig: NextConfig = {
 	},
 	// Heavy native / server-only deps must not be bundled into the
 	// route-handler bundles. They are loaded from node_modules at runtime.
-	serverExternalPackages: [
-		"@aws-sdk/client-s3",
-		"@aws-sdk/s3-request-presigner",
-		"bcrypt",
-		"cron",
-		"ioredis",
-		"mongoose",
-		"prom-client",
-		"sharp",
-	],
+	// serverExternalPackages: [
+	// 	"@aws-sdk/client-s3",
+	// 	"@aws-sdk/s3-request-presigner",
+	// 	"bcrypt",
+	// 	"cron",
+	// 	"ioredis",
+	// 	"mongoose",
+	// 	"prom-client",
+	// 	"sharp",
+	// ],
 	// async headers() {
 	// 	return [
 	// 		// {
