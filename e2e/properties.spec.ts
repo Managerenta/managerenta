@@ -11,7 +11,7 @@ async function loginAsSeed(
 	await page.goto("/login");
 	await page.getByPlaceholder("Enter your email").fill(SEED_USER.email);
 	await page.getByPlaceholder("Enter your password").fill(SEED_USER.password);
-	await page.getByRole("button", { name: /sign in/i }).click();
+	await page.getByRole("button", { name: /^sign in$/i }).click();
 	await page.waitForURL(/\/dashboard/, { timeout: 15000 });
 }
 

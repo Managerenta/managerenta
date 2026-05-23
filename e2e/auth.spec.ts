@@ -15,7 +15,7 @@ test.describe("Auth flow", () => {
 		await page
 			.getByPlaceholder("Enter your password")
 			.fill(SEED_USER.password);
-		await page.getByRole("button", { name: /sign in/i }).click();
+		await page.getByRole("button", { name: /^sign in$/i }).click();
 
 		await page.waitForURL(/\/dashboard/, { timeout: 15000 });
 		expect(page.url()).toContain("/dashboard");
@@ -34,7 +34,7 @@ test.describe("Auth flow", () => {
 		await page
 			.getByPlaceholder("Enter your password")
 			.fill("wrong-password");
-		await page.getByRole("button", { name: /sign in/i }).click();
+		await page.getByRole("button", { name: /^sign in$/i }).click();
 
 		// Give the request time to fail
 		await page.waitForTimeout(2000);
@@ -98,7 +98,7 @@ test.describe("Auth flow", () => {
 		await page
 			.getByPlaceholder("Enter your password")
 			.fill(SEED_USER.password);
-		await page.getByRole("button", { name: /sign in/i }).click();
+		await page.getByRole("button", { name: /^sign in$/i }).click();
 		await page.waitForURL(/\/dashboard/, { timeout: 15000 });
 
 		// Now hit /login again — proxy.ts should redirect to /dashboard

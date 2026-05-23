@@ -124,9 +124,11 @@ export const POST = withApiHandler(
 				if (!stored) throw ErrPasskeyChallengeExpired;
 
 				const verification = await verifyAuthenticationResponse({
-					// biome-ignore lint/suspicious/noExplicitAny: SimpleWebAuthn
-					// re-validates the inner JSON shape itself.
-					response: parsed.data.passkeyResponse as any,
+					// SimpleWebAuthn re-validates the inner JSON shape itself.
+					response: parsed.data
+						.passkeyResponse as unknown as Parameters<
+						typeof verifyAuthenticationResponse
+					>[0]["response"],
 					expectedChallenge: stored.challenge,
 					expectedOrigin: getExpectedOrigins(req),
 					expectedRPID: getRpId(),

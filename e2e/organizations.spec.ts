@@ -17,7 +17,7 @@ async function login(
 	await page.goto("/login");
 	await page.getByPlaceholder("Enter your email").fill(creds.email);
 	await page.getByPlaceholder("Enter your password").fill(creds.password);
-	await page.getByRole("button", { name: /sign in/i }).click();
+	await page.getByRole("button", { name: /^sign in$/i }).click();
 	await page.waitForURL(/\/dashboard/, { timeout: 15000 });
 }
 

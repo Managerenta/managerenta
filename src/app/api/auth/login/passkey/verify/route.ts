@@ -84,8 +84,9 @@ export const POST = withApiHandler(
 			if (!owner) throw ErrPasskeyVerificationFailed;
 
 			const verification = await verifyAuthenticationResponse({
-				// biome-ignore lint/suspicious/noExplicitAny: see register/verify
-				response: parsed.data.response as any,
+				response: parsed.data.response as unknown as Parameters<
+					typeof verifyAuthenticationResponse
+				>[0]["response"],
 				expectedChallenge: stored.challenge,
 				expectedOrigin: getExpectedOrigins(req),
 				expectedRPID: getRpId(),
