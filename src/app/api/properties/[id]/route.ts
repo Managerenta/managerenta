@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { ErrInvalidFields, ErrPropertyNotFound } from "@/server/constants";
 import {
 	assertWriteRole,
+	getClientIp,
 	handleError,
 	ok,
 	parseMultipart,
@@ -9,7 +10,12 @@ import {
 	withApiHandler,
 	withAuth,
 } from "@/server/lib";
-import { getPropertyById, updateProperty } from "@/server/services";
+import {
+	deleteProperty,
+	getPropertyById,
+	recordAuditEvent,
+	updateProperty,
+} from "@/server/services";
 import {
 	getPropertyByIdParamsSchema,
 	updatePropertyBodySchema,
@@ -62,6 +68,36 @@ export const PATCH = withApiHandler<RouteContext>(
 			if (!result) throw ErrPropertyNotFound;
 
 			return ok(result, "Property updated successfully");
+		} catch (error) {
+			return handleError(error);
+		}
+	}),
+);
+
+export const DELETE = withApiHandler<RouteContext>(
+	{ route: "/api/properties/[id]" },
+	withAuth<RouteContext>(async ({ req, auth, context }) => {
+		try {
+			assertWriteRole(auth);
+			const { id } = await context.params;
+			const params = getPropertyByIdParamsSchema.safeParse({ id });
+			if (!params.success) throw ErrInvalidFields;
+
+			const result = await deleteProperty({
+				id: params.data.id,
+				userId: auth.effectiveOwnerId,
+			});
+			void recordAuditEvent({
+				ownerId: auth.effectiveOwnerId,
+				actorId: auth.userId,
+				organizationId: auth.organizationId ?? undefined,
+				action: "delete",
+				entityType: "property",
+				entityId: params.data.id,
+				description: `Deleted property (cascaded ${result.units} units, ${result.tenants} tenants)`,
+				ip: getClientIp(req),
+			});
+			return ok(result, "Property deleted");
 		} catch (error) {
 			return handleError(error);
 		}

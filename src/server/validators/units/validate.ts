@@ -15,3 +15,14 @@ export const getUnitsQuerySchema = zod.object({
 	status: zod.enum(["Vacant", "Occupied"]).optional(),
 	limit: zod.coerce.number().int().min(1).max(100).optional(),
 });
+
+export const unitParamsSchema = zod
+	.object({ id: zod.string().min(1) })
+	.strict();
+
+export const updateUnitBodySchema = zod
+	.object({
+		name: zod.string().min(1).max(200).optional(),
+		rent: zod.coerce.number().min(0).optional(),
+	})
+	.strict();

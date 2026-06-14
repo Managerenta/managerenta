@@ -302,6 +302,42 @@ export async function updatePropertyDB({
 	}
 }
 
+export async function deletePropertyDB({
+	id,
+	userId,
+	session,
+}: {
+	id: string;
+	userId: string;
+	session?: ClientSession;
+}): Promise<IProperty | null> {
+	const timer = databaseResponseTimeHistogram.startTimer();
+	try {
+		const result = await Property.findOneAndUpdate(
+			{ _id: new mongoose.Types.ObjectId(id), userId, deleted: false },
+			{ $set: { deleted: true } },
+			{ returnDocument: "after", session },
+		);
+		if (!result) throw ErrPropertyNotFound;
+
+		timer({
+			operation: IOperationType.Update,
+			collection: collectionName,
+			method: "deletePropertyDB",
+			success: "true",
+		});
+		return { ...result.toObject(), id: result.id };
+	} catch {
+		timer({
+			operation: IOperationType.Update,
+			collection: collectionName,
+			method: "deletePropertyDB",
+			success: "false",
+		});
+		return null;
+	}
+}
+
 export async function incrementPropertyTotalUnitsDB({
 	id,
 	userId,
@@ -329,6 +365,43 @@ export async function incrementPropertyTotalUnitsDB({
 			operation: IOperationType.Update,
 			collection: collectionName,
 			method: "incrementPropertyTotalUnitsDB",
+			success: "false",
+		});
+	}
+}
+
+export async function decrementPropertyTotalUnitsDB({
+	id,
+	userId,
+	session,
+}: {
+	id: string;
+	userId: string;
+	session?: ClientSession;
+}): Promise<void> {
+	const timer = databaseResponseTimeHistogram.startTimer();
+	try {
+		await Property.findOneAndUpdate(
+			{
+				_id: new mongoose.Types.ObjectId(id),
+				userId,
+				deleted: false,
+				totalUnits: { $gt: 0 },
+			},
+			{ $inc: { totalUnits: -1 } },
+			{ session },
+		);
+		timer({
+			operation: IOperationType.Update,
+			collection: collectionName,
+			method: "decrementPropertyTotalUnitsDB",
+			success: "true",
+		});
+	} catch {
+		timer({
+			operation: IOperationType.Update,
+			collection: collectionName,
+			method: "decrementPropertyTotalUnitsDB",
 			success: "false",
 		});
 	}

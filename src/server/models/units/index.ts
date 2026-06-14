@@ -318,6 +318,141 @@ export async function getVacantUnitsDB({
 	}
 }
 
+export async function getUnitByIdDB({
+	id,
+	userId,
+	session,
+}: {
+	id: string;
+	userId: string;
+	session?: ClientSession;
+}): Promise<IUnitPopulated | null> {
+	const timer = databaseResponseTimeHistogram.startTimer();
+	try {
+		const result = (
+			await Unit.aggregate<IUnit>(
+				[
+					{
+						$match: {
+							_id: new mongoose.Types.ObjectId(id),
+							userId,
+						},
+					},
+					{ $limit: 1 },
+				],
+				{ session },
+			)
+		).at(0);
+
+		timer({
+			operation: IOperationType.Read,
+			collection: collectionName,
+			method: "getUnitByIdDB",
+			success: "true",
+		});
+
+		if (!result) return null;
+		return { ...result, tenant: await resolveTenant(result.tenant) };
+	} catch {
+		timer({
+			operation: IOperationType.Read,
+			collection: collectionName,
+			method: "getUnitByIdDB",
+			success: "false",
+		});
+		return null;
+	}
+}
+
+export async function updateUnitDB({
+	id,
+	userId,
+	payload,
+	session,
+}: {
+	id: string;
+	userId: string;
+	payload: Partial<Pick<IUnit, "name" | "rent">>;
+	session?: ClientSession;
+}): Promise<IUnit | null> {
+	const timer = databaseResponseTimeHistogram.startTimer();
+	try {
+		const result = await Unit.findOneAndUpdate(
+			{ _id: new mongoose.Types.ObjectId(id), userId, deleted: false },
+			{ $set: payload },
+			{ returnDocument: "after", session },
+		);
+		if (!result) return null;
+		timer({
+			operation: IOperationType.Update,
+			collection: collectionName,
+			method: "updateUnitDB",
+			success: "true",
+		});
+		return { ...result.toObject(), id: result.id };
+	} catch {
+		timer({
+			operation: IOperationType.Update,
+			collection: collectionName,
+			method: "updateUnitDB",
+			success: "false",
+		});
+		return null;
+	}
+}
+
+export async function deleteUnitDB({
+	id,
+	userId,
+	session,
+}: {
+	id: string;
+	userId: string;
+	session?: ClientSession;
+}): Promise<IUnit | null> {
+	const timer = databaseResponseTimeHistogram.startTimer();
+	try {
+		const result = await Unit.findOneAndUpdate(
+			{ _id: new mongoose.Types.ObjectId(id), userId, deleted: false },
+			{ $set: { deleted: true } },
+			{ returnDocument: "after", session },
+		);
+		if (!result) return null;
+		timer({
+			operation: IOperationType.Update,
+			collection: collectionName,
+			method: "deleteUnitDB",
+			success: "true",
+		});
+		return { ...result.toObject(), id: result.id };
+	} catch {
+		timer({
+			operation: IOperationType.Update,
+			collection: collectionName,
+			method: "deleteUnitDB",
+			success: "false",
+		});
+		return null;
+	}
+}
+
+export async function softDeleteUnitsByPropertyDB({
+	propertyId,
+	userId,
+	session,
+}: {
+	propertyId: string;
+	userId: string;
+	session?: ClientSession;
+}): Promise<number> {
+	const result = await Unit.updateMany(
+		{ propertyId, userId, deleted: false },
+		{ $set: { deleted: true } },
+		{ session },
+	);
+	return result.modifiedCount ?? 0;
+}
+
 export async function getUnitsByIdsDB({
 	ids,
 	userId,

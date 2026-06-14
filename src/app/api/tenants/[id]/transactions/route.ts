@@ -3,10 +3,11 @@ import {
 	assertWriteRole,
 	created,
 	handleError,
+	ok,
 	withApiHandler,
 	withAuth,
 } from "@/server/lib";
-import { addTransaction } from "@/server/services";
+import { addTransaction, listTransactions } from "@/server/services";
 import {
 	addTransactionBodySchema,
 	tenantParamsSchema,
@@ -15,6 +16,25 @@ import {
 export const runtime = "nodejs";
 
 type RouteContext = { params: Promise<{ id: string }> };
+
+export const GET = withApiHandler<RouteContext>(
+	{ route: "/api/tenants/[id]/transactions" },
+	withAuth<RouteContext>(async ({ auth, context }) => {
+		try {
+			const { id } = await context.params;
+			const params = tenantParamsSchema.safeParse({ id });
+			if (!params.success) throw ErrInvalidFields;
+
+			const result = await listTransactions({
+				tenantId: params.data.id,
+				userId: auth.effectiveOwnerId,
+			});
+			return ok(result);
+		} catch (error) {
+			return handleError(error);
+		}
+	}),
+);
 
 export const POST = withApiHandler<RouteContext>(
 	{ route: "/api/tenants/[id]/transactions" },
