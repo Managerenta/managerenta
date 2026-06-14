@@ -1,5 +1,6 @@
 export * from "./Context";
 export * from "./Dashboard";
+export * from "./Entity";
 export * from "./Notification";
 export * from "./Organization";
 export * from "./Property";

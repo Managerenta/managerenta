@@ -15,7 +15,7 @@ import {
 	FiUserPlus,
 	FiUsers,
 } from "react-icons/fi";
-import { Box, Button, Text } from "@/components";
+import { Box, Button, PushToggle, Text } from "@/components";
 import { getErrorMessage } from "@/constants";
 import { type INotificationRow, useNotifications, useToast } from "@/hooks";
 import { NotificationsWrapperStyled } from "./styled";
@@ -146,6 +146,7 @@ function NotificationsWrapper() {
 					</Text>
 				</Box>
 				<Box className="actions">
+					<PushToggle />
 					<Button
 						type="button"
 						title={

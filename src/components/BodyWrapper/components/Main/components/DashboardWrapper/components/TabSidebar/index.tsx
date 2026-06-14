@@ -4,10 +4,17 @@ import { usePathname, useRouter } from "next/navigation";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BsCalculator } from "react-icons/bs";
 import {
+	FiBarChart2,
+	FiBell,
+	FiBriefcase,
+	FiCalendar,
 	FiChevronDown,
+	FiFileText,
 	FiGrid,
+	FiList,
 	FiPlus,
 	FiSettings,
+	FiTool,
 	FiUsers,
 } from "react-icons/fi";
 import { HiOutlineBuildingOffice2 } from "react-icons/hi2";
@@ -24,10 +31,24 @@ const TAB_ITEMS = [
 	},
 	{ label: "tenants", value: "Tenants", icon: <FiUsers size={20} /> },
 	{
+		label: "maintenance",
+		value: "Maintenance",
+		icon: <FiTool size={20} />,
+	},
+	{ label: "vendors", value: "Vendors", icon: <FiBriefcase size={20} /> },
+	{
+		label: "documents",
+		value: "Documents",
+		icon: <FiFileText size={20} />,
+	},
+	{ label: "analytics", value: "Analytics", icon: <FiBarChart2 size={20} /> },
+	{ label: "calendar", value: "Calendar", icon: <FiCalendar size={20} /> },
+	{
 		label: "notifications",
 		value: "Notifications",
-		icon: <FiPlus size={20} />,
+		icon: <FiBell size={20} />,
 	},
+	{ label: "audit", value: "Audit", icon: <FiList size={20} /> },
 	{ label: "settings", value: "Settings", icon: <FiSettings size={20} /> },
 ];
 

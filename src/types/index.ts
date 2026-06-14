@@ -1,3 +1,4 @@
+export * from "./entities";
 export * from "./error";
 export * from "./property";
 export * from "./response";

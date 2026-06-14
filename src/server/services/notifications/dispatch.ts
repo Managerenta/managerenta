@@ -36,6 +36,25 @@ export function setNotificationTransport(t: Transport): void {
 	transportImpl = t;
 }
 
+/**
+ * Best-effort mirror of an in-app notification to the user's subscribed
+ * browsers. Imported lazily so the web-push dependency only loads when a
+ * notification is actually dispatched. Never throws.
+ */
+async function mirrorToWebPush(args: SendNotificationArgs): Promise<void> {
+	try {
+		const { sendWebPushToUser } = await import("../push");
+		await sendWebPushToUser({
+			userId: args.userId,
+			title: args.title,
+			body: args.body,
+			url: "/notifications",
+		});
+	} catch {
+		// push mirroring must never break notification delivery
+	}
+}
+
 export interface SendNotificationArgs {
 	userId: string;
 	tenantId?: string;
@@ -70,12 +89,15 @@ export async function sendNotification(args: SendNotificationArgs): Promise<{
 				meta: args.meta,
 			};
 
-			// in-app notifications are persisted only — no transport dispatch
+			// in-app notifications are persisted only — no transport dispatch.
+			// We also mirror them to the browser via web-push (no-op when the
+			// user has no push subscriptions or VAPID keys aren't configured).
 			if (channel === "in-app") {
 				const doc = await createNotificationDB({
 					...payload,
 					status: "sent",
 				});
+				void mirrorToWebPush(args);
 				return { doc, ok: !!doc };
 			}
 
