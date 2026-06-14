@@ -865,6 +865,96 @@ export async function reLoginUserWithRefreshTokenDB({
 	}
 }
 
+/**
+ * List the user's active sessions (refresh tokens). The raw refresh token is
+ * never exposed — each session is identified by a stable sha256 digest of the
+ * token so a client can request revocation without ever seeing the secret.
+ */
+export async function getUserSessionsDB({
+	id,
+	session,
+}: {
+	id: string;
+	session?: ClientSession;
+}): Promise<{ sessionId: string; deadline: Date; rawToken: string }[]> {
+	try {
+		const result = await User.findById(
+			new mongoose.Types.ObjectId(id),
+			null,
+			{ session },
+		).select("+refreshTokens");
+		if (!result) return [];
+		const { createHash } = await import("node:crypto");
+		return (result.refreshTokens ?? []).map((t) => ({
+			sessionId: createHash("sha256")
+				.update(t.refreshToken)
+				.digest("hex"),
+			deadline: t.deadline,
+			rawToken: t.refreshToken,
+		}));
+	} catch {
+		return [];
+	}
+}
+
+/**
+ * Revoke a single session by its sha256 session id. Returns true if a matching
+ * session was found and pulled.
+ */
+export async function revokeUserSessionDB({
+	id,
+	sessionId,
+	session,
+}: {
+	id: string;
+	sessionId: string;
+	session?: ClientSession;
+}): Promise<boolean> {
+	const sessions = await getUserSessionsDB({ id, session });
+	const match = sessions.find((s) => s.sessionId === sessionId);
+	if (!match) return false;
+	const result = await User.findByIdAndUpdate(
+		new mongoose.Types.ObjectId(id),
+		{ $pull: { refreshTokens: { refreshToken: match.rawToken } } },
+		{ session, returnDocument: "after", projection: { refreshTokens: 0 } },
+	);
+	return !!result;
+}
+
+/**
+ * Revoke all sessions, optionally keeping the caller's current one
+ * (identified by its raw refresh token) so "log out everywhere else" works.
+ */
+export async function revokeAllUserSessionsDB({
+	id,
+	exceptRefreshToken,
+	session,
+}: {
+	id: string;
+	exceptRefreshToken?: string;
+	session?: ClientSession;
+}): Promise<boolean> {
+	try {
+		const pull = exceptRefreshToken
+			? { refreshTokens: { refreshToken: { $ne: exceptRefreshToken } } }
+			: { refreshTokens: {} };
+		const result = await User.findByIdAndUpdate(
+			new mongoose.Types.ObjectId(id),
+			exceptRefreshToken
+				? { $pull: pull }
+				: { $set: { refreshTokens: [] } },
+			{
+				session,
+				returnDocument: "after",
+				projection: { refreshTokens: 0 },
+			},
+		);
+		return !!result;
+	} catch {
+		return false;
+	}
+}
+
 export async function removeExpiredUsersTokensDB() {
 	const timer = databaseResponseTimeHistogram.startTimer();
 	try {

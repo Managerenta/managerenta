@@ -1,9 +1,11 @@
 export { default as changePassword } from "./changePassword";
 export { default as createUser } from "./createUser";
 export { default as deleteUser } from "./deleteUser";
+export { default as getSessions } from "./getSessions";
 export { default as getUserByEmail } from "./getUserByEmail";
 export { default as getUserById } from "./getUserById";
 export { default as getUsersByEmails } from "./getUsersByEmails";
 export { default as getUsersByIds } from "./getUsersByIds";
+export * from "./revokeSession";
 export { default as updateUser } from "./updateUser";
 export { default as updateUserSettings } from "./updateUserSettings";

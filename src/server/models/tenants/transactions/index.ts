@@ -88,6 +88,124 @@ export async function getTransactionsByTenantIdDB({
 	return results;
 }
 
+export async function getTransactionByIdDB({
+	id,
+	tenantId,
+	userId,
+	session,
+}: {
+	id: string;
+	tenantId: string;
+	userId: string;
+	session?: ClientSession;
+}): Promise<ITransaction | null> {
+	const result = (
+		await Transaction.aggregate<ITransaction>(
+			[
+				{
+					$match: {
+						_id: new mongoose.Types.ObjectId(id),
+						tenantId,
+						userId,
+					},
+				},
+				{ $limit: 1 },
+				{ $addFields: { id: { $toString: "$_id" } } },
+			],
+			{ session },
+		)
+	).at(0);
+	return result ?? null;
+}
+
+export async function updateTransactionDB({
+	id,
+	tenantId,
+	userId,
+	payload,
+	session,
+}: {
+	id: string;
+	tenantId: string;
+	userId: string;
+	payload: Partial<
+		Pick<
+			ITransaction,
+			| "type"
+			| "description"
+			| "amount"
+			| "amountType"
+			| "paymentMethod"
+			| "date"
+			| "period"
+			| "periodStart"
+			| "periodEnd"
+		>
+	>;
+	session?: ClientSession;
+}): Promise<ITransaction | null> {
+	const timer = databaseResponseTimeHistogram.startTimer();
+	try {
+		const result = await Transaction.findOneAndUpdate(
+			{ _id: new mongoose.Types.ObjectId(id), tenantId, userId },
+			{ $set: payload },
+			{ returnDocument: "after", session },
+		);
+		if (!result) return null;
+		timer({
+			operation: IOperationType.Update,
+			collection: collectionName,
+			method: "updateTransactionDB",
+			success: "true",
+		});
+		return { ...result.toObject(), id: result.id };
+	} catch {
+		timer({
+			operation: IOperationType.Update,
+			collection: collectionName,
+			method: "updateTransactionDB",
+			success: "false",
+		});
+		return null;
+	}
+}
+
+export async function deleteTransactionDB({
+	id,
+	tenantId,
+	userId,
+	session,
+}: {
+	id: string;
+	tenantId: string;
+	userId: string;
+	session?: ClientSession;
+}): Promise<ITransaction | null> {
+	const timer = databaseResponseTimeHistogram.startTimer();
+	try {
+		const result = await Transaction.findOneAndDelete(
+			{ _id: new mongoose.Types.ObjectId(id), tenantId, userId },
+			{ session },
+		);
+		if (!result) return null;
+		timer({
+			operation: IOperationType.Delete,
+			collection: collectionName,
+			method: "deleteTransactionDB",
+			success: "true",
+		});
+		return { ...result.toObject(), id: result.id };
+	} catch {
+		timer({
+			operation: IOperationType.Delete,
+			collection: collectionName,
+			method: "deleteTransactionDB",
+			success: "false",
+		});
+		return null;
+	}
+}
+
 export async function sumRentCreditsByTenantIdsDB({
 	tenantIds,
 	since,

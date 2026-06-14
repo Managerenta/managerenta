@@ -46,6 +46,22 @@ export const getTenantsQuerySchema = zod.object({
 	sort: zod.string().optional(),
 });
 
+export const transactionParamsSchema = zod
+	.object({ id: zod.string().min(1), txId: zod.string().min(1) })
+	.strict();
+
+export const updateTransactionBodySchema = zod.object({
+	type: zod.enum(["rent", "maintenance", "utilities", "other"]).optional(),
+	description: zod.string().min(1).max(500).optional(),
+	amount: zod.coerce.number().min(0).optional(),
+	amountType: zod.enum(["credit", "debit"]).optional(),
+	paymentMethod: zod
+		.enum(["bank-transfer", "cash", "mobile-money", "card", "check"])
+		.optional(),
+	date: optionalDate(),
+	period: optionalInt(1, 120),
+});
+
 export const addTransactionBodySchema = zod.object({
 	type: zod.enum(["rent", "maintenance", "utilities", "other"]),
 	description: zod.string().min(1).max(500).optional(),

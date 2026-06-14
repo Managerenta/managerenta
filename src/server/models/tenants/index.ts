@@ -307,6 +307,23 @@ export async function deleteTenantDB({
 	}
 }
 
+export async function softDeleteTenantsByPropertyDB({
+	propertyId,
+	userId,
+	session,
+}: {
+	propertyId: string;
+	userId: string;
+	session?: ClientSession;
+}): Promise<number> {
+	const result = await Tenant.updateMany(
+		{ propertyId, userId, deleted: false },
+		{ $set: { deleted: true, status: "Inactive" } },
+		{ session },
+	);
+	return result.modifiedCount ?? 0;
+}
+
 export async function getTenantsByUnitIdDB({
 	unitId,
 	session,

@@ -2,6 +2,7 @@ import "server-only";
 import cron from "../constants/cron";
 import { connectMongoDB, disconnectMongoDB } from "../databases";
 import { disconnectRedis } from "../databases/redis";
+import { configureNotificationTransport } from "../services";
 
 declare global {
 	// eslint-disable-next-line no-var
@@ -42,6 +43,12 @@ export async function bootstrap(): Promise<void> {
 	global.__managerentaBootstrapped = true;
 
 	assertSecrets();
+
+	try {
+		configureNotificationTransport();
+	} catch (error) {
+		console.error("[bootstrap] Notification transport init failed:", error);
+	}
 
 	try {
 		await connectMongoDB();
