@@ -27,7 +27,8 @@ function Main({ children }: IProps) {
 	const router = useRouter();
 
 	const isAuthRoute = useMemo(
-		() => excludedRoutes.includes(pathname),
+		() =>
+			excludedRoutes.includes(pathname) || pathname.startsWith("/portal"),
 		[pathname, excludedRoutes],
 	);
 

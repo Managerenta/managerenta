@@ -1,8 +1,9 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { memo, useCallback, useMemo, useState } from "react";
-import { FiBell, FiDownload, FiHome, FiPlus } from "react-icons/fi";
+import { FiBell, FiDownload, FiHome, FiLink, FiPlus } from "react-icons/fi";
 import { Box, Button, Text } from "@/components";
+import { api, getErrorMessage } from "@/constants";
 import { useAddTransactionNavigation, useToast } from "@/hooks";
 import type { ITenantTransaction } from "@/types";
 import { TenantQuickActionsStyled } from "./styled";
@@ -69,6 +70,26 @@ function TenantQuickActions({
 		router.push(`/properties/${propertyId}`);
 	}, [router, propertyId, toast]);
 
+	const [isCopyingLink, setIsCopyingLink] = useState(false);
+	const handleCopyPortalLink = useCallback(async () => {
+		if (isCopyingLink) return;
+		setIsCopyingLink(true);
+		try {
+			const { data } = await api().get(
+				`/api/tenants/${tenantId}/portal-link`,
+			);
+			const path: string | undefined = data?.data?.path;
+			if (!path) throw new Error("Could not generate link");
+			const url = `${window.location.origin}${path}`;
+			await navigator.clipboard.writeText(url);
+			toast.push("Portal link copied to clipboard", { type: "success" });
+		} catch (err) {
+			toast.push(getErrorMessage(err), { type: "warn" });
+		} finally {
+			setIsCopyingLink(false);
+		}
+	}, [tenantId, toast, isCopyingLink]);
+
 	const handleDownloadReport = useCallback(() => {
 		if (transactions.length === 0) {
 			toast.push("No transactions to export");
@@ -122,12 +143,21 @@ function TenantQuickActions({
 				onClick: handleDownloadReport,
 				disabled: false,
 			},
+			{
+				id: "tqa-005",
+				label: isCopyingLink ? "Generating..." : "Copy Portal Link",
+				icon: <FiLink size={16} />,
+				onClick: handleCopyPortalLink,
+				disabled: isCopyingLink,
+			},
 		],
 		[
 			isSendingReminder,
 			handleSendReminder,
 			handleViewUnit,
 			handleDownloadReport,
+			isCopyingLink,
+			handleCopyPortalLink,
 		],
 	);
 
