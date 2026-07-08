@@ -172,6 +172,34 @@ export async function updateIamPolicyDocumentDB({
 	}
 }
 
+/**
+ * Reconcile a SYSTEM policy's document to the canonical definition. Used ONLY by
+ * idempotent seeding/migration to repair drift when a system policy's canonical
+ * shape changes between releases. Never reachable from the customer edit path
+ * (which is restricted to `managedBy:"customer"`), so system policies stay
+ * immutable to tenants while remaining releasable by the platform.
+ */
+export async function setSystemPolicyDocumentDB({
+	id,
+	document,
+	session,
+}: {
+	id: string;
+	document: PolicyDocument;
+	session?: ClientSession;
+}): Promise<IIamPolicy | null> {
+	try {
+		parsePolicyDocument(document);
+		return await IamPolicy.findOneAndUpdate(
+			{ _id: new mongoose.Types.ObjectId(id), managedBy: "system" },
+			{ document },
+			{ returnDocument: "after", session },
+		);
+	} catch {
+		return null;
+	}
+}
+
 export async function getIamPoliciesByIdsDB({
 	ids,
 	session,

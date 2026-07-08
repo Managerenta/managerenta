@@ -75,6 +75,18 @@ export async function decide(
 		};
 	}
 
+	// Tenant-isolation boundary: an org-plane request may only ever target the
+	// caller's own authz scope (their org, or their own id in personal scope).
+	// This holds regardless of policy *content*, so a customer policy carrying a
+	// wildcard resource (e.g. `mr:org:*:*:*/*`) can never reach another tenant's
+	// resources. Platform-plane requests are exempt (operators are org-agnostic).
+	if (target.plane === "org" && target.orgId !== resourceScope(auth)) {
+		return {
+			decision: "deny",
+			reason: "implicit deny (cross-scope org resource)",
+		};
+	}
+
 	const principal = await buildPrincipal(auth, target.plane);
 	if (!principal) {
 		return {

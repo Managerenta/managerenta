@@ -1,6 +1,6 @@
 import "server-only";
 import { getUsersByIdsDB } from "../models";
-import { principalArnForOperator, principalArnForUser } from "./arn";
+import { parseArn, principalArnForOperator, principalArnForUser } from "./arn";
 import {
 	addMembershipDB,
 	createIamGroupDB,
@@ -53,6 +53,30 @@ function scopeMatches(
 	return docOrg === scope.orgId;
 }
 
+/**
+ * Confine a customer policy document to the caller's tenant: every statement
+ * resource must be an ARN on the caller's plane, and for the org plane its
+ * orgId segment must equal the caller's org (no wildcard). Without this a
+ * customer could author an org-wildcard resource and, once attached+joined,
+ * escalate across tenants. Defence in depth beside the engine cross-scope guard.
+ */
+function resourcesInScope(
+	scope: AdminScope,
+	document: PolicyDocument,
+): boolean {
+	for (const statement of document.statements) {
+		for (const resource of statement.resource) {
+			const parsed = parseArn(resource);
+			if (!parsed.valid) return false;
+			if (parsed.plane !== scope.plane) return false;
+			if (scope.plane === "org" && parsed.orgId !== scope.orgId) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
 // ── Policies ────────────────────────────────────────────────────────────────
 
 export async function adminListPolicies(
@@ -71,6 +95,7 @@ export async function adminCreatePolicy({
 	document: PolicyDocument;
 }): Promise<IIamPolicy | null> {
 	if (!isValidPolicyDocument(document)) return null;
+	if (!resourcesInScope(scope, document)) return null;
 	const created = await createIamPolicyDB({
 		payload: {
 			name,
@@ -94,6 +119,7 @@ export async function adminUpdatePolicy({
 	document: PolicyDocument;
 }): Promise<IIamPolicy | null> {
 	if (!isValidPolicyDocument(document)) return null;
+	if (!resourcesInScope(scope, document)) return null;
 	// Confirm the target is in-scope AND customer-managed before mutating.
 	const [existing] = await getIamPoliciesByIdsDB({ ids: [policyId] });
 	if (
@@ -115,6 +141,16 @@ export async function adminDeletePolicy({
 	scope: AdminScope;
 	policyId: string;
 }): Promise<boolean> {
+	// Explicit in-scope + customer-managed guard (defence in depth; the DB fn
+	// also hard-filters, but do not rely on that alone).
+	const [existing] = await getIamPoliciesByIdsDB({ ids: [policyId] });
+	if (
+		!existing ||
+		existing.managedBy !== "customer" ||
+		!scopeMatches(existing, scope)
+	) {
+		return false;
+	}
 	const deleted = await deleteIamPolicyDB({
 		id: policyId,
 		orgId: scope.orgId,
@@ -198,6 +234,15 @@ export async function adminDeleteGroup({
 	scope: AdminScope;
 	groupId: string;
 }): Promise<boolean> {
+	// Explicit in-scope + customer-managed guard (defence in depth).
+	const [existing] = await getIamGroupsByIdsDB({ ids: [groupId] });
+	if (
+		!existing ||
+		existing.managedBy !== "customer" ||
+		!scopeMatches(existing, scope)
+	) {
+		return false;
+	}
 	// Purge the group's memberships first so no principal keeps a dangling grant.
 	const members = await getMembershipsForGroupDB({ groupId });
 	const deleted = await deleteIamGroupDB({ id: groupId, orgId: scope.orgId });

@@ -7,10 +7,24 @@ import {
 	findIamGroupByNameDB,
 	findIamPolicyByNameDB,
 	setGroupAttachedPoliciesDB,
+	setSystemPolicyDocumentDB,
 } from "../models";
 import type { PolicyDocument } from "../types";
 
 const POLICY_VERSION = "2026-01-01";
+
+/** Order-insensitive structural serialization for drift comparison. */
+function stableStringify(value: unknown): string {
+	return JSON.stringify(value, (_key, val) =>
+		val && typeof val === "object" && !Array.isArray(val)
+			? Object.fromEntries(
+					Object.keys(val as Record<string, unknown>)
+						.sort()
+						.map((k) => [k, (val as Record<string, unknown>)[k]]),
+				)
+			: val,
+	);
+}
 
 // ── Org-plane system policy documents ───────────────────────────────────────
 // These reproduce the old admin/manager/viewer semantics EXACTLY so no one's
@@ -32,7 +46,13 @@ export function orgAdminDocument(orgId: string): PolicyDocument {
 	};
 }
 
-/** manager → all CRUD, minus iam:*, organizations:RemoveMember/Delete. */
+/**
+ * manager → all CRUD on domain resources, minus org administration. The deny
+ * list mirrors exactly what the pre-cutover `assertOrganizationAdmin` reserved
+ * for admins: iam:*, member management (invite/role-change/remove), org-profile
+ * edits, and deletion. Without `organizations:Update`/`InviteMember` here a
+ * manager could edit org settings or invite/self-promote to admin.
+ */
 export function orgManagerDocument(orgId: string): PolicyDocument {
 	return {
 		version: POLICY_VERSION,
@@ -48,6 +68,8 @@ export function orgManagerDocument(orgId: string): PolicyDocument {
 				effect: "Deny",
 				action: [
 					"iam:*",
+					"organizations:Update",
+					"organizations:InviteMember",
 					"organizations:RemoveMember",
 					"organizations:Delete",
 				],
@@ -154,7 +176,19 @@ async function ensurePolicy(
 		name,
 		session,
 	});
-	if (existing) return existing;
+	if (existing) {
+		// Repair drift so a changed canonical definition (e.g. a tightened deny
+		// list) propagates to already-seeded orgs when the migration re-runs.
+		if (stableStringify(existing.document) !== stableStringify(document)) {
+			const repaired = await setSystemPolicyDocumentDB({
+				id: existing._id.toString(),
+				document,
+				session,
+			});
+			return repaired ?? existing;
+		}
+		return existing;
+	}
 	return createIamPolicyDB({
 		payload: { name, plane, orgId, managedBy: "system", document },
 		session,
