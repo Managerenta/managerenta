@@ -729,7 +729,7 @@ describe("getUserByEmailWithPasswordDB", () => {
 		const found = await getUserByEmailWithPasswordDB({
 			email: " USER1@EXAMPLE.COM ",
 		});
-		expect(found?.id).toBe(user._id.toString());
+		expect((found as { id: string } | null)?.id).toBe(user._id.toString());
 		expect(found?.password).toMatch(/^\$2[aby]\$/);
 	});
 
@@ -754,7 +754,7 @@ describe("getUserByIdWithPasswordDB", () => {
 		const found = await getUserByIdWithPasswordDB({
 			id: user._id.toString(),
 		});
-		expect(found?.id).toBe(user._id.toString());
+		expect((found as { id: string } | null)?.id).toBe(user._id.toString());
 		expect(found?.password).toMatch(/^\$2[aby]\$/);
 	});
 

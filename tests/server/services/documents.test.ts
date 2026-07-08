@@ -12,12 +12,12 @@ import { clearTestDB, connectTestDB } from "../../helpers/db";
 import { newId, seedProperty } from "../../helpers/seed";
 
 // ── Mock the true externals: S3 uploads and URL presigning ────────────────
-const sendMock = vi.hoisted(() => vi.fn(async () => ({})));
+const sendMock = vi.hoisted(() => vi.fn(async (_command?: any) => ({})));
 const getSignedUrlMock = vi.hoisted(() =>
 	vi.fn(
 		async (
 			_client: unknown,
-			command: { input: { Key: string } },
+			command: { input: { Key: string } & Record<string, any> },
 		) => `https://signed.example.test/${command.input.Key}`,
 	),
 );

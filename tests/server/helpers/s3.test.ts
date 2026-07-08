@@ -4,13 +4,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { redisRetrieveKeyString } from "../../../src/server/databases";
 
 // ── Mock the true externals: the S3 client and the URL presigner ──────────
-const sendMock = vi.hoisted(() => vi.fn(async () => ({})));
+const sendMock = vi.hoisted(() => vi.fn(async (_command?: any) => ({})));
 let presignCounter = 0;
 const getSignedUrlMock = vi.hoisted(() =>
 	vi.fn(
 		async (
 			_client: unknown,
-			command: { input: { Key: string } },
+			command: { input: { Key: string } & Record<string, any> },
 		) => {
 			presignCounter += 1;
 			return `https://signed.example.test/${command.input.Key}?n=${presignCounter}`;

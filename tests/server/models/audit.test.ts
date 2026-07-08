@@ -5,12 +5,13 @@ import {
 	createAuditEventDB,
 	getAuditEventsDB,
 } from "../../../src/server/models/audit";
+import type { IAuditCreateInput } from "../../../src/server/models/audit/types";
 import { clearTestDB, connectTestDB, dropTestDB } from "../../helpers/db";
 
 const OWNER = "owner-audit-1";
 const OTHER = "owner-audit-2";
 
-function payload(overrides: Record<string, unknown> = {}) {
+function payload(overrides: Record<string, unknown> = {}): IAuditCreateInput {
 	return {
 		ownerId: OWNER,
 		actorId: "actor-1",
@@ -19,7 +20,7 @@ function payload(overrides: Record<string, unknown> = {}) {
 		entityId: "prop-1",
 		description: "Created a property",
 		...overrides,
-	};
+	} as IAuditCreateInput;
 }
 
 beforeAll(async () => {

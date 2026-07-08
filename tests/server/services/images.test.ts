@@ -23,7 +23,7 @@ import {
 } from "../../helpers/seed";
 
 // Avatar/image branches call sharp for real and upload to S3 — mock only S3.
-const sendMock = vi.hoisted(() => vi.fn(async () => ({})));
+const sendMock = vi.hoisted(() => vi.fn(async (_command?: any) => ({})));
 vi.mock("@aws-sdk/client-s3", async (importOriginal) => {
 	const actual =
 		await importOriginal<typeof import("@aws-sdk/client-s3")>();

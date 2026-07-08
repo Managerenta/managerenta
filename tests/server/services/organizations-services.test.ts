@@ -591,7 +591,9 @@ describe("organizations/query services", () => {
 			name: org.name.toUpperCase(),
 			refreshCache: true,
 		});
-		expect(String(found?.id ?? found?._id)).toBe(org._id.toString());
+		expect(String(found?.id ?? (found as { _id?: unknown })?._id)).toBe(
+			org._id.toString(),
+		);
 
 		// second call without refreshCache hits the cache (stale check)
 		await Organization.updateOne(
@@ -672,7 +674,7 @@ describe("organizations/query services", () => {
 			limit: 10,
 			refreshCache: true,
 		});
-		const ids = result.map((o) => String(o.id ?? o._id)).sort();
+		const ids = result.map((o) => String(o.id ?? (o as { _id?: unknown })._id)).sort();
 		expect(ids).toEqual(
 			[orgA._id.toString(), orgB._id.toString()].sort(),
 		);
@@ -684,7 +686,7 @@ describe("organizations/query services", () => {
 			offset: 0,
 			limit: 10,
 		});
-		expect(cached.map((o) => String(o.id ?? o._id)).sort()).toEqual(ids);
+		expect(cached.map((o) => String(o.id ?? (o as { _id?: unknown })._id)).sort()).toEqual(ids);
 
 		// unknown ids → []
 		expect(
@@ -811,7 +813,7 @@ describe("organizations/getMyOrganizations", () => {
 		);
 
 		const mine = await getMyOrganizations({ userId: member.userId });
-		const ids = mine.map((o) => String(o.id ?? o._id));
+		const ids = mine.map((o) => String(o.id ?? (o as { _id?: unknown })._id));
 		expect(ids).toContain(orgA._id.toString());
 		expect(ids).toContain(orgB._id.toString());
 

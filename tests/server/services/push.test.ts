@@ -12,7 +12,9 @@ import { clearTestDB, connectTestDB } from "../../helpers/db";
 import { newId } from "../../helpers/seed";
 
 // web-push performs real HTTP + VAPID crypto → mock it wholesale.
-const sendNotificationMock = vi.hoisted(() => vi.fn(async () => ({})));
+const sendNotificationMock = vi.hoisted(() =>
+	vi.fn(async (_sub?: any, _payload?: any) => ({})),
+);
 const setVapidDetailsMock = vi.hoisted(() => vi.fn());
 vi.mock("web-push", () => ({
 	default: {

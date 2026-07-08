@@ -136,7 +136,7 @@ describe("users/getUserById caching", () => {
 
 		// Mutate the row behind the cache's back.
 		await User.updateOne(
-			{ _id: new mongoose.Types.ObjectId(userId) },
+			{ _id: new mongoose.Types.ObjectId(userId) as unknown as string },
 			{ $set: { name: "Changed Behind Cache" } },
 		);
 
@@ -153,7 +153,7 @@ describe("users/getUserById caching", () => {
 		expect(await Redis.exists(userByIdKey({ id: userId }))).toBe(1);
 
 		await User.updateOne(
-			{ _id: new mongoose.Types.ObjectId(userId) },
+			{ _id: new mongoose.Types.ObjectId(userId) as unknown as string },
 			{ $set: { name: "Post Invalidate" } },
 		);
 		await invalidateCacheKeys({ id: userId, email: payload.email });
@@ -172,7 +172,7 @@ describe("users/getUserById caching", () => {
 		clearInProcessCache(userId);
 		clearInProcessCache();
 		await User.updateOne(
-			{ _id: new mongoose.Types.ObjectId(userId) },
+			{ _id: new mongoose.Types.ObjectId(userId) as unknown as string },
 			{ $set: { name: "Only In Mongo" } },
 		);
 
@@ -245,7 +245,7 @@ describe("users/getUsersByIds + getUsersByEmails caching", () => {
 
 		// second call is a cache hit: stale after a direct write
 		await User.updateOne(
-			{ _id: new mongoose.Types.ObjectId(a.userId) },
+			{ _id: new mongoose.Types.ObjectId(a.userId) as unknown as string },
 			{ $set: { name: "Stale Check" } },
 		);
 		const cached = await getUsersByIds({ ids, offset: 0, limit: 10 });

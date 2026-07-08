@@ -12,7 +12,9 @@ import { clearTestDB, connectTestDB } from "../../helpers/db";
 import { newId } from "../../helpers/seed";
 
 // Mock the only true external: provider HTTP calls via axios.
-const postMock = vi.hoisted(() => vi.fn(async () => ({ data: { id: "x" } })));
+const postMock = vi.hoisted(() =>
+	vi.fn(async (_url?: any, _data?: any, _config?: any) => ({ data: { id: "x" } })),
+);
 vi.mock("axios", () => ({
 	default: { post: postMock },
 	post: postMock,

@@ -18,6 +18,7 @@ import {
 	updatePropertyDB,
 } from "../../../src/server/models/properties";
 import { Unit } from "../../../src/server/models/units";
+import { IUnitStatus } from "../../../src/server/models/units/types";
 import { disconnectRedis } from "../../../src/server/databases";
 import {
 	clearTestDB,
@@ -222,21 +223,21 @@ describe("getPropertiesDB", () => {
 			rent: 100,
 			propertyId: prop!.id,
 			userId: USER,
-			status: "Occupied",
+			status: IUnitStatus.Occupied,
 		});
 		await Unit.create({
 			name: "U2",
 			rent: 100,
 			propertyId: prop!.id,
 			userId: USER,
-			status: "Occupied",
+			status: IUnitStatus.Occupied,
 		});
 		await Unit.create({
 			name: "U3",
 			rent: 100,
 			propertyId: prop!.id,
 			userId: USER,
-			status: "Vacant",
+			status: IUnitStatus.Vacant,
 		});
 		// deleted units must not count
 		await Unit.create({
@@ -244,12 +245,12 @@ describe("getPropertiesDB", () => {
 			rent: 100,
 			propertyId: prop!.id,
 			userId: USER,
-			status: "Occupied",
+			status: IUnitStatus.Occupied,
 			deleted: true,
 		});
 
 		const { properties } = await getPropertiesDB({ userId: USER });
-		expect(properties[0]?.occupied).toBe(2);
+		expect((properties[0] as { occupied?: number })?.occupied).toBe(2);
 	});
 
 	it("presigns property images through the post-aggregate hook", async () => {
