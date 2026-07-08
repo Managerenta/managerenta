@@ -229,12 +229,20 @@ into a flattened policy set.
 
 Three indexed reads, run on **every** API request, so **Redis-cached**:
 
-- Key `iam:eff:{principalArn}` → JSON of the flattened policy set, TTL ~5 min.
+- Key `iam:eff:{globalVersion}:{principalArn}` → JSON of the flattened policy
+  set, TTL ~5 min. `globalVersion` is a monotonic counter stored at
+  `iam:policyVersion`.
 - **Invalidation on write:** any mutation to a group's membership, a group's
   attached policies, or a policy's document invalidates. Because such mutations
-  are rare vs. reads, invalidation is intentionally **broad over clever**: drop
-  the whole `iam:eff:*` namespace on any policy/group edit, and the specific
-  principal key on a membership edit. Correctness over exact fan-out.
+  are rare vs. reads, invalidation is intentionally **broad over clever**:
+  - **Policy or group edit** (affects potentially many principals) → `INCR
+    iam:policyVersion`. Every subsequent read computes a new cache key, so the
+    entire old generation is orphaned at once and expires by TTL — no `SCAN`, no
+    wildcard delete, atomic.
+  - **Single membership edit** (affects one principal) → `DEL` that principal's
+    current-version key directly.
+
+  Correctness over exact fan-out.
 - Cache stores only resolved documents, never decisions (decisions depend on
   per-request `context`).
 
