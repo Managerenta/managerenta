@@ -57,10 +57,13 @@ export async function getPortalSummary({
 	const tid = oid(tenantId);
 	if (!tid) return null;
 
+	// `status: "Active"` — a moved-out / deactivated tenant's old portal link
+	// must stop serving financial data (the signed token lives for a year).
 	const tenant = (await Tenant.findOne({
 		_id: tid,
 		userId: ownerId,
 		deleted: false,
+		status: "Active",
 	}).lean()) as any;
 	if (!tenant) return null;
 
@@ -72,7 +75,10 @@ export async function getPortalSummary({
 			? Property.findOne({ _id: oid(tenant.propertyId) }).lean()
 			: null,
 		Transaction
-			? Transaction.find({ tenantId, userId: ownerId, deleted: false })
+			? // Transactions are hard-deleted (no `deleted` field); a
+				// `deleted: false` filter matches zero docs, emptying the
+				// tenant's payment history and totalPaid.
+				Transaction.find({ tenantId, userId: ownerId })
 					.sort({ date: -1 })
 					.limit(50)
 					.lean()
@@ -167,6 +173,7 @@ export async function submitPortalMaintenance({
 		_id: tid,
 		userId: ownerId,
 		deleted: false,
+		status: "Active",
 	}).lean()) as any;
 	if (!tenant) return null;
 

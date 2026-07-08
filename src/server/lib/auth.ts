@@ -1,6 +1,10 @@
 import "server-only";
 import type { NextRequest } from "next/server";
-import { decodeJwtToken, ErrInvalidAction } from "../constants";
+import {
+	decodeJwtToken,
+	ErrInvalidAction,
+	ErrUnauthorized,
+} from "../constants";
 import { getOrganizationByIdDB } from "../models";
 import { IOrganizationRole } from "../models/organizations/types";
 import { reLoginUserWithRefreshToken } from "../services";
@@ -66,11 +70,18 @@ export async function verifyAuthToken(
 		};
 	}
 
+	// Missing/expired/unusable credentials are a 401 (ErrUnauthorized), not a
+	// 400: the client's axios interceptor redirects to /login on 401, and
+	// non-edge-gated pages rely on that to bounce anonymous visitors.
 	const refreshToken = await getCookieValue(REFRESH_COOKIE);
-	if (!refreshToken) throw ErrInvalidAction;
+	if (!refreshToken) throw ErrUnauthorized;
 
-	const decodedRefresh = await decodeJwtToken({ refreshToken });
-	if (!decodedRefresh) throw ErrInvalidAction;
+	// A tampered/expired refresh JWT must also be a 401, not a 400 — mirror
+	// the access-token decode above which swallows the throw to null.
+	const decodedRefresh = await decodeJwtToken({ refreshToken }).catch(
+		() => null,
+	);
+	if (!decodedRefresh) throw ErrUnauthorized;
 
 	const { userId, ip } = decodedRefresh;
 	const next = await reLoginUserWithRefreshToken({
@@ -78,7 +89,7 @@ export async function verifyAuthToken(
 		refreshToken,
 		ip: ip || getClientIp(req),
 	});
-	if (!next) throw ErrInvalidAction;
+	if (!next) throw ErrUnauthorized;
 
 	const scope = await resolveOrgScope(userId);
 	return { userId, token: next, refreshed: true, ...scope };

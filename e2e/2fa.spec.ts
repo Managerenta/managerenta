@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { generateTotpToken } from "../src/server/constants/totp";
 import { resetSeedUserToBaseline } from "./support/reset-user";
+import { waitForApiIdle } from "./support/settle";
 
 const SEED_USER = {
 	email: "abdullah@example.com",
@@ -15,6 +16,9 @@ async function loginAsSeed(
 	await page.getByPlaceholder("Enter your password").fill(SEED_USER.password);
 	await page.getByRole("button", { name: /^sign in$/i }).click();
 	await page.waitForURL(/\/dashboard/, { timeout: 15000 });
+	// Let the shell's background user-reading requests drain before the test
+	// mutates the user, so none can clobber the cache post-mutation.
+	await waitForApiIdle(page);
 }
 
 test.describe("2FA TOTP", () => {

@@ -30,7 +30,7 @@ export async function upsertPushSubscriptionDB({
 		await PushSubscription.findOneAndUpdate(
 			{ endpoint: payload.endpoint },
 			{ $set: { ...payload, deleted: false } },
-			{ upsert: true, new: true },
+			{ upsert: true, returnDocument: "after" },
 		);
 		return true;
 	} catch {

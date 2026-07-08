@@ -12,7 +12,12 @@ type RouteContext = { params: Promise<{ token: string }> };
  * request is scoped to the tenant's own property/unit on the server side.
  */
 export const POST = withApiHandler<RouteContext>(
-	{ route: "/api/portal/[token]/maintenance" },
+	{
+		route: "/api/portal/[token]/maintenance",
+		// Public token-holders create landlord-visible records; keep the
+		// bucket much tighter than the global 100/min default.
+		rateLimit: { windowMs: 60 * 60 * 1000, maxRequests: 10 },
+	},
 	async ({ req, context }) => {
 		try {
 			const { token } = await context.params;

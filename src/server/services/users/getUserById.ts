@@ -6,6 +6,13 @@ export function getQueryKey({ id }: { id: string }) {
 }
 
 const IN_PROCESS_TTL_MS = 5_000;
+/**
+ * Redis TTL for the getUserById cache. Kept short (60s) so that the worst-case
+ * staleness from an invalidate-then-stale-write race (a slow concurrent read
+ * repopulating the cache just after a mutation) is bounded to a minute rather
+ * than a full day. The hot path is still served from the 5s in-process memo.
+ */
+export const USER_BY_ID_CACHE_TTL_SECONDS = 60;
 type CacheEntry = {
 	value: Awaited<ReturnType<typeof getUserByIdDB>>;
 	expiresAt: number;
@@ -75,8 +82,12 @@ export default async function getUserById({
 	const result = await getUserByIdDB({ id });
 	if (!result) return null;
 
-	const expiresIn = 60 * 60 * 24; // 24 hours
-	await redisUpdateKeyString<typeof result>(query, result, true, expiresIn);
+	await redisUpdateKeyString<typeof result>(
+		query,
+		result,
+		true,
+		USER_BY_ID_CACHE_TTL_SECONDS,
+	);
 	inProcessCache.set(id, {
 		value: result,
 		expiresAt: Date.now() + IN_PROCESS_TTL_MS,

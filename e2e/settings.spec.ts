@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { waitForApiIdle } from "./support/settle";
 
 const SEED_USER = {
 	email: "abdullah@example.com",
@@ -13,21 +14,12 @@ async function loginAsSeed(
 	await page.getByPlaceholder("Enter your password").fill(SEED_USER.password);
 	await page.getByRole("button", { name: /^sign in$/i }).click();
 	await page.waitForURL(/\/dashboard/, { timeout: 15000 });
-	// Wait for the Navbar's /api/users/user-profile fetch (the one that races
-	// with the test's PATCH) to land. `networkidle` doesn't settle with Next
-	// dev's HMR socket open, so we explicitly wait for the one response we
-	// care about.
-	await page
-		.waitForResponse(
-			(r) =>
-				r.url().includes("/api/users/user-profile") && r.status() < 500,
-			{ timeout: 5000 },
-		)
-		.catch(() => {
-			// Already settled before we attached, or the page chose not to
-			// refetch — either way, the cache pre-warm in updateUserSettings
-			// is the real fix and this is just belt-and-braces.
-		});
+	// Drain ALL of the shell's background user-reading requests before the
+	// test mutates preferences. Waiting on /api/users/user-profile alone was
+	// insufficient — every authenticated request (orgs, notifications,
+	// dashboard stats) also repopulates the getUserById cache, so any of them
+	// could be the slow reader that clobbers the post-mutation value.
+	await waitForApiIdle(page);
 }
 
 test.describe("Settings APIs (server-side)", () => {
@@ -98,9 +90,14 @@ test.describe("Settings APIs (server-side)", () => {
 	test("Preferences UI saves a change", async ({ page }) => {
 		await page.goto("/settings?tab=account");
 		await page.waitForSelector("text=Preferences", { timeout: 15000 });
-		// Use the currency select; pick the GBP option.
-		const select = page.locator("select.pref-select").first();
-		await select.selectOption("GBP");
+		// The currency dropdown is the shared react-select Select component
+		// (classNamePrefix "mr-select"); open it and pick the GBP option from
+		// the portaled menu.
+		await page.locator(".pref-select .mr-select__control").first().click();
+		await page
+			.locator(".mr-select__option", { hasText: "British Pound (£)" })
+			.first()
+			.click();
 
 		// Toast appears with success. The toast container is rendered by the
 		// app's own useToast hook (styled-components, hashed classnames), so

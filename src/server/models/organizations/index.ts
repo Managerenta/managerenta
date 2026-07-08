@@ -281,15 +281,19 @@ export async function removeOrganizationMembersDB({
 	try {
 		const orgId = new mongoose.Types.ObjectId(id);
 		const memberId = new mongoose.Types.ObjectId(_memberId);
+		// `members` is an array of `{ memberId, permission }` subdocuments, so
+		// the pull condition must match the subdocument's `memberId` field. A
+		// bare `{ $in: [memberId] }` compares each whole subdocument against an
+		// ObjectId and never matches (see `removeMemberDB` for the same shape).
 		const result = await Organization.findOneAndUpdate(
 			{ _id: orgId, deleted: false },
-			{ $pull: { members: { $in: [memberId] } } },
+			{ $pull: { members: { memberId } } },
 			{ returnDocument: "after", session },
 		);
 		timer({
 			operation: IOperationType.Update,
 			collection: collectionName,
-			method: "removeAssociatedOwnerIdFromOrganizationsDB",
+			method: "removeOrganizationMembersDB",
 			success: "true",
 		});
 		return result;
@@ -297,7 +301,7 @@ export async function removeOrganizationMembersDB({
 		timer({
 			operation: IOperationType.Update,
 			collection: collectionName,
-			method: "removeAssociatedOwnerIdFromOrganizationsDB",
+			method: "removeOrganizationMembersDB",
 			success: "false",
 		});
 		return null;
@@ -319,13 +323,14 @@ export async function getOrganizationsDB({
 }): Promise<IOrganization[]> {
 	const timer = databaseResponseTimeHistogram.startTimer();
 	const safeLimit = Math.min(limit, MAX_LIMIT);
+	const safeName = (name ?? "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 	try {
 		const result = await Organization.aggregate<IOrganization>(
 			[
 				{
 					$match: {
-						name: { $regex: name, $options: "i" },
+						name: { $regex: safeName, $options: "i" },
 					},
 				},
 				{
@@ -415,13 +420,14 @@ export async function getOrganizationByNameDB({
 	session?: ClientSession;
 }): Promise<IOrganization | null> {
 	const timer = databaseResponseTimeHistogram.startTimer();
+	const safeName = (name ?? "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 	try {
 		const result = (
 			await Organization.aggregate<IOrganization>(
 				[
 					{
 						$match: {
-							name: { $regex: name, $options: "i" },
+							name: { $regex: safeName, $options: "i" },
 						},
 					},
 					{

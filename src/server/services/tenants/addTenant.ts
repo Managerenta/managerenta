@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { ErrUnitNotFound } from "../../constants";
+import { ErrResourceAlreadyExist, ErrUnitNotFound } from "../../constants";
 import { uploadAndResizeImage } from "../../helpers";
 import {
 	createTenantDB,
@@ -32,6 +32,12 @@ export default async function addTenant({
 }) {
 	const [unitDoc] = await getUnitsByIdsDB({ ids: [unitId], userId });
 	if (!unitDoc) throw ErrUnitNotFound;
+
+	// Refuse to add a tenant to an already-occupied unit — otherwise the new
+	// tenant silently overwrites the unit's embedded snapshot while the prior
+	// tenant record stays Active (orphaned). The UI only offers vacant units;
+	// this guards direct API calls.
+	if (unitDoc.status === "Occupied") throw ErrResourceAlreadyExist;
 
 	const propertyId = unitDoc.propertyId;
 

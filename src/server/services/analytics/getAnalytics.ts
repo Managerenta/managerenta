@@ -53,9 +53,10 @@ async function getMonthlySeries(
 	}
 
 	if (Transaction) {
+		// Transactions are hard-deleted (no `deleted` field). A `deleted: false`
+		// filter matches ZERO docs here, silently zeroing revenue/expenses.
 		const txs = (await Transaction.find({
 			userId,
-			deleted: false,
 			date: { $gte: start },
 		}).lean()) as any[];
 		for (const t of txs) {

@@ -52,8 +52,13 @@ schema.post("aggregate", async (documents: IDocument[]) => {
 	await Promise.allSettled(
 		documents.map(async (doc) => {
 			if (!doc.fileKey) return;
+			// attachment disposition: uploaded content must download, not
+			// render — the stored content-type is client-influenced.
 			doc.url =
-				(await s3GetFileLink({ fileName: doc.fileKey })) ?? undefined;
+				(await s3GetFileLink({
+					fileName: doc.fileKey,
+					downloadFileName: doc.fileName,
+				})) ?? undefined;
 		}),
 	);
 });
@@ -81,7 +86,11 @@ export async function createDocumentDB({
 			success: "true",
 		});
 		const obj: IDocument = { ...result.toObject(), id: result.id };
-		obj.url = (await s3GetFileLink({ fileName: obj.fileKey })) ?? undefined;
+		obj.url =
+			(await s3GetFileLink({
+				fileName: obj.fileKey,
+				downloadFileName: obj.fileName,
+			})) ?? undefined;
 		return obj;
 	} catch {
 		timer({

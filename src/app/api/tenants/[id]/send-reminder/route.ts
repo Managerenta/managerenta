@@ -14,7 +14,12 @@ export const runtime = "nodejs";
 type RouteContext = { params: Promise<{ id: string }> };
 
 export const POST = withApiHandler<RouteContext>(
-	{ route: "/api/tenants/[id]/send-reminder" },
+	{
+		route: "/api/tenants/[id]/send-reminder",
+		// Sends outbound email/SMS to the tenant — throttle well below the
+		// global default so the address can't be bombed.
+		rateLimit: { windowMs: 60 * 60 * 1000, maxRequests: 30 },
+	},
 	withAuth<RouteContext>(async ({ auth, context }) => {
 		try {
 			assertWriteRole(auth);

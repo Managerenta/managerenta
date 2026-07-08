@@ -40,9 +40,16 @@ function inProcessSet(key: string, url: string, now: number): void {
 export default async function s3GetFileLink({
 	expiresInSeconds = 3_600, // 1 hours
 	fileName,
+	downloadFileName,
 }: {
 	fileName: string;
 	expiresInSeconds?: number;
+	/**
+	 * When set, the presigned URL forces `Content-Disposition: attachment`
+	 * with this filename, so user-uploaded content is downloaded rather than
+	 * rendered in the browser (content-type is client-influenced at upload).
+	 */
+	downloadFileName?: string;
 }): Promise<string | null> {
 	try {
 		// Normalize: extract the S3 key whether stored as full URL or bare key
@@ -50,7 +57,9 @@ export default async function s3GetFileLink({
 			? fileName.replace("https://", "").split(".s3.amazonaws.com/")[1]
 			: fileName;
 
-		const cacheKey = `s3:presigned:${uri}`;
+		const cacheKey = downloadFileName
+			? `s3:presigned:att:${uri}`
+			: `s3:presigned:${uri}`;
 		const now = Date.now();
 
 		const memo = inProcessGet(cacheKey, now);
@@ -65,7 +74,15 @@ export default async function s3GetFileLink({
 		const s3 = getS3Instance();
 		const url = await getSignedUrl(
 			s3,
-			new GetObjectCommand({ Bucket: S3_BUCKET, Key: uri }),
+			new GetObjectCommand({
+				Bucket: S3_BUCKET,
+				Key: uri,
+				...(downloadFileName
+					? {
+							ResponseContentDisposition: `attachment; filename="${downloadFileName.replace(/["\\\r\n]/g, "_")}"`,
+						}
+					: {}),
+			}),
 			{ expiresIn: expiresInSeconds },
 		);
 

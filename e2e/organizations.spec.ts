@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { resetOrgTestState } from "./support/reset-user";
+import { waitForApiIdle } from "./support/settle";
 
 const SEED_USER = {
 	email: "abdullah@example.com",
@@ -20,6 +21,7 @@ async function login(
 	await page.getByPlaceholder("Enter your password").fill(creds.password);
 	await page.getByRole("button", { name: /^sign in$/i }).click();
 	await page.waitForURL(/\/dashboard/, { timeout: 15000 });
+	await waitForApiIdle(page);
 }
 
 test.describe("Organizations", () => {

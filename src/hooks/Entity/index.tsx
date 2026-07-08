@@ -43,6 +43,9 @@ export function useAnalytics(months = 6) {
 	const { data, isLoading } = useSWR<IEnvelope<IAnalytics>>(
 		`/api/analytics?months=${months}`,
 		fetcher,
+		// The global SWRConfig disables revalidateOnMount; without this the
+		// page never fetches on first visit.
+		{ revalidateOnMount: true },
 	);
 	return { analytics: data?.data, isLoading };
 }
@@ -54,7 +57,7 @@ export function useAnalytics(months = 6) {
 export function usePropertyOptions() {
 	const { data } = useSWR<{
 		data?: { _id: string; id?: string; name: string }[];
-	}>("/api/properties?limit=100", fetcher);
+	}>("/api/properties?limit=100", fetcher, { revalidateOnMount: true });
 
 	return useMemo(() => {
 		const list = data?.data ?? [];
@@ -90,7 +93,9 @@ export function useMaintenance(params: {
 			total: number;
 			stats: IMaintenanceStats;
 		}>
-	>(`/api/maintenance?${qs.toString()}`, fetcher);
+	>(`/api/maintenance?${qs.toString()}`, fetcher, {
+		revalidateOnMount: true,
+	});
 
 	return {
 		requests: data?.data?.requests ?? [],
@@ -115,7 +120,7 @@ export function useVendors(params: { specialty?: string; search?: string }) {
 
 	const { data, isLoading, mutate } = useSWR<
 		IEnvelope<{ vendors: IVendor[]; total: number }>
-	>(`/api/vendors?${qs.toString()}`, fetcher);
+	>(`/api/vendors?${qs.toString()}`, fetcher, { revalidateOnMount: true });
 
 	return {
 		vendors: data?.data?.vendors ?? [],
@@ -147,7 +152,7 @@ export function useDocuments(params: {
 
 	const { data, isLoading, mutate } = useSWR<
 		IEnvelope<{ documents: IDocumentItem[]; total: number }>
-	>(`/api/documents?${qs.toString()}`, fetcher);
+	>(`/api/documents?${qs.toString()}`, fetcher, { revalidateOnMount: true });
 
 	return {
 		documents: data?.data?.documents ?? [],
@@ -171,6 +176,7 @@ export function useCalendar(year: number, month: number) {
 	const { data, isLoading } = useSWR<IEnvelope<{ events: ICalendarEvent[] }>>(
 		`/api/calendar?year=${year}&month=${month}`,
 		fetcher,
+		{ revalidateOnMount: true },
 	);
 	return { events: data?.data?.events ?? [], isLoading };
 }
@@ -185,7 +191,7 @@ export function useAudit(params: { entityType?: string; action?: string }) {
 
 	const { data, isLoading, mutate } = useSWR<
 		IEnvelope<{ events: IAuditEvent[]; total: number }>
-	>(`/api/audit?${qs.toString()}`, fetcher);
+	>(`/api/audit?${qs.toString()}`, fetcher, { revalidateOnMount: true });
 
 	return {
 		events: data?.data?.events ?? [],

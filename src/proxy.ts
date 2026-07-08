@@ -25,6 +25,12 @@ const PROTECTED_ROUTES = [
 	"/tenants",
 	"/notifications",
 	"/invitations",
+	"/analytics",
+	"/audit",
+	"/calendar",
+	"/documents",
+	"/maintenance",
+	"/vendors",
 ];
 
 const AUTH_ROUTES = ["/login", "/signup", "/"];

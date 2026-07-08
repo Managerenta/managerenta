@@ -117,10 +117,13 @@ export async function getTenantsDB({
 		const matchFilter: Record<string, unknown> = { userId };
 		if (status && status !== "all") matchFilter.status = status;
 		if (search?.trim()) {
+			// Escape regex metacharacters — raw user input in $regex is a
+			// ReDoS vector (see maintenance/vendors/documents models).
+			const safe = search.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 			matchFilter.$or = [
-				{ name: { $regex: search.trim(), $options: "i" } },
-				{ email: { $regex: search.trim(), $options: "i" } },
-				{ phone: { $regex: search.trim(), $options: "i" } },
+				{ name: { $regex: safe, $options: "i" } },
+				{ email: { $regex: safe, $options: "i" } },
+				{ phone: { $regex: safe, $options: "i" } },
 			];
 		}
 

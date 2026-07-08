@@ -1,5 +1,9 @@
 import "server-only";
-import { ErrInvalidFileType, supportedImageMimeTypes } from "../constants";
+import {
+	ErrInvalidFields,
+	ErrInvalidFileType,
+	supportedImageMimeTypes,
+} from "../constants";
 
 export interface IFileUpload {
 	fieldname: string;
@@ -87,9 +91,31 @@ export async function parseMultipart(
 	const maxTotalBytes = options?.maxTotalBytes ?? DEFAULT_MAX_TOTAL_BYTES;
 	const maxFileCount = options?.maxFileCount ?? DEFAULT_MAX_FILES;
 
-	const form = await req.formData();
 	const fields: Record<string, string> = {};
 	const files: Record<string, IFileUpload[]> = {};
+
+	// Accept JSON bodies too: file-less clients (API consumers, tests, mobile)
+	// PATCH these endpoints with application/json. Values are flattened to
+	// strings, matching what multipart fields look like to the zod schemas.
+	const contentType = req.headers.get("content-type") ?? "";
+	if (contentType.includes("application/json")) {
+		const body: unknown = await req.json().catch(() => {
+			throw ErrInvalidFields;
+		});
+		if (body && typeof body === "object" && !Array.isArray(body)) {
+			for (const [key, value] of Object.entries(body)) {
+				if (value === null || value === undefined) continue;
+				fields[key] =
+					typeof value === "string" ? value : JSON.stringify(value);
+			}
+		}
+		return { fields, files };
+	}
+
+	const form = await req.formData().catch(() => {
+		// Unsupported/garbled content type is a client error, not a 500.
+		throw ErrInvalidFields;
+	});
 
 	let totalBytes = 0;
 	let fileCount = 0;

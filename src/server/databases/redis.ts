@@ -75,6 +75,9 @@ export async function redisDeleteKeys(...queries: string[]): Promise<boolean> {
 
 	if (!resolvedKeys.length) return false;
 
+	// del() returns the count of keys removed — report success when at least
+	// one matched key was deleted (was `=== 1`, which wrongly returned false
+	// whenever a glob matched 2+ keys).
 	const response = await Redis.del(resolvedKeys);
-	return response === 1;
+	return response > 0;
 }

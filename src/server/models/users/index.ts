@@ -208,13 +208,15 @@ const schema = new mongoose.Schema<IUser, UserModel, IUserMethods>(
 schema.index({ username: 1, email: 1 });
 schema.index({ "refreshTokens.deadline": 1 });
 // Passkey lookup-by-credentialId is the hot path on passwordless login.
-// `sparse: true` skips users with no passkeys; partial filter avoids the
-// "duplicate null" pitfall on a unique index over an array field.
+// The partial filter restricts the unique index to docs that actually have
+// a credentialId, avoiding the "duplicate null" pitfall over an array field.
+// NOTE: `sparse` must NOT be combined with `partialFilterExpression` —
+// MongoDB rejects that pair, so the index silently failed to build (leaving
+// the login lookup unindexed). partialFilterExpression alone is sufficient.
 schema.index(
 	{ "security.passkeys.credentialId": 1 },
 	{
 		unique: true,
-		sparse: true,
 		partialFilterExpression: {
 			"security.passkeys.credentialId": { $exists: true },
 		},
@@ -1178,12 +1180,13 @@ export async function getUserByIdWithPasswordDB({
 }): Promise<(IUser & { password: string }) | null> {
 	const timer = databaseResponseTimeHistogram.startTimer();
 	try {
-		const result = await User.findById(
-			new mongoose.Types.ObjectId(id),
+		// `findById` bypasses the pre-aggregate `{ deleted: false }` hook that
+		// guards `getUserByIdDB`, so filter soft-deleted users explicitly here.
+		// A soft-deleted account must never be able to change its password.
+		const result = await User.findOne(
+			{ _id: new mongoose.Types.ObjectId(id), deleted: false },
 			null,
-			{
-				session,
-			},
+			{ session },
 		).select("+password");
 
 		if (!result) throw ErrUserNotFound;

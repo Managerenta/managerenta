@@ -5,12 +5,14 @@ import {
 	findOrganizationByInviteTokenDB,
 	updateUserRawDB,
 } from "../../models";
+import getUserById from "../users/getUserById";
 import { invalidateCacheKeys as invalidateUserCache } from "../users/utils";
 import { invalidateCacheKeys } from "./utils";
 
 type DocWithId = {
 	_id: { toString(): string };
 	name?: string;
+	invites?: { token: string; email: string }[];
 };
 
 export default async function acceptInvite({
@@ -27,6 +29,19 @@ export default async function acceptInvite({
 		token: hashed,
 	})) as unknown as DocWithId | null;
 	if (!org) return null;
+
+	// Invites are bound to the invited email: a leaked/forwarded link must
+	// not let an arbitrary signed-in account join at the assigned role.
+	const invite = org.invites?.find((i) => i.token === hashed);
+	const user = await getUserById({ id: userId });
+	if (
+		!invite ||
+		!user?.email ||
+		invite.email.toLowerCase() !== user.email.toLowerCase()
+	) {
+		return null;
+	}
+
 	const orgIdStr = org._id?.toString() ?? "";
 	const updated = (await consumeInviteAndAddMemberDB({
 		orgId: orgIdStr,

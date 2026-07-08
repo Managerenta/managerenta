@@ -1,5 +1,21 @@
 import axios, { type AxiosRequestConfig } from "axios";
 
+// Public pages that render without a user session. A background 401 (e.g. the
+// app shell probing /api/users/user-profile while logged out) must NOT bounce
+// visitors here to /login — each renders its own unauthenticated experience.
+// The tenant portal (/portal/*) is token-authorised and likewise public.
+const PUBLIC_PATHS = [
+	"/login",
+	"/signup",
+	"/forgot-password",
+	"/reset-password",
+	"/verify-email",
+];
+
+function isPublicPath(path: string): boolean {
+	return PUBLIC_PATHS.includes(path) || path.startsWith("/portal/");
+}
+
 const axiosClient = axios.create({
 	withCredentials: true,
 });
@@ -8,7 +24,7 @@ axiosClient.interceptors.response.use(
 	(response) => response,
 	(error) => {
 		if (typeof window !== "undefined" && error?.response?.status === 401) {
-			if (window.location.pathname !== "/login") {
+			if (!isPublicPath(window.location.pathname)) {
 				window.location.href = "/login";
 			}
 		}
