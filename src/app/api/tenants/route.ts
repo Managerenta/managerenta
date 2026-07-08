@@ -1,8 +1,8 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { ErrInvalidFields, ErrTenantNotFound } from "@/server/constants";
+import { arn, authorize, resourceScope } from "@/server/iam";
 import {
-	assertWriteRole,
 	created,
 	handleError,
 	parseMultipart,
@@ -22,6 +22,12 @@ export const GET = withApiHandler(
 	{ route: "/api/tenants" },
 	withAuth(async ({ req, auth }) => {
 		try {
+			await authorize(
+				auth,
+				"tenants:List",
+				arn.org.tenants(resourceScope(auth)),
+				{ req },
+			);
 			const url = new URL(req.url);
 			const queryObj = Object.fromEntries(url.searchParams.entries());
 			const query = getTenantsQuerySchema.safeParse(queryObj);
@@ -54,7 +60,12 @@ export const POST = withApiHandler(
 	{ route: "/api/tenants" },
 	withAuth(async ({ req, auth }) => {
 		try {
-			assertWriteRole(auth);
+			await authorize(
+				auth,
+				"tenants:Create",
+				arn.org.tenants(resourceScope(auth)),
+				{ req },
+			);
 			const parsed = await parseMultipart(req as NextRequest);
 			const body = addTenantBodySchema.safeParse(parsed.fields);
 			if (!body.success) throw ErrInvalidFields;

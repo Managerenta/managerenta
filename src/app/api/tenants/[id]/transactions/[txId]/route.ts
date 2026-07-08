@@ -1,11 +1,6 @@
 import { ErrInvalidFields, ErrResourceNotFound } from "@/server/constants";
-import {
-	assertWriteRole,
-	handleError,
-	ok,
-	withApiHandler,
-	withAuth,
-} from "@/server/lib";
+import { arn, authorize, resourceScope } from "@/server/iam";
+import { handleError, ok, withApiHandler, withAuth } from "@/server/lib";
 import { deleteTransaction, updateTransaction } from "@/server/services";
 import {
 	transactionParamsSchema,
@@ -20,8 +15,13 @@ export const PATCH = withApiHandler<RouteContext>(
 	{ route: "/api/tenants/[id]/transactions/[txId]" },
 	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
-			assertWriteRole(auth);
 			const { id, txId } = await context.params;
+			await authorize(
+				auth,
+				"tenants:Update",
+				arn.org.tenants(resourceScope(auth), id),
+				{ req },
+			);
 			const params = transactionParamsSchema.safeParse({ id, txId });
 			if (!params.success) throw ErrInvalidFields;
 
@@ -50,10 +50,15 @@ export const PATCH = withApiHandler<RouteContext>(
 
 export const DELETE = withApiHandler<RouteContext>(
 	{ route: "/api/tenants/[id]/transactions/[txId]" },
-	withAuth<RouteContext>(async ({ auth, context }) => {
+	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
-			assertWriteRole(auth);
 			const { id, txId } = await context.params;
+			await authorize(
+				auth,
+				"tenants:Update",
+				arn.org.tenants(resourceScope(auth), id),
+				{ req },
+			);
 			const params = transactionParamsSchema.safeParse({ id, txId });
 			if (!params.success) throw ErrInvalidFields;
 

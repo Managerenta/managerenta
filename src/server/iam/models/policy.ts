@@ -205,6 +205,52 @@ export async function getIamPoliciesByIdsDB({
 	}
 }
 
+export async function listIamPoliciesDB({
+	plane,
+	orgId,
+	session,
+}: {
+	plane: Plane;
+	orgId: mongoose.Types.ObjectId | string | null;
+	session?: ClientSession;
+}): Promise<IIamPolicy[]> {
+	try {
+		return await IamPolicy.find(
+			{ plane, orgId: toObjectIdOrNull(orgId) },
+			null,
+			{ session },
+		)
+			.sort({ name: 1 })
+			.lean<IIamPolicy[]>();
+	} catch {
+		return [];
+	}
+}
+
+/** Delete a customer-managed policy. System policies are immutable and never removed. */
+export async function deleteIamPolicyDB({
+	id,
+	orgId,
+	session,
+}: {
+	id: string;
+	orgId?: mongoose.Types.ObjectId | string | null;
+	session?: ClientSession;
+}): Promise<boolean> {
+	try {
+		const filter: Record<string, unknown> = {
+			_id: new mongoose.Types.ObjectId(id),
+			managedBy: "customer",
+		};
+		// Org-admin callers scope deletion to their own org; platform callers omit.
+		if (orgId !== undefined) filter.orgId = toObjectIdOrNull(orgId);
+		const result = await IamPolicy.deleteOne(filter, { session });
+		return result.deletedCount > 0;
+	} catch {
+		return false;
+	}
+}
+
 export async function findIamPolicyByNameDB({
 	plane,
 	orgId,

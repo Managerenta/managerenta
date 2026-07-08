@@ -1,11 +1,6 @@
 import { ErrInvalidFields, ErrResourceNotFound } from "@/server/constants";
-import {
-	assertWriteRole,
-	handleError,
-	ok,
-	withApiHandler,
-	withAuth,
-} from "@/server/lib";
+import { arn, authorize, resourceScope } from "@/server/iam";
+import { handleError, ok, withApiHandler, withAuth } from "@/server/lib";
 import { deleteVendor, getVendorById, updateVendor } from "@/server/services";
 import {
 	updateVendorBodySchema,
@@ -18,9 +13,15 @@ type RouteContext = { params: Promise<{ id: string }> };
 
 export const GET = withApiHandler<RouteContext>(
 	{ route: "/api/vendors/[id]" },
-	withAuth<RouteContext>(async ({ auth, context }) => {
+	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
 			const { id } = await context.params;
+			await authorize(
+				auth,
+				"vendors:Read",
+				arn.org.vendors(resourceScope(auth), id),
+				{ req },
+			);
 			const params = vendorParamsSchema.safeParse({ id });
 			if (!params.success) throw ErrInvalidFields;
 
@@ -40,8 +41,13 @@ export const PATCH = withApiHandler<RouteContext>(
 	{ route: "/api/vendors/[id]" },
 	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
-			assertWriteRole(auth);
 			const { id } = await context.params;
+			await authorize(
+				auth,
+				"vendors:Update",
+				arn.org.vendors(resourceScope(auth), id),
+				{ req },
+			);
 			const params = vendorParamsSchema.safeParse({ id });
 			if (!params.success) throw ErrInvalidFields;
 
@@ -69,10 +75,15 @@ export const PATCH = withApiHandler<RouteContext>(
 
 export const DELETE = withApiHandler<RouteContext>(
 	{ route: "/api/vendors/[id]" },
-	withAuth<RouteContext>(async ({ auth, context }) => {
+	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
-			assertWriteRole(auth);
 			const { id } = await context.params;
+			await authorize(
+				auth,
+				"vendors:Delete",
+				arn.org.vendors(resourceScope(auth), id),
+				{ req },
+			);
 			const params = vendorParamsSchema.safeParse({ id });
 			if (!params.success) throw ErrInvalidFields;
 

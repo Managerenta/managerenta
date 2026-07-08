@@ -1,6 +1,6 @@
 import { ErrInvalidFields, ErrTryAgain } from "@/server/constants";
+import { arn, authorize, resourceScope } from "@/server/iam";
 import {
-	assertWriteRole,
 	created,
 	handleError,
 	ok,
@@ -19,6 +19,12 @@ export const GET = withApiHandler(
 	{ route: "/api/maintenance" },
 	withAuth(async ({ req, auth }) => {
 		try {
+			await authorize(
+				auth,
+				"maintenance:List",
+				arn.org.maintenance(resourceScope(auth)),
+				{ req },
+			);
 			const url = new URL(req.url);
 			const query = getMaintenanceQuerySchema.safeParse(
 				Object.fromEntries(url.searchParams),
@@ -40,7 +46,12 @@ export const POST = withApiHandler(
 	{ route: "/api/maintenance" },
 	withAuth(async ({ req, auth }) => {
 		try {
-			assertWriteRole(auth);
+			await authorize(
+				auth,
+				"maintenance:Create",
+				arn.org.maintenance(resourceScope(auth)),
+				{ req },
+			);
 			let raw: unknown;
 			try {
 				raw = await req.json();

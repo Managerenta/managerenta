@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { ErrInvalidFields, ErrPropertyNotFound } from "@/server/constants";
+import { arn, authorize, resourceScope } from "@/server/iam";
 import {
-	assertWriteRole,
 	getClientIp,
 	handleError,
 	ok,
@@ -28,9 +28,15 @@ type RouteContext = { params: Promise<{ id: string }> };
 
 export const GET = withApiHandler<RouteContext>(
 	{ route: "/api/properties/[id]" },
-	withAuth<RouteContext>(async ({ auth, context }) => {
+	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
 			const { id } = await context.params;
+			await authorize(
+				auth,
+				"properties:Read",
+				arn.org.properties(resourceScope(auth), id),
+				{ req },
+			);
 			const params = getPropertyByIdParamsSchema.safeParse({ id });
 			if (!params.success) throw ErrInvalidFields;
 
@@ -50,8 +56,13 @@ export const PATCH = withApiHandler<RouteContext>(
 	{ route: "/api/properties/[id]" },
 	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
-			assertWriteRole(auth);
 			const { id } = await context.params;
+			await authorize(
+				auth,
+				"properties:Update",
+				arn.org.properties(resourceScope(auth), id),
+				{ req },
+			);
 			const params = updatePropertyParamsSchema.safeParse({ id });
 			if (!params.success) throw ErrInvalidFields;
 
@@ -78,8 +89,13 @@ export const DELETE = withApiHandler<RouteContext>(
 	{ route: "/api/properties/[id]" },
 	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
-			assertWriteRole(auth);
 			const { id } = await context.params;
+			await authorize(
+				auth,
+				"properties:Delete",
+				arn.org.properties(resourceScope(auth), id),
+				{ req },
+			);
 			const params = getPropertyByIdParamsSchema.safeParse({ id });
 			if (!params.success) throw ErrInvalidFields;
 

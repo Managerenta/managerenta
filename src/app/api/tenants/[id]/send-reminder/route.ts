@@ -1,11 +1,6 @@
 import { ErrInvalidFields, ErrTenantNotFound } from "@/server/constants";
-import {
-	assertWriteRole,
-	handleError,
-	ok,
-	withApiHandler,
-	withAuth,
-} from "@/server/lib";
+import { arn, authorize, resourceScope } from "@/server/iam";
+import { handleError, ok, withApiHandler, withAuth } from "@/server/lib";
 import { sendRentReminder } from "@/server/services";
 import { tenantParamsSchema } from "@/server/validators/tenants/validate";
 
@@ -20,10 +15,15 @@ export const POST = withApiHandler<RouteContext>(
 		// global default so the address can't be bombed.
 		rateLimit: { windowMs: 60 * 60 * 1000, maxRequests: 30 },
 	},
-	withAuth<RouteContext>(async ({ auth, context }) => {
+	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
-			assertWriteRole(auth);
 			const { id } = await context.params;
+			await authorize(
+				auth,
+				"tenants:SendReminder",
+				arn.org.tenants(resourceScope(auth), id),
+				{ req },
+			);
 			const params = tenantParamsSchema.safeParse({ id });
 			if (!params.success) throw ErrInvalidFields;
 

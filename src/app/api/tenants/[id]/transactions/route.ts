@@ -1,6 +1,6 @@
 import { ErrInvalidFields, ErrTenantNotFound } from "@/server/constants";
+import { arn, authorize, resourceScope } from "@/server/iam";
 import {
-	assertWriteRole,
 	created,
 	handleError,
 	ok,
@@ -19,9 +19,15 @@ type RouteContext = { params: Promise<{ id: string }> };
 
 export const GET = withApiHandler<RouteContext>(
 	{ route: "/api/tenants/[id]/transactions" },
-	withAuth<RouteContext>(async ({ auth, context }) => {
+	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
 			const { id } = await context.params;
+			await authorize(
+				auth,
+				"tenants:Read",
+				arn.org.tenants(resourceScope(auth), id),
+				{ req },
+			);
 			const params = tenantParamsSchema.safeParse({ id });
 			if (!params.success) throw ErrInvalidFields;
 
@@ -40,8 +46,13 @@ export const POST = withApiHandler<RouteContext>(
 	{ route: "/api/tenants/[id]/transactions" },
 	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
-			assertWriteRole(auth);
 			const { id } = await context.params;
+			await authorize(
+				auth,
+				"tenants:Update",
+				arn.org.tenants(resourceScope(auth), id),
+				{ req },
+			);
 			const params = tenantParamsSchema.safeParse({ id });
 			if (!params.success) throw ErrInvalidFields;
 

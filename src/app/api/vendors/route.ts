@@ -1,6 +1,6 @@
 import { ErrInvalidFields, ErrTryAgain } from "@/server/constants";
+import { arn, authorize, resourceScope } from "@/server/iam";
 import {
-	assertWriteRole,
 	created,
 	handleError,
 	ok,
@@ -19,6 +19,12 @@ export const GET = withApiHandler(
 	{ route: "/api/vendors" },
 	withAuth(async ({ req, auth }) => {
 		try {
+			await authorize(
+				auth,
+				"vendors:List",
+				arn.org.vendors(resourceScope(auth)),
+				{ req },
+			);
 			const url = new URL(req.url);
 			const query = getVendorsQuerySchema.safeParse(
 				Object.fromEntries(url.searchParams),
@@ -40,7 +46,12 @@ export const POST = withApiHandler(
 	{ route: "/api/vendors" },
 	withAuth(async ({ req, auth }) => {
 		try {
-			assertWriteRole(auth);
+			await authorize(
+				auth,
+				"vendors:Create",
+				arn.org.vendors(resourceScope(auth)),
+				{ req },
+			);
 			let raw: unknown;
 			try {
 				raw = await req.json();

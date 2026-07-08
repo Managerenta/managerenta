@@ -156,6 +156,51 @@ export async function getIamGroupsByIdsDB({
 	}
 }
 
+export async function listIamGroupsDB({
+	plane,
+	orgId,
+	session,
+}: {
+	plane: Plane;
+	orgId: mongoose.Types.ObjectId | string | null;
+	session?: ClientSession;
+}): Promise<IIamGroup[]> {
+	try {
+		return await IamGroup.find(
+			{ plane, orgId: toObjectIdOrNull(orgId) },
+			null,
+			{ session },
+		)
+			.sort({ name: 1 })
+			.lean<IIamGroup[]>();
+	} catch {
+		return [];
+	}
+}
+
+/** Delete a customer-managed group. System groups are immutable and never removed. */
+export async function deleteIamGroupDB({
+	id,
+	orgId,
+	session,
+}: {
+	id: string;
+	orgId?: mongoose.Types.ObjectId | string | null;
+	session?: ClientSession;
+}): Promise<boolean> {
+	try {
+		const filter: Record<string, unknown> = {
+			_id: toObjectId(id),
+			managedBy: "customer",
+		};
+		if (orgId !== undefined) filter.orgId = toObjectIdOrNull(orgId);
+		const result = await IamGroup.deleteOne(filter, { session });
+		return result.deletedCount > 0;
+	} catch {
+		return false;
+	}
+}
+
 export async function findIamGroupByNameDB({
 	plane,
 	orgId,

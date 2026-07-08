@@ -830,4 +830,43 @@ export async function getOrganizationMembersDB({
 	}
 }
 
+/**
+ * Platform operator suspend/reactivate: toggle `deleted` in EITHER direction.
+ * Distinct from {@link deleteOrganizationDB}, which only matches non-deleted
+ * docs (so it cannot reactivate). Must run behind a platform-plane authorize().
+ */
+export async function setOrganizationDeletedDB({
+	id,
+	deleted,
+	session,
+}: {
+	id: string;
+	deleted: boolean;
+	session?: ClientSession;
+}): Promise<IOrganization | null> {
+	const timer = databaseResponseTimeHistogram.startTimer();
+	try {
+		const result = await Organization.findByIdAndUpdate(
+			new mongoose.Types.ObjectId(id),
+			{ deleted },
+			{ returnDocument: "after" },
+		);
+		timer({
+			operation: IOperationType.Update,
+			collection: collectionName,
+			method: "setOrganizationDeletedDB",
+			success: "true",
+		});
+		return result;
+	} catch {
+		timer({
+			operation: IOperationType.Update,
+			collection: collectionName,
+			method: "setOrganizationDeletedDB",
+			success: "false",
+		});
+		return null;
+	}
+}
+
 export * from "./types";

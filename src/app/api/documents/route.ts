@@ -4,8 +4,8 @@ import {
 	ErrMissingFile,
 	ErrTryAgain,
 } from "@/server/constants";
+import { arn, authorize, resourceScope } from "@/server/iam";
 import {
-	assertWriteRole,
 	created,
 	handleError,
 	ok,
@@ -26,6 +26,12 @@ export const GET = withApiHandler(
 	{ route: "/api/documents" },
 	withAuth(async ({ req, auth }) => {
 		try {
+			await authorize(
+				auth,
+				"documents:List",
+				arn.org.documents(resourceScope(auth)),
+				{ req },
+			);
 			const url = new URL(req.url);
 			const query = getDocumentsQuerySchema.safeParse(
 				Object.fromEntries(url.searchParams),
@@ -47,7 +53,12 @@ export const POST = withApiHandler(
 	{ route: "/api/documents" },
 	withAuth(async ({ req, auth }) => {
 		try {
-			assertWriteRole(auth);
+			await authorize(
+				auth,
+				"documents:Create",
+				arn.org.documents(resourceScope(auth)),
+				{ req },
+			);
 
 			const form = await req.formData();
 			const file = form.get("file");

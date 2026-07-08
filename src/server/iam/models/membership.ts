@@ -181,6 +181,42 @@ export async function removeAllMembershipsForPrincipalDB({
 	}
 }
 
+export async function getMembershipsForGroupDB({
+	groupId,
+	session,
+}: {
+	groupId: string;
+	session?: ClientSession;
+}): Promise<IIamGroupMembership[]> {
+	try {
+		return await IamGroupMembership.find(
+			{ groupId: toObjectId(groupId) },
+			null,
+			{ session },
+		).lean<IIamGroupMembership[]>();
+	} catch {
+		return [];
+	}
+}
+
+export async function listMembershipsForOrgDB({
+	orgId,
+	session,
+}: {
+	orgId: string;
+	session?: ClientSession;
+}): Promise<IIamGroupMembership[]> {
+	try {
+		return await IamGroupMembership.find(
+			{ orgId: toObjectIdOrNull(orgId) },
+			null,
+			{ session },
+		).lean<IIamGroupMembership[]>();
+	} catch {
+		return [];
+	}
+}
+
 export async function getMembershipsForPrincipalDB({
 	principalType,
 	principalId,

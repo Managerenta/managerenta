@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { ErrInvalidFields, ErrTenantNotFound } from "@/server/constants";
+import { arn, authorize, resourceScope } from "@/server/iam";
 import {
-	assertWriteRole,
 	handleError,
 	ok,
 	parseMultipart,
@@ -21,9 +21,15 @@ type RouteContext = { params: Promise<{ id: string }> };
 
 export const GET = withApiHandler<RouteContext>(
 	{ route: "/api/tenants/[id]" },
-	withAuth<RouteContext>(async ({ auth, context }) => {
+	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
 			const { id } = await context.params;
+			await authorize(
+				auth,
+				"tenants:Read",
+				arn.org.tenants(resourceScope(auth), id),
+				{ req },
+			);
 			const params = tenantParamsSchema.safeParse({ id });
 			if (!params.success) throw ErrInvalidFields;
 
@@ -43,8 +49,13 @@ export const PATCH = withApiHandler<RouteContext>(
 	{ route: "/api/tenants/[id]" },
 	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
-			assertWriteRole(auth);
 			const { id } = await context.params;
+			await authorize(
+				auth,
+				"tenants:Update",
+				arn.org.tenants(resourceScope(auth), id),
+				{ req },
+			);
 			const params = tenantParamsSchema.safeParse({ id });
 			if (!params.success) throw ErrInvalidFields;
 
@@ -68,10 +79,15 @@ export const PATCH = withApiHandler<RouteContext>(
 
 export const DELETE = withApiHandler<RouteContext>(
 	{ route: "/api/tenants/[id]" },
-	withAuth<RouteContext>(async ({ auth, context }) => {
+	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
-			assertWriteRole(auth);
 			const { id } = await context.params;
+			await authorize(
+				auth,
+				"tenants:Delete",
+				arn.org.tenants(resourceScope(auth), id),
+				{ req },
+			);
 			const params = tenantParamsSchema.safeParse({ id });
 			if (!params.success) throw ErrInvalidFields;
 

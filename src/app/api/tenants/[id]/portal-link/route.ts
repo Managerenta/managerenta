@@ -3,13 +3,8 @@ import {
 	ErrTenantNotFound,
 	signTenantPortalToken,
 } from "@/server/constants";
-import {
-	assertWriteRole,
-	handleError,
-	ok,
-	withApiHandler,
-	withAuth,
-} from "@/server/lib";
+import { arn, authorize, resourceScope } from "@/server/iam";
+import { handleError, ok, withApiHandler, withAuth } from "@/server/lib";
 import { getTenantById } from "@/server/services";
 
 export const runtime = "nodejs";
@@ -23,10 +18,15 @@ type RouteContext = { params: Promise<{ id: string }> };
  */
 export const GET = withApiHandler<RouteContext>(
 	{ route: "/api/tenants/[id]/portal-link" },
-	withAuth<RouteContext>(async ({ auth, context }) => {
+	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
-			assertWriteRole(auth);
 			const { id } = await context.params;
+			await authorize(
+				auth,
+				"tenants:GeneratePortalLink",
+				arn.org.tenants(resourceScope(auth), id),
+				{ req },
+			);
 			if (!id) throw ErrInvalidFields;
 
 			const tenant = await getTenantById({

@@ -1,6 +1,6 @@
 import { ErrInvalidFields, ErrUnitNotFound } from "@/server/constants";
+import { arn, authorize, resourceScope } from "@/server/iam";
 import {
-	assertWriteRole,
 	getClientIp,
 	handleError,
 	ok,
@@ -24,9 +24,15 @@ type RouteContext = { params: Promise<{ id: string }> };
 
 export const GET = withApiHandler<RouteContext>(
 	{ route: "/api/units/[id]" },
-	withAuth<RouteContext>(async ({ auth, context }) => {
+	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
 			const { id } = await context.params;
+			await authorize(
+				auth,
+				"units:Read",
+				arn.org.units(resourceScope(auth), id),
+				{ req },
+			);
 			const params = unitParamsSchema.safeParse({ id });
 			if (!params.success) throw ErrInvalidFields;
 
@@ -46,8 +52,13 @@ export const PATCH = withApiHandler<RouteContext>(
 	{ route: "/api/units/[id]" },
 	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
-			assertWriteRole(auth);
 			const { id } = await context.params;
+			await authorize(
+				auth,
+				"units:Update",
+				arn.org.units(resourceScope(auth), id),
+				{ req },
+			);
 			const params = unitParamsSchema.safeParse({ id });
 			if (!params.success) throw ErrInvalidFields;
 
@@ -77,8 +88,13 @@ export const DELETE = withApiHandler<RouteContext>(
 	{ route: "/api/units/[id]" },
 	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
-			assertWriteRole(auth);
 			const { id } = await context.params;
+			await authorize(
+				auth,
+				"units:Delete",
+				arn.org.units(resourceScope(auth), id),
+				{ req },
+			);
 			const params = unitParamsSchema.safeParse({ id });
 			if (!params.success) throw ErrInvalidFields;
 

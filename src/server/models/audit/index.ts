@@ -132,4 +132,77 @@ export async function getAuditEventsDB({
 	}
 }
 
+/**
+ * Cross-owner audit query for the platform operator console. Unlike
+ * {@link getAuditEventsDB} it does NOT scope to a single `ownerId`, so it must
+ * only ever be reached behind a platform-plane `authorize()` (active operator).
+ * Optional filters narrow by owner, organization, entity type or action.
+ */
+export async function getPlatformAuditEventsDB({
+	limit = 50,
+	offset = 0,
+	entityType,
+	action,
+	organizationId,
+	ownerId,
+	session,
+}: {
+	limit?: number;
+	offset?: number;
+	entityType?: string;
+	action?: string;
+	organizationId?: string;
+	ownerId?: string;
+	session?: ClientSession;
+}): Promise<{ events: IAuditEvent[]; total: number }> {
+	const timer = databaseResponseTimeHistogram.startTimer();
+	try {
+		const match: Record<string, unknown> = {};
+		if (entityType && entityType !== "all") match.entityType = entityType;
+		if (action && action !== "all") match.action = action;
+		if (organizationId) match.organizationId = organizationId;
+		if (ownerId) match.ownerId = ownerId;
+
+		const safeLimit = Math.min(limit, MAX_LIMIT);
+		const [eventsResult, countResult] = await Promise.allSettled([
+			AuditEvent.aggregate<IAuditEvent>(
+				[
+					{ $match: match },
+					{ $sort: { createdAt: -1 } },
+					{ $skip: offset },
+					{ $limit: safeLimit },
+				],
+				{ session },
+			),
+			AuditEvent.aggregate<{ total: number }>(
+				[{ $match: match }, { $count: "total" }],
+				{ session },
+			),
+		]);
+
+		timer({
+			operation: IOperationType.Read,
+			collection: collectionName,
+			method: "getPlatformAuditEventsDB",
+			success: "true",
+		});
+
+		const events =
+			eventsResult.status === "fulfilled" ? eventsResult.value : [];
+		const total =
+			countResult.status === "fulfilled"
+				? (countResult.value[0]?.total ?? 0)
+				: 0;
+		return { events, total };
+	} catch {
+		timer({
+			operation: IOperationType.Read,
+			collection: collectionName,
+			method: "getPlatformAuditEventsDB",
+			success: "false",
+		});
+		return { events: [], total: 0 };
+	}
+}
+
 export * from "./types";

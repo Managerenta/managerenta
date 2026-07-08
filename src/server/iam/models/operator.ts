@@ -79,6 +79,32 @@ export async function countIamOperatorsDB({
 	}
 }
 
+export async function listIamOperatorsDB({
+	session,
+}: {
+	session?: ClientSession;
+} = {}): Promise<IIamOperator[]> {
+	try {
+		return await IamOperator.find({}, null, { session })
+			.sort({ createdAt: -1 })
+			.lean<IIamOperator[]>();
+	} catch {
+		return [];
+	}
+}
+
+export async function countActiveIamOperatorsDB({
+	session,
+}: {
+	session?: ClientSession;
+} = {}): Promise<number> {
+	try {
+		return await IamOperator.countDocuments({ status: "active" }, { session });
+	} catch {
+		return 0;
+	}
+}
+
 export async function getIamOperatorByUserIdDB({
 	userId,
 	session,

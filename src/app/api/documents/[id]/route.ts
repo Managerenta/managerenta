@@ -1,11 +1,6 @@
 import { ErrInvalidFields, ErrResourceNotFound } from "@/server/constants";
-import {
-	assertWriteRole,
-	handleError,
-	ok,
-	withApiHandler,
-	withAuth,
-} from "@/server/lib";
+import { arn, authorize, resourceScope } from "@/server/iam";
+import { handleError, ok, withApiHandler, withAuth } from "@/server/lib";
 import { deleteDocument, getDocumentById } from "@/server/services";
 import { documentParamsSchema } from "@/server/validators/documents/validate";
 
@@ -15,9 +10,15 @@ type RouteContext = { params: Promise<{ id: string }> };
 
 export const GET = withApiHandler<RouteContext>(
 	{ route: "/api/documents/[id]" },
-	withAuth<RouteContext>(async ({ auth, context }) => {
+	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
 			const { id } = await context.params;
+			await authorize(
+				auth,
+				"documents:Read",
+				arn.org.documents(resourceScope(auth), id),
+				{ req },
+			);
 			const params = documentParamsSchema.safeParse({ id });
 			if (!params.success) throw ErrInvalidFields;
 
@@ -35,10 +36,15 @@ export const GET = withApiHandler<RouteContext>(
 
 export const DELETE = withApiHandler<RouteContext>(
 	{ route: "/api/documents/[id]" },
-	withAuth<RouteContext>(async ({ auth, context }) => {
+	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
-			assertWriteRole(auth);
 			const { id } = await context.params;
+			await authorize(
+				auth,
+				"documents:Delete",
+				arn.org.documents(resourceScope(auth), id),
+				{ req },
+			);
 			const params = documentParamsSchema.safeParse({ id });
 			if (!params.success) throw ErrInvalidFields;
 

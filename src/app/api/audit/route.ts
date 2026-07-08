@@ -1,4 +1,5 @@
 import { ErrInvalidAction, ErrInvalidFields } from "@/server/constants";
+import { arn, authorize, resourceScope } from "@/server/iam";
 import { handleError, ok, withApiHandler, withAuth } from "@/server/lib";
 import { IOrganizationRole } from "@/server/models/organizations/types";
 import { listAuditEvents } from "@/server/services";
@@ -10,6 +11,12 @@ export const GET = withApiHandler(
 	{ route: "/api/audit" },
 	withAuth(async ({ req, auth }) => {
 		try {
+			await authorize(
+				auth,
+				"audit:List",
+				arn.org.audit(resourceScope(auth)),
+				{ req },
+			);
 			// Audit history is sensitive: in an organization only admins may read
 			// it. In personal scope the owner is always allowed.
 			if (auth.organizationId && auth.role !== IOrganizationRole.ADMIN) {

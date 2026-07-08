@@ -1,6 +1,6 @@
 import { ErrInvalidFields, ErrTryAgain } from "@/server/constants";
+import { arn, authorize, resourceScope } from "@/server/iam";
 import {
-	assertWriteRole,
 	created,
 	handleError,
 	ok,
@@ -19,8 +19,14 @@ type RouteContext = { params: Promise<{ id: string }> };
 
 export const GET = withApiHandler<RouteContext>(
 	{ route: "/api/properties/[id]/units" },
-	withAuth<RouteContext>(async ({ auth, context }) => {
+	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
+			await authorize(
+				auth,
+				"units:List",
+				arn.org.units(resourceScope(auth)),
+				{ req },
+			);
 			const { id } = await context.params;
 			const params = addUnitParamsSchema.safeParse({ propertyId: id });
 			if (!params.success) throw ErrInvalidFields;
@@ -40,7 +46,12 @@ export const POST = withApiHandler<RouteContext>(
 	{ route: "/api/properties/[id]/units" },
 	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
-			assertWriteRole(auth);
+			await authorize(
+				auth,
+				"units:Create",
+				arn.org.units(resourceScope(auth)),
+				{ req },
+			);
 			const { id } = await context.params;
 			const params = addUnitParamsSchema.safeParse({ propertyId: id });
 			if (!params.success) throw ErrInvalidFields;
