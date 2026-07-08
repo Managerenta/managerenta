@@ -3,6 +3,7 @@ export * from "./Dashboard";
 export * from "./Entity";
 export * from "./Notification";
 export * from "./Organization";
+export * from "./OrgIam";
 export * from "./Property";
 export * from "./Reviews";
 export * from "./Settings";

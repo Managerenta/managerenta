@@ -1,15 +1,40 @@
 "use client";
 import { memo, useMemo } from "react";
+import { FiLock } from "react-icons/fi";
 import { Box, Button, Text } from "@/components";
-import { useSettingsData, useSettingsNavigation } from "@/hooks";
+import {
+	useOrganizations,
+	useSettingsData,
+	useSettingsNavigation,
+} from "@/hooks";
+import type { ISettingsTab } from "@/types";
 import { SettingsHeaderStyled } from "./styled";
 
 function SettingsHeader() {
 	const { tabs } = useSettingsData();
 	const { activeTab, openTab } = useSettingsNavigation();
+	const { currentOrganizationId, role } = useOrganizations();
+
+	// The Access / IAM tab is only meaningful to an org owner/admin inside an
+	// organization workspace (the owner's role resolves to "admin"). Outside an
+	// org, or for non-admins, we hide it entirely.
+	const visibleTabs = useMemo<ISettingsTab[]>(() => {
+		if (currentOrganizationId && role === "admin") {
+			return [
+				...tabs,
+				{
+					id: "tab-006",
+					label: "Access / IAM",
+					value: "access",
+					icon: <FiLock size={16} />,
+				},
+			];
+		}
+		return tabs;
+	}, [tabs, currentOrganizationId, role]);
 
 	const renderedTabs = useMemo(() => {
-		return tabs.map(({ id, label, value, icon }) => (
+		return visibleTabs.map(({ id, label, value, icon }) => (
 			<Box
 				key={id}
 				className={`tab-item ${activeTab === value ? "active" : ""}`}
@@ -32,7 +57,7 @@ function SettingsHeader() {
 				/>
 			</Box>
 		));
-	}, [tabs, activeTab, openTab]);
+	}, [visibleTabs, activeTab, openTab]);
 
 	return (
 		<SettingsHeaderStyled>

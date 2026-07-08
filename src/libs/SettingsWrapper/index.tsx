@@ -2,6 +2,7 @@
 import { memo } from "react";
 import { useSettingsNavigation } from "@/hooks";
 import {
+	AccessIamSettings,
 	NotificationsSettings,
 	OrganizationsSettings,
 	Preferences,
@@ -30,6 +31,7 @@ function SettingsWrapper() {
 			)}
 
 			{activeTab === "organizations" && <OrganizationsSettings />}
+			{activeTab === "access" && <AccessIamSettings />}
 			{activeTab === "notifications" && <NotificationsSettings />}
 			{activeTab === "reminders" && <RemindersSettings />}
 			{activeTab === "privacy" && <PrivacySettings />}

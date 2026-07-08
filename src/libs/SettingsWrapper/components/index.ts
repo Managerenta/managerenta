@@ -1,3 +1,4 @@
+export { default as AccessIamSettings } from "./AccessIamSettings";
 export { default as NotificationsSettings } from "./NotificationsSettings";
 export { default as OrganizationsSettings } from "./OrganizationsSettings";
 export { default as Preferences } from "./Preferences";

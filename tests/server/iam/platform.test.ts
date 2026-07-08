@@ -214,6 +214,52 @@ describe("getPlatformAnalytics", () => {
 	});
 });
 
+describe("platform edge cases", () => {
+	it("filters org list by search and tolerates a missing owner user", async () => {
+		const owner = await makeUser("Owner E");
+		const uniqueName = `findme-${oid()}`;
+		await createOrganizationDB({
+			payload: {
+				ownerId: new mongoose.Types.ObjectId(owner),
+				name: uniqueName,
+				description: "searchable",
+			} as never,
+		});
+		// An org whose owner is not a real user → owner enrichment must be null.
+		const orphanOrg = await makeOrg(oid());
+
+		const found = await getPlatformOrganizations({ search: uniqueName });
+		expect(found.organizations.some((o) => o.name === uniqueName)).toBe(true);
+
+		const orphanRow = (await getPlatformOrganizations({ limit: 100 })).organizations.find(
+			(o) => o.id === orphanOrg,
+		);
+		expect(orphanRow?.owner).toBeNull();
+	});
+
+	it("reads the cached overview on a second call without refresh", async () => {
+		const owner = await makeUser("Owner F");
+		await makeOrg(owner);
+		const fresh = await getPlatformOverview({ refreshCache: true });
+		const cached = await getPlatformOverview(); // cache path
+		expect(cached.organizations).toBe(fresh.organizations);
+	});
+
+	it("returns null when suspending a nonexistent org, and zeros for empty analytics", async () => {
+		expect(
+			await setOrganizationSuspended({ orgId: oid(), suspended: true }),
+		).toBeNull();
+
+		const a = await getPlatformAnalytics({ months: 3 });
+		expect(a.monthly).toHaveLength(3);
+		expect(a.monthly.every((m) => m.revenue === 0 && m.expenses === 0)).toBe(
+			true,
+		);
+		expect(a.topOrganizations).toEqual([]);
+		expect(a.occupancy).toEqual({ occupied: 0, vacant: 0 });
+	});
+});
+
 describe("listPlatformAudit", () => {
 	it("returns events across ALL owners and filters by ownerId", async () => {
 		const ownerA = oid();

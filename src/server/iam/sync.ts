@@ -61,6 +61,9 @@ export async function syncOrgMemberRole({
 		await invalidatePrincipal(principalArnForUser(orgId, userId));
 		return true;
 	} catch {
+		// Defensive: the DB/cache helpers above fail closed internally (return
+		// null/0, never throw), so this fires only on an unexpected runtime error.
+		/* v8 ignore next */
 		return false;
 	}
 }
@@ -86,6 +89,8 @@ export async function syncOrgMemberRemoved({
 		await invalidatePrincipal(principalArnForUser(orgId, userId));
 		return true;
 	} catch {
+		// Defensive: helpers fail closed internally; unreachable in practice.
+		/* v8 ignore next */
 		return false;
 	}
 }

@@ -328,6 +328,75 @@ describe("admin members", () => {
 	});
 });
 
+describe("admin groups + members — platform operator paths", () => {
+	it("lists platform groups and rejects a group with a nonexistent policy id", async () => {
+		await adminCreateGroup({ scope: PLATFORM, name: `PG-${oid()}` });
+		const listed = await adminListGroups(PLATFORM);
+		expect(Array.isArray(listed)).toBe(true);
+
+		// A policy id that does not resolve → length mismatch → rejected.
+		expect(
+			await adminCreateGroup({
+				scope: PLATFORM,
+				name: `PG2-${oid()}`,
+				attachedPolicyIds: [oid()],
+			}),
+		).toBeNull();
+	});
+
+	it("adds and removes an OPERATOR principal on a platform group and invalidates it", async () => {
+		const group = await adminCreateGroup({
+			scope: PLATFORM,
+			name: `Ops-${oid()}`,
+		});
+		const operatorId = oid();
+		expect(
+			await adminAddMember({
+				scope: PLATFORM,
+				groupId: group!._id.toString(),
+				principalType: "operator",
+				principalId: operatorId,
+			}),
+		).toBe(true);
+
+		const members = await adminListGroupMembers({
+			groupId: group!._id.toString(),
+		});
+		expect(members.some((m) => m.principalId === operatorId)).toBe(true);
+
+		expect(
+			await adminRemoveMember({
+				scope: PLATFORM,
+				groupId: group!._id.toString(),
+				principalType: "operator",
+				principalId: operatorId,
+			}),
+		).toBe(true);
+
+		// Deleting a group that still has an operator member purges the membership
+		// (exercises the operator principal-ARN branch in the cleanup loop).
+		const group2 = await adminCreateGroup({
+			scope: PLATFORM,
+			name: `Ops2-${oid()}`,
+		});
+		await adminAddMember({
+			scope: PLATFORM,
+			groupId: group2!._id.toString(),
+			principalType: "operator",
+			principalId: oid(),
+		});
+		expect(
+			await adminDeleteGroup({
+				scope: PLATFORM,
+				groupId: group2!._id.toString(),
+			}),
+		).toBe(true);
+		expect(
+			await getMembershipsForGroupDB({ groupId: group2!._id.toString() }),
+		).toHaveLength(0);
+	});
+});
+
 describe("admin operators", () => {
 	it("promotes a real user, rejects unknown users and duplicates, toggles status", async () => {
 		expect(await adminCreateOperator({ userId: oid() })).toEqual({
