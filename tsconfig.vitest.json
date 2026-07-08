@@ -1,0 +1,12 @@
+{
+	// Type-checks the test suite separately from the production build. The
+	// root tsconfig (used by `next build`) excludes `tests/` because test
+	// files are dev-only and are executed by vitest (which type-strips), so
+	// they must not gate the production bundle. Run `yarn typecheck:test`.
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"noEmit": true
+	},
+	"include": ["src", "tests", "vitest.config.ts"],
+	"exclude": ["node_modules"]
+}

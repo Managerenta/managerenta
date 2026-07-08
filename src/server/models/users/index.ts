@@ -1183,11 +1183,9 @@ export async function getUserByIdWithPasswordDB({
 		// `findById` bypasses the pre-aggregate `{ deleted: false }` hook that
 		// guards `getUserByIdDB`, so filter soft-deleted users explicitly here.
 		// A soft-deleted account must never be able to change its password.
-		const result = await User.findOne(
-			{ _id: new mongoose.Types.ObjectId(id), deleted: false },
-			null,
-			{ session },
-		).select("+password");
+		const result = await User.findOne({ _id: id, deleted: false })
+			.select("+password")
+			.session(session ?? null);
 
 		if (!result) throw ErrUserNotFound;
 

@@ -4,6 +4,7 @@
 	"private": true,
 	"scripts": {
 		"ts.check": "tsc --project tsconfig.json",
+		"ts.check.test": "tsc --project tsconfig.vitest.json",
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
