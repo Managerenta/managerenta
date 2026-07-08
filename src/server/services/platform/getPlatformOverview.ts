@@ -82,7 +82,10 @@ async function getOrgGrowth(
 	for (let i = 0; i < months; i++) {
 		const d = new Date(start.getFullYear(), start.getMonth() + i, 1);
 		indexByKey.set(`${d.getFullYear()}-${d.getMonth()}`, buckets.length);
-		buckets.push({ month: MONTH_LABELS[d.getMonth()] as string, created: 0 });
+		buckets.push({
+			month: MONTH_LABELS[d.getMonth()] as string,
+			created: 0,
+		});
 	}
 	if (!model) return buckets;
 	try {
@@ -104,7 +107,9 @@ async function getOrgGrowth(
 
 export default async function getPlatformOverview({
 	refreshCache = false,
-}: { refreshCache?: boolean } = {}): Promise<PlatformOverview> {
+}: {
+	refreshCache?: boolean;
+} = {}): Promise<PlatformOverview> {
 	if (!refreshCache) {
 		const cached =
 			await redisRetrieveKeyString<PlatformOverview>(CACHE_KEY);
@@ -136,9 +141,7 @@ export default async function getPlatformOverview({
 	]);
 
 	const vacantUnits = Math.max(units - occupiedUnits, 0);
-	const occupancyRate = units
-		? Math.round((occupiedUnits / units) * 100)
-		: 0;
+	const occupancyRate = units ? Math.round((occupiedUnits / units) * 100) : 0;
 
 	const result: PlatformOverview = {
 		organizations,

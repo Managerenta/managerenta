@@ -15,7 +15,10 @@ const statementSchema = zod
 		action: zod.array(zod.string().min(1)).min(1),
 		resource: zod.array(zod.string().min(1)).min(1),
 		condition: zod
-			.record(zod.string(), zod.record(zod.string(), zod.array(zod.string())))
+			.record(
+				zod.string(),
+				zod.record(zod.string(), zod.array(zod.string())),
+			)
 			.optional(),
 	})
 	.strict();
@@ -63,7 +66,9 @@ export const DELETE = withApiHandler<RouteContext>(
 	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
 			const { id } = await context.params;
-			await authorize(auth, "iam:DeletePolicy", arn.platform.iam(), { req });
+			await authorize(auth, "iam:DeletePolicy", arn.platform.iam(), {
+				req,
+			});
 			const result = await adminDeletePolicy({ scope, policyId: id });
 			if (!result) throw ErrInvalidAction;
 			return ok(null, "Policy deleted");

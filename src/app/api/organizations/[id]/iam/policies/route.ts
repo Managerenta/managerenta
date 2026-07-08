@@ -21,7 +21,10 @@ const statementSchema = zod
 		action: zod.array(zod.string().min(1)).min(1),
 		resource: zod.array(zod.string().min(1)).min(1),
 		condition: zod
-			.record(zod.string(), zod.record(zod.string(), zod.array(zod.string())))
+			.record(
+				zod.string(),
+				zod.record(zod.string(), zod.array(zod.string())),
+			)
 			.optional(),
 	})
 	.strict();
@@ -43,7 +46,10 @@ export const GET = withApiHandler<RouteContext>(
 		try {
 			const { id } = await context.params;
 			await authorize(auth, "iam:List", arn.org.iam(id), { req });
-			const policies = await adminListPolicies({ plane: "org", orgId: id });
+			const policies = await adminListPolicies({
+				plane: "org",
+				orgId: id,
+			});
 			return ok(policies);
 		} catch (error) {
 			return handleError(error);

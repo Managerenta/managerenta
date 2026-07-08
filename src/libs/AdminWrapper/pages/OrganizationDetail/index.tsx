@@ -4,8 +4,8 @@ import { memo, useMemo, useState } from "react";
 import { FiArrowLeft } from "react-icons/fi";
 import { Box, Button, Loader, Text } from "@/components";
 import { api } from "@/constants";
-import { useAdminOrganizationDetail } from "@/hooks/Admin";
 import { useToast } from "@/hooks";
+import { useAdminOrganizationDetail } from "@/hooks/Admin";
 import { Badge, EntityPageStyled, StatCard } from "../../../shared/entity";
 import AdminShell from "../../AdminShell";
 
@@ -25,7 +25,10 @@ function OrganizationDetailContent({ id }: { id: string }) {
 					</td>
 					<td>
 						<Text
-							style={{ fontSize: 13, color: "var(--Text-Secondary)" }}
+							style={{
+								fontSize: 13,
+								color: "var(--Text-Secondary)",
+							}}
 						>
 							{m.email || "—"}
 						</Text>
@@ -87,7 +90,11 @@ function OrganizationDetailContent({ id }: { id: string }) {
 			<Box className="page-head">
 				<Box className="titles">
 					<Box
-						style={{ display: "flex", alignItems: "center", gap: 12 }}
+						style={{
+							display: "flex",
+							alignItems: "center",
+							gap: 12,
+						}}
 					>
 						<Text className="title">{detail.name}</Text>
 						{detail.suspended ? (
@@ -111,7 +118,13 @@ function OrganizationDetailContent({ id }: { id: string }) {
 					</Text>
 				</Box>
 				<Button
-					title={saving ? "Saving…" : detail.suspended ? "Reactivate" : "Suspend"}
+					title={
+						saving
+							? "Saving…"
+							: detail.suspended
+								? "Reactivate"
+								: "Suspend"
+					}
 					variant={detail.suspended ? "primary" : "danger"}
 					disabled={saving}
 					handleClick={toggleSuspend}
@@ -135,7 +148,10 @@ function OrganizationDetailContent({ id }: { id: string }) {
 							{detail.owner.name || "—"}
 						</Text>
 						<Text
-							style={{ fontSize: 13, color: "var(--Text-Secondary)" }}
+							style={{
+								fontSize: 13,
+								color: "var(--Text-Secondary)",
+							}}
 						>
 							{detail.owner.email}
 						</Text>
@@ -172,7 +188,9 @@ function OrganizationDetailContent({ id }: { id: string }) {
 					</table>
 				</Box>
 				{detail.members.length === 0 ? (
-					<Box className="empty">No members in this organization.</Box>
+					<Box className="empty">
+						No members in this organization.
+					</Box>
 				) : null}
 			</Box>
 		</EntityPageStyled>

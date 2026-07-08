@@ -50,9 +50,7 @@ describe("syncOrgMemberRole", () => {
 			orgId,
 		});
 		expect(rows).toHaveLength(1);
-		expect(rows[0]?.groupId.toString()).toBe(
-			groups!.viewer._id.toString(),
-		);
+		expect(rows[0]?.groupId.toString()).toBe(groups!.viewer._id.toString());
 
 		// A viewer can read but not write through the engine.
 		const auth = orgAuth(userId, orgId);
@@ -90,7 +88,8 @@ describe("syncOrgMemberRole", () => {
 		// Now an admin: privileged actions resolve to allow.
 		const auth = orgAuth(userId, orgId);
 		expect(
-			(await decide(auth, "iam:CreateGroup", arn.org.iam(orgId))).decision,
+			(await decide(auth, "iam:CreateGroup", arn.org.iam(orgId)))
+				.decision,
 		).toBe("allow");
 	});
 

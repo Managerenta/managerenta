@@ -50,9 +50,10 @@ afterAll(async () => {
 
 describe("platform services degrade gracefully on DB failure", () => {
 	it("overview returns zeros when count/aggregate queries reject", async () => {
-		vi.spyOn(mongoose.models.organizations, "countDocuments").mockRejectedValue(
-			new Error("db down") as never,
-		);
+		vi.spyOn(
+			mongoose.models.organizations,
+			"countDocuments",
+		).mockRejectedValue(new Error("db down") as never);
 		vi.spyOn(mongoose.models.transactions, "aggregate").mockRejectedValue(
 			new Error("db down") as never,
 		);
@@ -62,9 +63,10 @@ describe("platform services degrade gracefully on DB failure", () => {
 	});
 
 	it("org list returns an empty page when the query rejects", async () => {
-		vi.spyOn(mongoose.models.organizations, "countDocuments").mockRejectedValue(
-			new Error("db down") as never,
-		);
+		vi.spyOn(
+			mongoose.models.organizations,
+			"countDocuments",
+		).mockRejectedValue(new Error("db down") as never);
 		expect(await getPlatformOrganizations({ limit: 10 })).toEqual({
 			organizations: [],
 			total: 0,
@@ -77,9 +79,10 @@ describe("platform services degrade gracefully on DB failure", () => {
 		).toBeNull();
 
 		const orgId = await makeOrg();
-		vi.spyOn(mongoose.models.properties, "countDocuments").mockRejectedValue(
-			new Error("db down") as never,
-		);
+		vi.spyOn(
+			mongoose.models.properties,
+			"countDocuments",
+		).mockRejectedValue(new Error("db down") as never);
 		vi.spyOn(mongoose.models.transactions, "aggregate").mockRejectedValue(
 			new Error("db down") as never,
 		);

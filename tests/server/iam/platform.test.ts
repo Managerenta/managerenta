@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { createAuditEventDB, createOrganizationDB } from "../../../src/server/models";
+import {
+	createAuditEventDB,
+	createOrganizationDB,
+} from "../../../src/server/models";
 import {
 	getPlatformAnalytics,
 	getPlatformOrganizationDetail,
@@ -63,10 +66,7 @@ async function makeUnit(
 	});
 }
 
-async function makeTenant(
-	userId: string,
-	propertyId: string,
-): Promise<string> {
+async function makeTenant(userId: string, propertyId: string): Promise<string> {
 	const t = await mongoose.models.tenants.create({
 		name: `tenant-${oid()}`,
 		phone: "123",
@@ -158,15 +158,15 @@ describe("getPlatformOrganizations + detail + suspend", () => {
 		expect(
 			afterSuspend.organizations.find((r) => r.id === orgId)?.suspended,
 		).toBe(true);
-		expect((await getPlatformOverview({ refreshCache: true })).organizations).toBe(
-			0,
-		);
+		expect(
+			(await getPlatformOverview({ refreshCache: true })).organizations,
+		).toBe(0);
 
 		// Reactivate.
 		await setOrganizationSuspended({ orgId, suspended: false });
-		expect((await getPlatformOverview({ refreshCache: true })).organizations).toBe(
-			1,
-		);
+		expect(
+			(await getPlatformOverview({ refreshCache: true })).organizations,
+		).toBe(1);
 	});
 
 	it("returns full detail with owner-scoped stats", async () => {
@@ -229,11 +229,13 @@ describe("platform edge cases", () => {
 		const orphanOrg = await makeOrg(oid());
 
 		const found = await getPlatformOrganizations({ search: uniqueName });
-		expect(found.organizations.some((o) => o.name === uniqueName)).toBe(true);
-
-		const orphanRow = (await getPlatformOrganizations({ limit: 100 })).organizations.find(
-			(o) => o.id === orphanOrg,
+		expect(found.organizations.some((o) => o.name === uniqueName)).toBe(
+			true,
 		);
+
+		const orphanRow = (
+			await getPlatformOrganizations({ limit: 100 })
+		).organizations.find((o) => o.id === orphanOrg);
 		expect(orphanRow?.owner).toBeNull();
 	});
 
@@ -252,9 +254,9 @@ describe("platform edge cases", () => {
 
 		const a = await getPlatformAnalytics({ months: 3 });
 		expect(a.monthly).toHaveLength(3);
-		expect(a.monthly.every((m) => m.revenue === 0 && m.expenses === 0)).toBe(
-			true,
-		);
+		expect(
+			a.monthly.every((m) => m.revenue === 0 && m.expenses === 0),
+		).toBe(true);
 		expect(a.topOrganizations).toEqual([]);
 		expect(a.occupancy).toEqual({ occupied: 0, vacant: 0 });
 	});

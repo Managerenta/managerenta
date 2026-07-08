@@ -65,11 +65,17 @@ function OrganizationsContent() {
 					<td>{o.tenantCount}</td>
 					<td>
 						{o.suspended ? (
-							<Badge $bg="var(--mr-color-danger-soft)" $fg="var(--mr-color-danger)">
+							<Badge
+								$bg="var(--mr-color-danger-soft)"
+								$fg="var(--mr-color-danger)"
+							>
 								Suspended
 							</Badge>
 						) : (
-							<Badge $bg="var(--mr-color-success-soft)" $fg="var(--mr-color-success)">
+							<Badge
+								$bg="var(--mr-color-success-soft)"
+								$fg="var(--mr-color-success)"
+							>
 								Active
 							</Badge>
 						)}

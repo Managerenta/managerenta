@@ -135,9 +135,7 @@ async function policyIdsInScope(
 	return policies.every((p) => scopeMatches(p, scope));
 }
 
-export async function adminListGroups(
-	scope: AdminScope,
-): Promise<IIamGroup[]> {
+export async function adminListGroups(scope: AdminScope): Promise<IIamGroup[]> {
 	return listIamGroupsDB({ plane: scope.plane, orgId: scope.orgId });
 }
 
@@ -246,7 +244,9 @@ export async function adminListGroupMembers({
 	groupId: string;
 }): Promise<EnrichedMember[]> {
 	const members = await getMembershipsForGroupDB({ groupId });
-	const ids = Array.from(new Set(members.map((m) => m.principalId.toString())));
+	const ids = Array.from(
+		new Set(members.map((m) => m.principalId.toString())),
+	);
 	const users = ids.length
 		? await getUsersByIdsDB({ ids, limit: ids.length, offset: 0 })
 		: [];
@@ -382,8 +382,7 @@ export async function adminListOperators(): Promise<EnrichedOperator[]> {
 			status: o.status,
 			name: u?.name ?? "",
 			email: u?.email ?? "",
-			createdAt:
-				(o as unknown as { createdAt?: Date }).createdAt ?? null,
+			createdAt: (o as unknown as { createdAt?: Date }).createdAt ?? null,
 		};
 	});
 }

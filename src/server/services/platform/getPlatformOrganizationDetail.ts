@@ -87,7 +87,11 @@ export default async function getPlatformOrganizationDetail({
 	const memberIds = (doc.members ?? []).map((m) => m.memberId.toString());
 	const allIds = Array.from(new Set([ownerId, ...memberIds]));
 	const users = allIds.length
-		? await getUsersByIdsDB({ ids: allIds, limit: allIds.length, offset: 0 })
+		? await getUsersByIdsDB({
+				ids: allIds,
+				limit: allIds.length,
+				offset: 0,
+			})
 		: [];
 	const userMap = new Map(users.map((u) => [u._id.toString(), u]));
 
@@ -95,7 +99,11 @@ export default async function getPlatformOrganizationDetail({
 		await Promise.all([
 			count("properties", { userId: ownerId, deleted: false }),
 			count("units", { userId: ownerId, deleted: false }),
-			count("units", { userId: ownerId, deleted: false, status: "Occupied" }),
+			count("units", {
+				userId: ownerId,
+				deleted: false,
+				status: "Occupied",
+			}),
 			count("tenants", { userId: ownerId, deleted: false }),
 			revenueForOwner(ownerId),
 		]);

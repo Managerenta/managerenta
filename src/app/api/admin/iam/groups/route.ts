@@ -38,7 +38,9 @@ export const POST = withApiHandler(
 	{ route: "/api/admin/iam/groups" },
 	withAuth(async ({ req, auth }) => {
 		try {
-			await authorize(auth, "iam:CreateGroup", arn.platform.iam(), { req });
+			await authorize(auth, "iam:CreateGroup", arn.platform.iam(), {
+				req,
+			});
 			let body: unknown;
 			try {
 				body = await req.json();

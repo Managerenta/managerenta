@@ -15,7 +15,10 @@ const statementSchema = zod
 		action: zod.array(zod.string().min(1)).min(1),
 		resource: zod.array(zod.string().min(1)).min(1),
 		condition: zod
-			.record(zod.string(), zod.record(zod.string(), zod.array(zod.string())))
+			.record(
+				zod.string(),
+				zod.record(zod.string(), zod.array(zod.string())),
+			)
 			.optional(),
 	})
 	.strict();

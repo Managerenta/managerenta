@@ -42,7 +42,10 @@ function OverviewContent() {
 				/>
 				<StatCard label="Users" value={overview?.users ?? 0} />
 				<StatCard label="Operators" value={overview?.operators ?? 0} />
-				<StatCard label="Properties" value={overview?.properties ?? 0} />
+				<StatCard
+					label="Properties"
+					value={overview?.properties ?? 0}
+				/>
 				<StatCard label="Units" value={overview?.units ?? 0} />
 				<StatCard label="Tenants" value={overview?.tenants ?? 0} />
 				<StatCard

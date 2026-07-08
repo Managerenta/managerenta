@@ -16,7 +16,9 @@ export const DELETE = withApiHandler<RouteContext>(
 	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
 			const { id, principalId } = await context.params;
-			await authorize(auth, "iam:RemoveMember", arn.platform.iam(), { req });
+			await authorize(auth, "iam:RemoveMember", arn.platform.iam(), {
+				req,
+			});
 			const type =
 				new URL(req.url).searchParams.get("type") === "user"
 					? "user"

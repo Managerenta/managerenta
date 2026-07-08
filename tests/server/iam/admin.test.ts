@@ -49,7 +49,11 @@ function platformDoc(action: string): PolicyDocument {
 	return {
 		version: "2026-01-01",
 		statements: [
-			{ effect: "Allow", action: [action], resource: ["mr:platform:*:*:*/*"] },
+			{
+				effect: "Allow",
+				action: [action],
+				resource: ["mr:platform:*:*:*/*"],
+			},
 		],
 	};
 }
@@ -57,7 +61,11 @@ function orgDoc(orgId: string, action: string): PolicyDocument {
 	return {
 		version: "2026-01-01",
 		statements: [
-			{ effect: "Allow", action: [action], resource: [`mr:org:*:${orgId}:*/*`] },
+			{
+				effect: "Allow",
+				action: [action],
+				resource: [`mr:org:*:${orgId}:*/*`],
+			},
 		],
 	};
 }
@@ -83,9 +91,9 @@ describe("admin policies", () => {
 		expect(created?.managedBy).toBe("customer");
 
 		const list = await adminListPolicies(PLATFORM);
-		expect(list.some((p) => p._id.toString() === created!._id.toString())).toBe(
-			true,
-		);
+		expect(
+			list.some((p) => p._id.toString() === created!._id.toString()),
+		).toBe(true);
 
 		const updated = await adminUpdatePolicy({
 			scope: PLATFORM,
@@ -116,7 +124,10 @@ describe("admin policies", () => {
 			await adminCreatePolicy({
 				scope: PLATFORM,
 				name: `Bad-${oid()}`,
-				document: { version: "1", statements: [] } as unknown as PolicyDocument,
+				document: {
+					version: "1",
+					statements: [],
+				} as unknown as PolicyDocument,
 			}),
 		).toBeNull();
 	});
@@ -414,9 +425,9 @@ describe("admin operators", () => {
 		});
 
 		const list = await adminListOperators();
-		expect(list.some((o) => o.userId === userId && o.name === "Operator")).toBe(
-			true,
-		);
+		expect(
+			list.some((o) => o.userId === userId && o.name === "Operator"),
+		).toBe(true);
 
 		expect(
 			await adminSetOperatorStatus({ userId, status: "disabled" }),

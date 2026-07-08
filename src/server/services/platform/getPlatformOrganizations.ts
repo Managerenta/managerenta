@@ -84,7 +84,11 @@ export default async function getPlatformOrganizations({
 	const ownerIds = Array.from(new Set(docs.map((d) => d.ownerId.toString())));
 	const [users, propertyCounts, tenantCounts] = await Promise.all([
 		ownerIds.length
-			? getUsersByIdsDB({ ids: ownerIds, limit: ownerIds.length, offset: 0 })
+			? getUsersByIdsDB({
+					ids: ownerIds,
+					limit: ownerIds.length,
+					offset: 0,
+				})
 			: Promise.resolve([]),
 		countsByOwner("properties", ownerIds),
 		countsByOwner("tenants", ownerIds),

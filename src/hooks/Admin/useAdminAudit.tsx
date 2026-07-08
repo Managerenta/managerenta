@@ -29,7 +29,8 @@ export function useAdminAudit({
 }) {
 	const params = new URLSearchParams({ limit: "50" });
 	if (action && action !== "all") params.set("action", action);
-	if (entityType && entityType !== "all") params.set("entityType", entityType);
+	if (entityType && entityType !== "all")
+		params.set("entityType", entityType);
 	const { data, isLoading } = useSWR<{ data?: IAdminAuditList }>(
 		`/api/admin/audit?${params.toString()}`,
 		fetcher,

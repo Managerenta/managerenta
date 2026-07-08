@@ -50,12 +50,19 @@ async function getMonthly(
 		try {
 			const txs = (await Transaction.find({
 				date: { $gte: start },
-			}).lean()) as Array<{ date: Date; amountType: string; amount?: number }>;
+			}).lean()) as Array<{
+				date: Date;
+				amountType: string;
+				amount?: number;
+			}>;
 			for (const t of txs) {
 				const d = new Date(t.date);
-				const idx = indexByKey.get(`${d.getFullYear()}-${d.getMonth()}`);
+				const idx = indexByKey.get(
+					`${d.getFullYear()}-${d.getMonth()}`,
+				);
 				if (idx === undefined || !buckets[idx]) continue;
-				if (t.amountType === "credit") buckets[idx].revenue += t.amount ?? 0;
+				if (t.amountType === "credit")
+					buckets[idx].revenue += t.amount ?? 0;
 				else buckets[idx].expenses += t.amount ?? 0;
 			}
 		} catch {
@@ -75,7 +82,9 @@ async function getMonthly(
 			}>;
 			for (const r of reqs) {
 				const d = new Date(r.completedDate ?? r.createdAt);
-				const idx = indexByKey.get(`${d.getFullYear()}-${d.getMonth()}`);
+				const idx = indexByKey.get(
+					`${d.getFullYear()}-${d.getMonth()}`,
+				);
 				if (idx === undefined || !buckets[idx]) continue;
 				buckets[idx].expenses += r.cost ?? 0;
 			}
@@ -97,7 +106,10 @@ async function getTopOrganizations(
 	const Transaction = mongoose.models.transactions;
 	if (!Transaction) return [];
 	try {
-		const rows = await Transaction.aggregate<{ _id: string; total: number }>([
+		const rows = await Transaction.aggregate<{
+			_id: string;
+			total: number;
+		}>([
 			{ $match: { amountType: "credit" } },
 			{ $group: { _id: "$userId", total: { $sum: "$amount" } } },
 		]);
@@ -153,7 +165,10 @@ async function getMaintenanceByCategory(): Promise<
 	const Maintenance = mongoose.models.maintenancerequests;
 	if (!Maintenance) return [];
 	try {
-		const rows = await Maintenance.aggregate<{ _id: string; total: number }>([
+		const rows = await Maintenance.aggregate<{
+			_id: string;
+			total: number;
+		}>([
 			{ $match: { deleted: false, cost: { $gt: 0 } } },
 			{ $group: { _id: "$category", total: { $sum: "$cost" } } },
 			{ $sort: { total: -1 } },

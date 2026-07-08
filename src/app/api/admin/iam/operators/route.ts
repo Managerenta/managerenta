@@ -49,7 +49,9 @@ export const POST = withApiHandler(
 			}
 			const parsed = createSchema.safeParse(body);
 			if (!parsed.success) throw ErrInvalidFields;
-			const result = await adminCreateOperator({ userId: parsed.data.userId });
+			const result = await adminCreateOperator({
+				userId: parsed.data.userId,
+			});
 			if (!result.ok) {
 				if (result.reason === "unknown-user") throw ErrResourceNotFound;
 				if (result.reason === "already-operator") {

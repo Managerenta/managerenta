@@ -99,7 +99,10 @@ export async function countActiveIamOperatorsDB({
 	session?: ClientSession;
 } = {}): Promise<number> {
 	try {
-		return await IamOperator.countDocuments({ status: "active" }, { session });
+		return await IamOperator.countDocuments(
+			{ status: "active" },
+			{ session },
+		);
 	} catch {
 		return 0;
 	}

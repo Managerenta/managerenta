@@ -271,8 +271,8 @@ function AccessIamSettings() {
 					<Box>
 						<Text className="section-title">Groups</Text>
 						<Text className="caption">
-							System groups are read-only. Create custom groups and
-							attach policies to them.
+							System groups are read-only. Create custom groups
+							and attach policies to them.
 						</Text>
 					</Box>
 				</Box>

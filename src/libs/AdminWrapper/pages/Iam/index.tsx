@@ -49,27 +49,33 @@ function OperatorsSection() {
 		}
 		setBusy(true);
 		try {
-			await api().post("/api/admin/iam/operators", { userId: userId.trim() });
+			await api().post("/api/admin/iam/operators", {
+				userId: userId.trim(),
+			});
 			toast.push("Operator added", { type: "success" });
 			setUserId("");
 			await globalMutate(mutateKey);
 		} catch (e) {
-			toast.push(errMessage(e, "Could not add operator"), { type: "warn" });
+			toast.push(errMessage(e, "Could not add operator"), {
+				type: "warn",
+			});
 		} finally {
 			setBusy(false);
 		}
 	};
 
-	const toggleStatus = async (
-		id: string,
-		status: "active" | "disabled",
-	) => {
+	const toggleStatus = async (id: string, status: "active" | "disabled") => {
 		const next = status === "active" ? "disabled" : "active";
 		try {
-			await api().patch(`/api/admin/iam/operators/${id}`, { status: next });
-			toast.push(next === "active" ? "Operator enabled" : "Operator disabled", {
-				type: "success",
+			await api().patch(`/api/admin/iam/operators/${id}`, {
+				status: next,
 			});
+			toast.push(
+				next === "active" ? "Operator enabled" : "Operator disabled",
+				{
+					type: "success",
+				},
+			);
 			await globalMutate(mutateKey);
 		} catch (e) {
 			toast.push(errMessage(e, "Could not update operator"), {
@@ -99,11 +105,15 @@ function OperatorsSection() {
 					<Box key={o.userId} className="iam-card">
 						<Box className="card-top">
 							<Box>
-								<Text className="card-name">{o.name || "Unnamed user"}</Text>
+								<Text className="card-name">
+									{o.name || "Unnamed user"}
+								</Text>
 								<Text className="card-meta">
 									{o.email || o.userId} ·{" "}
 									{o.createdAt
-										? new Date(o.createdAt).toLocaleDateString("en-NG")
+										? new Date(
+												o.createdAt,
+											).toLocaleDateString("en-NG")
 										: "—"}
 								</Text>
 							</Box>
@@ -124,10 +134,20 @@ function OperatorsSection() {
 									</Badge>
 								)}
 								<Button
-									title={o.status === "active" ? "Disable" : "Enable"}
-									variant={o.status === "active" ? "danger-soft" : "soft"}
+									title={
+										o.status === "active"
+											? "Disable"
+											: "Enable"
+									}
+									variant={
+										o.status === "active"
+											? "danger-soft"
+											: "soft"
+									}
 									size="sm"
-									handleClick={() => toggleStatus(o.userId, o.status)}
+									handleClick={() =>
+										toggleStatus(o.userId, o.status)
+									}
 								/>
 							</Box>
 						</Box>
@@ -174,7 +194,9 @@ function GroupMembersPanel({ groupId }: { groupId: string }) {
 			toast.push("Member removed", { type: "success" });
 			await mutate();
 		} catch (e) {
-			toast.push(errMessage(e, "Could not remove member"), { type: "warn" });
+			toast.push(errMessage(e, "Could not remove member"), {
+				type: "warn",
+			});
 		}
 	};
 
@@ -188,7 +210,10 @@ function GroupMembersPanel({ groupId }: { groupId: string }) {
 							{m.name || m.principalId}
 						</Text>
 						<Text
-							style={{ fontSize: 12, color: "var(--Text-Secondary)" }}
+							style={{
+								fontSize: 12,
+								color: "var(--Text-Secondary)",
+							}}
 						>
 							{m.email || m.principalType}
 						</Text>
@@ -264,7 +289,9 @@ function GroupCard({
 			toast.push("Group deleted", { type: "success" });
 			await globalMutate(mutateKey);
 		} catch (e) {
-			toast.push(errMessage(e, "Could not delete group"), { type: "warn" });
+			toast.push(errMessage(e, "Could not delete group"), {
+				type: "warn",
+			});
 		}
 	};
 
@@ -275,7 +302,9 @@ function GroupCard({
 					<Text className="card-name">{group.name}</Text>
 					<Text className="card-meta">
 						{group.attachedPolicyIds.length} attached{" "}
-						{group.attachedPolicyIds.length === 1 ? "policy" : "policies"}
+						{group.attachedPolicyIds.length === 1
+							? "policy"
+							: "policies"}
 					</Text>
 				</Box>
 				<Box className="card-actions">
@@ -339,7 +368,9 @@ function GroupsSection() {
 			setName("");
 			await globalMutate(mutateKey);
 		} catch (e) {
-			toast.push(errMessage(e, "Could not create group"), { type: "warn" });
+			toast.push(errMessage(e, "Could not create group"), {
+				type: "warn",
+			});
 		} finally {
 			setBusy(false);
 		}
@@ -425,7 +456,9 @@ function PolicyCard({
 			setEditing(false);
 			await globalMutate(mutateKey);
 		} catch (e) {
-			toast.push(errMessage(e, "Could not update policy"), { type: "warn" });
+			toast.push(errMessage(e, "Could not update policy"), {
+				type: "warn",
+			});
 		} finally {
 			setBusy(false);
 		}
@@ -437,7 +470,9 @@ function PolicyCard({
 			toast.push("Policy deleted", { type: "success" });
 			await globalMutate(mutateKey);
 		} catch (e) {
-			toast.push(errMessage(e, "Could not delete policy"), { type: "warn" });
+			toast.push(errMessage(e, "Could not delete policy"), {
+				type: "warn",
+			});
 		}
 	};
 
@@ -462,7 +497,9 @@ function PolicyCard({
 								title={editing ? "Cancel" : "Edit"}
 								variant="soft"
 								size="sm"
-								handleClick={() => (editing ? setEditing(false) : startEdit())}
+								handleClick={() =>
+									editing ? setEditing(false) : startEdit()
+								}
 							/>
 							<Button
 								title="Delete"
@@ -528,7 +565,9 @@ function PoliciesSection() {
 			setDoc(NEW_POLICY_TEMPLATE);
 			await globalMutate(mutateKey);
 		} catch (e) {
-			toast.push(errMessage(e, "Could not create policy"), { type: "warn" });
+			toast.push(errMessage(e, "Could not create policy"), {
+				type: "warn",
+			});
 		} finally {
 			setBusy(false);
 		}
@@ -542,7 +581,10 @@ function PoliciesSection() {
 					value={name}
 					onChange={(e) => setName(e.target.value)}
 				/>
-				<textarea value={doc} onChange={(e) => setDoc(e.target.value)} />
+				<textarea
+					value={doc}
+					onChange={(e) => setDoc(e.target.value)}
+				/>
 				<Button
 					title="Create policy"
 					variant="primary"

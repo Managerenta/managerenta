@@ -19,7 +19,9 @@ export const PATCH = withApiHandler<RouteContext>(
 	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
 			const { id } = await context.params;
-			await authorize(auth, "iam:AttachPolicy", arn.platform.iam(), { req });
+			await authorize(auth, "iam:AttachPolicy", arn.platform.iam(), {
+				req,
+			});
 			let body: unknown;
 			try {
 				body = await req.json();
@@ -46,7 +48,9 @@ export const DELETE = withApiHandler<RouteContext>(
 	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
 			const { id } = await context.params;
-			await authorize(auth, "iam:DeleteGroup", arn.platform.iam(), { req });
+			await authorize(auth, "iam:DeleteGroup", arn.platform.iam(), {
+				req,
+			});
 			const result = await adminDeleteGroup({ scope, groupId: id });
 			if (!result) throw ErrInvalidAction;
 			return ok(null, "Group deleted");

@@ -1,6 +1,13 @@
 "use client";
 import { memo, useMemo, useState } from "react";
-import { Box, Donut, GroupedBarChart, HBarList, Select, Text } from "@/components";
+import {
+	Box,
+	Donut,
+	GroupedBarChart,
+	HBarList,
+	Select,
+	Text,
+} from "@/components";
 import { useAdminAnalytics } from "@/hooks/Admin";
 import { AnalyticsStyled } from "../../../AnalyticsWrapper/styled";
 import { EntityPageStyled } from "../../../shared/entity";
@@ -12,7 +19,14 @@ const compactNaira = (n: number) => {
 	return `₦${n}`;
 };
 
-const PALETTE = ["#1E3A5F", "#D97757", "#15803D", "#B45309", "#1D4E89", "#8B95A4"];
+const PALETTE = [
+	"#1E3A5F",
+	"#D97757",
+	"#15803D",
+	"#B45309",
+	"#1D4E89",
+	"#8B95A4",
+];
 
 const rangeOptions = [
 	{ label: "Last 3 months", value: "3" },
@@ -57,7 +71,9 @@ function AnalyticsContent() {
 
 	const occ = analytics?.occupancy;
 	const occTotal = (occ?.occupied ?? 0) + (occ?.vacant ?? 0);
-	const occRate = occTotal ? Math.round(((occ?.occupied ?? 0) / occTotal) * 100) : 0;
+	const occRate = occTotal
+		? Math.round(((occ?.occupied ?? 0) / occTotal) * 100)
+		: 0;
 
 	return (
 		<EntityPageStyled>
@@ -83,9 +99,15 @@ function AnalyticsContent() {
 					<Box className="card-head">
 						<Text className="card-title">Revenue vs Expenses</Text>
 						<Box className="legend">
-							<span className="dot" style={{ background: "#1E3A5F" }} />
+							<span
+								className="dot"
+								style={{ background: "#1E3A5F" }}
+							/>
 							<Text className="legend-label">Revenue</Text>
-							<span className="dot" style={{ background: "#D97757" }} />
+							<span
+								className="dot"
+								style={{ background: "#D97757" }}
+							/>
 							<Text className="legend-label">Expenses</Text>
 						</Box>
 					</Box>
@@ -100,7 +122,9 @@ function AnalyticsContent() {
 						/>
 					) : (
 						<Box className="chart-empty">
-							{isLoading ? "Loading…" : "No transaction data yet."}
+							{isLoading
+								? "Loading…"
+								: "No transaction data yet."}
 						</Box>
 					)}
 				</Box>
@@ -126,12 +150,20 @@ function AnalyticsContent() {
 						/>
 						<Box className="donut-legend">
 							<Box className="row">
-								<span className="dot" style={{ background: "#1E3A5F" }} />
+								<span
+									className="dot"
+									style={{ background: "#1E3A5F" }}
+								/>
 								<Text>Occupied</Text>
-								<Text className="num">{occ?.occupied ?? 0}</Text>
+								<Text className="num">
+									{occ?.occupied ?? 0}
+								</Text>
 							</Box>
 							<Box className="row">
-								<span className="dot" style={{ background: "#D7CDBC" }} />
+								<span
+									className="dot"
+									style={{ background: "#D7CDBC" }}
+								/>
 								<Text>Vacant</Text>
 								<Text className="num">{occ?.vacant ?? 0}</Text>
 							</Box>
@@ -140,16 +172,22 @@ function AnalyticsContent() {
 				</Box>
 
 				<Box className="card">
-					<Text className="card-title">Top Organizations by Revenue</Text>
+					<Text className="card-title">
+						Top Organizations by Revenue
+					</Text>
 					{topOrgItems.length ? (
 						<HBarList items={topOrgItems} />
 					) : (
-						<Box className="chart-empty">No revenue recorded yet.</Box>
+						<Box className="chart-empty">
+							No revenue recorded yet.
+						</Box>
 					)}
 				</Box>
 
 				<Box className="card">
-					<Text className="card-title">Maintenance Spend by Category</Text>
+					<Text className="card-title">
+						Maintenance Spend by Category
+					</Text>
 					{maintenanceItems.length ? (
 						<HBarList items={maintenanceItems} />
 					) : (

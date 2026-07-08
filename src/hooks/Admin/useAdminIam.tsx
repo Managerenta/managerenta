@@ -50,7 +50,10 @@ export interface IAdminGroupMember {
 
 export function useAdminOperators() {
 	const key = "/api/admin/iam/operators";
-	const { data, isLoading } = useSWR<{ data?: IAdminOperator[] }>(key, fetcher);
+	const { data, isLoading } = useSWR<{ data?: IAdminOperator[] }>(
+		key,
+		fetcher,
+	);
 	return { operators: data?.data ?? [], isLoading, mutateKey: key };
 }
 
