@@ -14,12 +14,14 @@ import {
 	FiList,
 	FiPlus,
 	FiSettings,
+	FiShield,
 	FiTool,
 	FiUsers,
 } from "react-icons/fi";
 import { HiOutlineBuildingOffice2 } from "react-icons/hi2";
 import { Box, Text } from "@/components";
 import { useOrganizations } from "@/hooks";
+import { useWhoami } from "@/hooks/Admin";
 import { TabSidebarStyled } from "./styled";
 
 const TAB_ITEMS = [
@@ -57,6 +59,7 @@ function TabSidebar() {
 	const router = useRouter();
 	const { organizations, currentOrganizationId, current, switchTo } =
 		useOrganizations();
+	const { operator: isOperator } = useWhoami();
 	const [open, setOpen] = useState(false);
 	const ref = useRef<HTMLDivElement>(null);
 
@@ -172,7 +175,24 @@ function TabSidebar() {
 				)}
 			</Box>
 
-			<Box className="navigation-section">{navigationItems}</Box>
+			<Box className="navigation-section">
+				{navigationItems}
+				{isOperator ? (
+					<Link
+						href="/admin"
+						className={`nav-item ${
+							currentTab === "admin" ? "active" : ""
+						}`}
+					>
+						<Box className="nav-content">
+							<Box className="nav-icon">
+								<FiShield size={20} />
+							</Box>
+							<Text className="nav-text">Operator Console</Text>
+						</Box>
+					</Link>
+				) : null}
+			</Box>
 		</TabSidebarStyled>
 	);
 }

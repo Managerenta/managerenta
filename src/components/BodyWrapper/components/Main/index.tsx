@@ -32,6 +32,8 @@ function Main({ children }: IProps) {
 		[pathname, excludedRoutes],
 	);
 
+	const isAdminRoute = pathname.startsWith("/admin");
+
 	useEffect(() => {
 		if (isUserLoggedIn && isAuthRoute) {
 			console.log("User is logged in, redirecting to dashboard...");
@@ -53,6 +55,8 @@ function Main({ children }: IProps) {
 				<Box className="body-wrapper">
 					<Box className="body-container-max-width">
 						{isAuthRoute ? (
+							children
+						) : isAdminRoute ? (
 							children
 						) : (
 							<DashboardWrapper>{children}</DashboardWrapper>
