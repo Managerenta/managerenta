@@ -5,7 +5,7 @@ import { Suspense, useCallback, useMemo, useState } from "react";
 import { Box, Button, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
 import { useToast } from "@/hooks";
-import { AuthPageStyled } from "../../(auth-pages)/styled";
+import { AuthPageStyled } from "../../styled";
 
 function AcceptInviteInner() {
 	const toast = useToast();

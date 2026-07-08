@@ -5,7 +5,7 @@ import { Suspense, useCallback, useState } from "react";
 import { Box, Button, Input, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
 import { useToast } from "@/hooks";
-import { AuthPageStyled } from "../(auth-pages)/styled";
+import { AuthPageStyled } from "../styled";
 
 function ResetPasswordInner() {
 	const toast = useToast();

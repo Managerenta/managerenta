@@ -29,9 +29,7 @@ export default function AppContext({
 	env: IEnv;
 	isUserSessionActive: boolean;
 }) {
-	// const [isUserLoggedIn, setIsUserLoggedIn] =
-	// 	useState<boolean>(isUserSessionActive);
-	const [_isUserLoggedIn, _setIsUserLoggedIn] =
+	const [isUserLoggedIn, setIsUserLoggedIn] =
 		useState<boolean>(isUserSessionActive);
 	const userName = useMemo(() => "", []);
 
@@ -45,7 +43,7 @@ export default function AppContext({
 				baseURL: "",
 			});
 			if (status !== 200) return false;
-			_setIsUserLoggedIn(false);
+			setIsUserLoggedIn(false);
 			return true;
 		} catch {
 			return false;
@@ -57,10 +55,8 @@ export default function AppContext({
 			cookieHeader: isBrowser ? document.cookie : "",
 		});
 
-		_setIsUserLoggedIn(result);
+		setIsUserLoggedIn(result);
 	}, [isBrowser]);
-
-	const isUserLoggedIn = useMemo(() => _isUserLoggedIn, [_isUserLoggedIn]);
 
 	useEffect(() => {
 		if (!isBrowser) return;
@@ -72,7 +68,7 @@ export default function AppContext({
 	}, [isBrowser]);
 
 	useEffect(() => {
-		_setIsUserLoggedIn(isUserSessionActive);
+		setIsUserLoggedIn(isUserSessionActive);
 	}, [isUserSessionActive]);
 
 	return (

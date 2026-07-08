@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { Box, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
-import { AuthPageStyled } from "../(auth-pages)/styled";
+import { AuthPageStyled } from "../styled";
 
 function VerifyEmailInner() {
 	const search = useSearchParams();
