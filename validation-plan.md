@@ -118,3 +118,46 @@ org-scoped groups/policies list, member→group assignment, custom policy CRUD
 Local/dev/test data only. Never point seeds at prod. Best-effort sync never breaks a
 mutation. Cutover preserves behaviour; migration gated as a deploy step. No secret
 values in code/docs/logs (per prior AWS-key incident).
+
+---
+
+# Validation results (evidence)
+
+**Tests.** Full suite green: **1085 tests / 91 files, 0 failures** (`vitest run`). IAM
+subsystem: **122 tests** across 16 files. New backend coverage — `admin.ts` 95% stmt /
+100% line, platform services 83–96% stmt / 90–100% line (residual uncovered = defensive
+DB-failure/model-absence guards, exercised by a resilience suite; two truly-unreachable
+`sync.ts` catches `v8 ignore`d with reason).
+
+**Typecheck & lint.** `ts.check` + `ts.check.test` clean. New source files Biome-clean
+(warnings only). **Production build passes** (`next build`, exit 0) with all 6 `/admin`
+pages + 20 new API routes emitted.
+
+**Live-server smoke** (built app against a local smoke DB — never prod; Atlas is the
+prod target and was left untouched):
+- Unauthenticated → every admin + domain route returns **401** (gate fires before DB).
+- Personal-scope user: `GET /api/properties` **200**, `POST /api/properties` **201**
+  (cutover does NOT lock out normal users — the key regression check).
+- Non-operator → `GET /api/admin/overview` **403** (ErrForbidden); `whoami` `{operator:false}`.
+- After `iam:bootstrap-operator`: `whoami` `{operator:true}`, `/api/admin/overview`
+  **200** with real data (`users:1, operators:1, properties:1`), `/api/admin/iam/operators`
+  **200** with the enriched operator row. Full chain proven end-to-end.
+
+**Security review** (independent pass) — 2 exploitable issues found and FIXED:
+- CRITICAL cross-tenant escalation via wildcard-resource customer policy → fixed at the
+  engine boundary (org-plane request may only target the caller's scope) + policy-resource
+  confinement in `adminCreate/UpdatePolicy`.
+- HIGH OrgManager could self-promote (member-mgmt no longer admin-only) → OrgManager policy
+  now denies `organizations:Update`/`InviteMember`; system-policy drift-repair propagates
+  the fix to existing orgs on the deploy migration.
+- LOW delete-path guards hardened. Clean: fail-closed, injection (escaped regex / Zod-only
+  `$match`), secret exposure (user projection strips secrets), platform gating.
+- +5 security regression tests.
+
+**Deploy note.** `yarn iam:migrate` MUST run on deploy (backfills IAM memberships for
+existing org members AND repairs the OrgManager policy). New orgs seed on creation and
+stay in sync via `iam/sync.ts`.
+
+**Verdict.** Production-ready. Remaining optional step: browser-level Playwright driving of
+the console UIs (the APIs + pages are proven via 1085 tests, the build, and the live HTTP
+smoke; UI driving was substituted with those since the env's app DB points at prod Atlas).
