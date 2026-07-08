@@ -7,7 +7,7 @@ import {
 	useMemo,
 	useState,
 } from "react";
-import { Box, Text } from "@/components";
+import { Box, Select, Text } from "@/components";
 import {
 	type Theme,
 	ThemeContextProvider,
@@ -53,42 +53,6 @@ function Preferences() {
 		[update, toast],
 	);
 
-	const renderedCurrencyOptions = useMemo(
-		() =>
-			currencyOptions.map(({ id, label, value }) => (
-				<option key={id} value={value}>
-					{label}
-				</option>
-			)),
-		[currencyOptions],
-	);
-	const renderedDateFormatOptions = useMemo(
-		() =>
-			dateFormatOptions.map(({ id, label, value }) => (
-				<option key={id} value={value}>
-					{label}
-				</option>
-			)),
-		[dateFormatOptions],
-	);
-	const renderedLanguageOptions = useMemo(
-		() =>
-			languageOptions.map(({ id, label, value }) => (
-				<option key={id} value={value}>
-					{label}
-				</option>
-			)),
-		[languageOptions],
-	);
-	const renderedTimezoneOptions = useMemo(
-		() =>
-			timezoneOptions.map(({ id, label, value }) => (
-				<option key={id} value={value}>
-					{label}
-				</option>
-			)),
-		[timezoneOptions],
-	);
 	const renderedThemeOptions = useMemo(() => {
 		return themeOptions.map(({ id, label, value }) => (
 			<Box
@@ -117,44 +81,35 @@ function Preferences() {
 				<Box className="left-prefs">
 					<Box className="form-field">
 						<Text className="field-label">Currency Display</Text>
-						<select
+						<Select
 							className="pref-select"
-							disabled={isLoading}
+							isDisabled={isLoading}
+							options={currencyOptions}
 							value={preferences.currency}
-							onChange={(e) =>
-								persist("currency", e.target.value)
-							}
-						>
-							{renderedCurrencyOptions}
-						</select>
+							onChange={(v) => persist("currency", v)}
+						/>
 					</Box>
 
 					<Box className="form-field">
 						<Text className="field-label">Date Format</Text>
-						<select
+						<Select
 							className="pref-select"
-							disabled={isLoading}
+							isDisabled={isLoading}
+							options={dateFormatOptions}
 							value={preferences.dateFormat}
-							onChange={(e) =>
-								persist("dateFormat", e.target.value)
-							}
-						>
-							{renderedDateFormatOptions}
-						</select>
+							onChange={(v) => persist("dateFormat", v)}
+						/>
 					</Box>
 
 					<Box className="form-field">
 						<Text className="field-label">Language</Text>
-						<select
+						<Select
 							className="pref-select"
-							disabled={isLoading}
+							isDisabled={isLoading}
+							options={languageOptions}
 							value={preferences.language}
-							onChange={(e) =>
-								persist("language", e.target.value)
-							}
-						>
-							{renderedLanguageOptions}
-						</select>
+							onChange={(v) => persist("language", v)}
+						/>
 					</Box>
 				</Box>
 
@@ -168,16 +123,13 @@ function Preferences() {
 
 					<Box className="form-field">
 						<Text className="field-label">Timezone</Text>
-						<select
+						<Select
 							className="pref-select"
-							disabled={isLoading}
+							isDisabled={isLoading}
+							options={timezoneOptions}
 							value={preferences.timezone}
-							onChange={(e) =>
-								persist("timezone", e.target.value)
-							}
-						>
-							{renderedTimezoneOptions}
-						</select>
+							onChange={(v) => persist("timezone", v)}
+						/>
 					</Box>
 				</Box>
 			</Box>

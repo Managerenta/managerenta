@@ -25,14 +25,8 @@ export const PropertiesWrapperStyled = styled(Box)`
 			font-size: 14px;
 			color: #64748b;
 
-			select {
-				padding: 6px 10px;
-				border: 1px solid var(--Border-Subtle);
-				border-radius: 6px;
-				font-size: 14px;
-				color: var(--Black);
-				background: var(--Surface-Card);
-				cursor: pointer;
+			.page-size {
+				width: 96px;
 			}
 		}
 

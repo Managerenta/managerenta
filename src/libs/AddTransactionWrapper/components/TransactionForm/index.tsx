@@ -1,7 +1,7 @@
 "use client";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { FiHome, FiPlus, FiTool, FiZap } from "react-icons/fi";
-import { Box, Button, Input, Text } from "@/components";
+import { Box, Button, Input, Select, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
 import { useAddTransactionNavigation, useToast } from "@/hooks";
 import { TransactionFormStyled } from "./styled";
@@ -99,22 +99,6 @@ function TransactionForm({ tenantId, monthlyRent }: IProps) {
 		));
 	}, [selectedType]);
 
-	const renderedPaymentMethods = useMemo(() => {
-		return PAYMENT_METHODS.map(({ id, label, value }) => (
-			<option key={id} value={value}>
-				{label}
-			</option>
-		));
-	}, []);
-
-	const renderedPeriods = useMemo(() => {
-		return PERIODS.map(({ id, label, value }) => (
-			<option key={id} value={value}>
-				{label}
-			</option>
-		));
-	}, []);
-
 	const handleCancel = useCallback(() => {
 		closeAddTransaction();
 	}, [closeAddTransaction]);
@@ -173,13 +157,15 @@ function TransactionForm({ tenantId, monthlyRent }: IProps) {
 				<Box className="form-row single">
 					<Box className="form-field half">
 						<Text className="field-label">Payment Period</Text>
-						<select
-							className="method-select"
-							value={period}
-							onChange={(e) => setPeriod(Number(e.target.value))}
-						>
-							{renderedPeriods}
-						</select>
+						<Select
+							isSearchable={false}
+							options={PERIODS.map(({ label, value }) => ({
+								label,
+								value: String(value),
+							}))}
+							value={String(period)}
+							onChange={(v) => setPeriod(Number(v))}
+						/>
 					</Box>
 				</Box>
 			)}
@@ -245,13 +231,15 @@ function TransactionForm({ tenantId, monthlyRent }: IProps) {
 
 				<Box className="form-field half">
 					<Text className="field-label">Payment Method</Text>
-					<select
-						className="method-select"
+					<Select
+						isSearchable={false}
+						options={PAYMENT_METHODS.map(({ label, value }) => ({
+							label,
+							value,
+						}))}
 						value={paymentMethod}
-						onChange={(e) => setPaymentMethod(e.target.value)}
-					>
-						{renderedPaymentMethods}
-					</select>
+						onChange={setPaymentMethod}
+					/>
 				</Box>
 			</Box>
 

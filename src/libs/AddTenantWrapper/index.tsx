@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { FiX } from "react-icons/fi";
 import useSWR from "swr";
-import { Box, Button, Text } from "@/components";
+import { Box, Button, Select, Text } from "@/components";
 import { api, fetcher, getErrorMessage } from "@/constants";
 import { useToast } from "@/hooks";
 import { AddTenantWrapperStyled } from "./styled";
@@ -31,6 +31,15 @@ const EMPTY_FORM = {
 	leaseExpiry: "",
 	rentDueDay: "1",
 };
+
+const RENT_DUE_DAY_OPTIONS = Array.from({ length: 28 }, (_, i) => i + 1).map(
+	(day) => ({
+		label: `${day}${
+			day === 1 ? "st" : day === 2 ? "nd" : day === 3 ? "rd" : "th"
+		} of each month`,
+		value: String(day),
+	}),
+);
 
 function AddTenantWrapper() {
 	const toast = useToast();
@@ -109,8 +118,7 @@ function AddTenantWrapper() {
 	);
 
 	const handleUnitChange = useCallback(
-		(e: React.ChangeEvent<HTMLSelectElement>) => {
-			const unitId = e.target.value;
+		(unitId: string) => {
 			setForm((prev) => ({ ...prev, unitId }));
 			const unit = vacantUnits.find((u) => u._id === unitId);
 			setSelectedRent(unit?.rent ?? null);
@@ -207,36 +215,27 @@ function AddTenantWrapper() {
 								disabled
 							/>
 						) : (
-							<select
-								value={form.unitId}
-								onChange={handleUnitChange}
-								disabled={unitsLoading}
-							>
-								<option value="" disabled>
-									{unitsLoading
+							<Select
+								isDisabled={unitsLoading}
+								placeholder={
+									unitsLoading
 										? "Loading units..."
 										: vacantUnits.length === 0
 											? "No vacant units available"
-											: "Select a vacant unit"}
-								</option>
-								{groupedProperties.map(
-									({ propertyId, propertyName, units }) => (
-										<optgroup
-											key={propertyId}
-											label={propertyName}
-										>
-											{units.map((unit) => (
-												<option
-													key={unit._id}
-													value={unit._id}
-												>
-													{unit.name}
-												</option>
-											))}
-										</optgroup>
-									),
+											: "Select a vacant unit"
+								}
+								value={form.unitId}
+								onChange={handleUnitChange}
+								options={groupedProperties.map(
+									({ propertyName, units }) => ({
+										label: propertyName,
+										options: units.map((unit) => ({
+											label: unit.name,
+											value: unit._id,
+										})),
+									}),
 								)}
-							</select>
+							/>
 						)}
 						{selectedRent !== null && (
 							<span className="rent-hint">
@@ -324,26 +323,17 @@ function AddTenantWrapper() {
 							Rent Due Day{" "}
 							<span className="optional">(optional)</span>
 						</Text>
-						<select
+						<Select
+							isSearchable={false}
+							options={RENT_DUE_DAY_OPTIONS}
 							value={form.rentDueDay}
-							onChange={handleChange("rentDueDay")}
-						>
-							{Array.from({ length: 28 }, (_, i) => i + 1).map(
-								(day) => (
-									<option key={day} value={String(day)}>
-										{day}
-										{day === 1
-											? "st"
-											: day === 2
-												? "nd"
-												: day === 3
-													? "rd"
-													: "th"}{" "}
-										of each month
-									</option>
-								),
-							)}
-						</select>
+							onChange={(v) =>
+								setForm((prev) => ({
+									...prev,
+									rentDueDay: v,
+								}))
+							}
+						/>
 					</Box>
 				</Box>
 

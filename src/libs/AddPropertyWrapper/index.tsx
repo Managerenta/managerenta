@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { memo, useCallback, useState } from "react";
 import { FiX } from "react-icons/fi";
-import { Box, Button, Text } from "@/components";
+import { Box, Button, Select, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
 import { useToast } from "@/hooks";
 import { AddPropertyWrapperStyled } from "./styled";
@@ -147,19 +147,20 @@ function AddPropertyWrapper() {
 						<Text className="field-label">
 							Property Type <span className="required">*</span>
 						</Text>
-						<select
+						<Select
+							placeholder="Select type"
+							options={PROPERTY_TYPES.map((t) => ({
+								label: t,
+								value: t,
+							}))}
 							value={propertyForm.type}
-							onChange={handlePropertyChange("type")}
-						>
-							<option value="" disabled>
-								Select type
-							</option>
-							{PROPERTY_TYPES.map((t) => (
-								<option key={t} value={t}>
-									{t}
-								</option>
-							))}
-						</select>
+							onChange={(v) =>
+								setPropertyForm((prev) => ({
+									...prev,
+									type: v,
+								}))
+							}
+						/>
 					</Box>
 
 					<Box className="form-field">

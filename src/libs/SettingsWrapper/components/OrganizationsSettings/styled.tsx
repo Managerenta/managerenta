@@ -131,14 +131,6 @@ export const OrganizationsSettingsStyled = styled(Box)`
 		gap: 8px;
 		align-items: center;
 
-		select {
-			padding: 10px 14px;
-			border: 1px solid var(--Border-Subtle);
-			border-radius: 8px;
-			background: var(--Surface-Page);
-			font-size: 13px;
-		}
-
 		input {
 			padding: 10px 14px;
 			border: 1px solid var(--Border-Subtle);
@@ -204,12 +196,9 @@ export const OrganizationsSettingsStyled = styled(Box)`
 		border-radius: 999px;
 	}
 
-	.member-row select {
-		padding: 6px 8px;
-		border: 1px solid var(--Border-Subtle);
-		border-radius: 6px;
-		background: var(--Surface-Card);
-		font-size: 12px;
+	.member-row .role-select {
+		width: 150px;
+		flex: 0 0 auto;
 	}
 
 	.remove-btn {

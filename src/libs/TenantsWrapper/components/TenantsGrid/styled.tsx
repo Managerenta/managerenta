@@ -231,6 +231,14 @@ export const TenantsGridStyled = styled(Box)<{ $viewMode: "grid" | "list" }>`
 		}
 	}
 
+	/* Two tenant cards stop fitting once the content column drops below ~900px
+	   (sidebar visible). */
+	@media (max-width: 900px) {
+		.grid:not(.list) {
+			grid-template-columns: 1fr;
+		}
+	}
+
 	@media (max-width: 767px) {
 		.grid:not(.list) {
 			grid-template-columns: 1fr;

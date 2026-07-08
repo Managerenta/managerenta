@@ -70,13 +70,7 @@ export const TransactionHistoryStyled = styled(Box)`
 		flex-wrap: wrap;
 
 		.filter-select {
-			padding: 8px 14px;
-			border: 1px solid var(--Border-Subtle);
-			border-radius: 8px;
-			font-size: 13px;
-			color: var(--Black);
-			background: var(--Surface-Card);
-			cursor: pointer;
+			width: 180px;
 		}
 
 		.search-input {
@@ -291,11 +285,8 @@ export const TransactionHistoryStyled = styled(Box)`
 			padding-bottom: 4px;
 
 			.filter-select {
-				padding: 6px 12px;
-				font-size: 12px;
-				border-radius: 20px;
-				white-space: nowrap;
-				min-width: auto;
+				width: 150px;
+				flex: 0 0 auto;
 			}
 
 			.search-input {

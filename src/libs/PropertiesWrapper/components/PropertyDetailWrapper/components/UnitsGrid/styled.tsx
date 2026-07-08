@@ -75,13 +75,7 @@ export const UnitsGridStyled = styled(Box)`
 			}
 
 			.sort-dropdown {
-				padding: 8px 14px;
-				border: 1px solid var(--Border-Subtle);
-				border-radius: 8px;
-				font-size: 13px;
-				color: var(--Black);
-				background: var(--Surface-Card);
-				cursor: pointer;
+				width: 160px;
 			}
 		}
 	}
@@ -203,6 +197,14 @@ export const UnitsGridStyled = styled(Box)`
 	@media (max-width: 1200px) {
 		.units-grid {
 			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+
+	/* Two unit cards stop fitting once the content column drops below ~900px
+	   (sidebar visible). */
+	@media (max-width: 900px) {
+		.units-grid {
+			grid-template-columns: 1fr;
 		}
 	}
 

@@ -1,6 +1,6 @@
 "use client";
 import { memo, useCallback, useMemo, useState } from "react";
-import { Box, Button, Image, Text } from "@/components";
+import { Box, Button, Image, Select, Text } from "@/components";
 import { useAddTransactionNavigation, useTenantNavigation } from "@/hooks";
 import type { IPropertyUnit } from "@/types";
 import { UnitsGridStyled } from "./styled";
@@ -261,15 +261,17 @@ function UnitsGrid({ units, totalCount, onAddTenant }: IProps) {
 				<Box className="units-filters">
 					<Box className="filter-tabs">{renderedFilterTabs}</Box>
 
-					<select
+					<Select
 						className="sort-dropdown"
+						isSearchable={false}
 						value={sortBy}
-						onChange={(e) => setSortBy(e.target.value)}
-					>
-						<option value="unit-number">Unit Number</option>
-						<option value="status">Status</option>
-						<option value="rent">Rent</option>
-					</select>
+						onChange={setSortBy}
+						options={[
+							{ label: "Unit Number", value: "unit-number" },
+							{ label: "Status", value: "status" },
+							{ label: "Rent", value: "rent" },
+						]}
+					/>
 				</Box>
 			</Box>
 

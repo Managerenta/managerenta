@@ -117,9 +117,8 @@ export const EditPropertyWrapperStyled = styled(Box)`
 				}
 			}
 
-			input,
-			select,
-			textarea {
+			> input,
+			> textarea {
 				width: 100%;
 				padding: 10px 12px;
 				border: 1px solid var(--Border-Subtle);
@@ -141,12 +140,7 @@ export const EditPropertyWrapperStyled = styled(Box)`
 				}
 			}
 
-			select {
-				cursor: pointer;
-				appearance: auto;
-			}
-
-			textarea {
+			> textarea {
 				resize: vertical;
 				min-height: 80px;
 			}

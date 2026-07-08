@@ -124,8 +124,8 @@ export const TransactionFormStyled = styled(Box)`
 				}
 			}
 
-			input[type="date"],
-			input[type="text"] {
+			> input[type="date"],
+			> input[type="text"] {
 				padding: 10px 14px;
 				border: 1px solid var(--Border-Subtle);
 				border-radius: 8px;
@@ -150,16 +150,6 @@ export const TransactionFormStyled = styled(Box)`
 				&::placeholder {
 					color: #94a3b8;
 				}
-			}
-
-			.method-select {
-				padding: 10px 14px;
-				border: 1px solid var(--Border-Subtle);
-				border-radius: 8px;
-				font-size: 14px;
-				color: var(--Black);
-				background: var(--Surface-Card);
-				cursor: pointer;
 			}
 
 			.upload-zone {

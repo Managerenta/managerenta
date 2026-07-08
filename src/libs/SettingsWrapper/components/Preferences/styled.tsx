@@ -40,21 +40,6 @@ export const PreferencesStyled = styled(Box)`
 				color: #64748b;
 			}
 
-			.pref-select {
-				padding: 10px 14px;
-				border: 1px solid var(--Border-Subtle);
-				border-radius: 8px;
-				font-size: 14px;
-				color: var(--Black);
-				background: var(--Surface-Page);
-				cursor: pointer;
-
-				&:focus {
-					outline: none;
-					border-color: var(--Main-Blue);
-				}
-			}
-
 			.radio-group {
 				display: flex;
 				flex-direction: column;
@@ -98,11 +83,18 @@ export const PreferencesStyled = styled(Box)`
 		}
 	}
 
+	/* Single column once the sidebar narrows the content area (<=1024px). */
+	@media (max-width: 1024px) {
+		.preferences-grid {
+			grid-template-columns: 1fr;
+			gap: 24px;
+		}
+	}
+
 	@media (max-width: 767px) {
 		padding: 16px;
 
 		.preferences-grid {
-			grid-template-columns: 1fr;
 			gap: 16px;
 		}
 	}

@@ -195,4 +195,25 @@ export const CalendarStyled = styled(Box)`
 			min-height: 70px;
 		}
 	}
+
+	@media (max-width: 767px) {
+		.cal-main {
+			padding: 12px;
+		}
+		.cal-month {
+			min-width: 0;
+			font-size: 15px;
+		}
+		.weekdays,
+		.grid {
+			gap: 4px;
+		}
+		.weekday {
+			font-size: 10px;
+		}
+		.cell {
+			min-height: 60px;
+			padding: 4px;
+		}
+	}
 `;

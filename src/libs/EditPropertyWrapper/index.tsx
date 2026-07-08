@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { FiX } from "react-icons/fi";
 import useSWR from "swr";
-import { Box, Button, Image, Text } from "@/components";
+import { Box, Button, Image, Select, Text } from "@/components";
 import { api, fetcher, getErrorMessage } from "@/constants";
 import { useToast } from "@/hooks";
 import { EditPropertyWrapperStyled } from "./styled";
@@ -208,19 +208,20 @@ function EditPropertyWrapper({ propertyId }: IProps) {
 									Property Type{" "}
 									<span className="required">*</span>
 								</Text>
-								<select
+								<Select
+									placeholder="Select type"
+									options={PROPERTY_TYPES.map((t) => ({
+										label: t,
+										value: t,
+									}))}
 									value={form.type}
-									onChange={handleChange("type")}
-								>
-									<option value="" disabled>
-										Select type
-									</option>
-									{PROPERTY_TYPES.map((t) => (
-										<option key={t} value={t}>
-											{t}
-										</option>
-									))}
-								</select>
+									onChange={(v) =>
+										setForm((prev) => ({
+											...prev,
+											type: v,
+										}))
+									}
+								/>
 							</Box>
 
 							<Box className="form-field">

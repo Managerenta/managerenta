@@ -10,7 +10,7 @@ import {
 	FiTool,
 	FiZap,
 } from "react-icons/fi";
-import { Box, Button, Input, Text } from "@/components";
+import { Box, Button, Input, Select, Text } from "@/components";
 import { useToast } from "@/hooks";
 import type { ITenantTransaction } from "@/types";
 import { downloadReceipt } from "./downloadReceipt";
@@ -304,12 +304,13 @@ function TransactionHistory({ transactions, totals, tenantInfo }: IProps) {
 			<Text className="section-title">Transaction History</Text>
 
 			<Box className="filters-row">
-				<select
+				<Select
 					className="filter-select"
+					isSearchable={false}
 					value={typeFilter}
-					onChange={(e) =>
+					onChange={(v) =>
 						setTypeFilter(
-							e.target.value as
+							v as
 								| "all"
 								| "rent"
 								| "maintenance"
@@ -317,32 +318,29 @@ function TransactionHistory({ transactions, totals, tenantInfo }: IProps) {
 								| "other",
 						)
 					}
-				>
-					<option value="all">All Transactions</option>
-					<option value="rent">Rent</option>
-					<option value="maintenance">Maintenance</option>
-					<option value="utilities">Utilities</option>
-					<option value="other">Other</option>
-				</select>
+					options={[
+						{ label: "All Transactions", value: "all" },
+						{ label: "Rent", value: "rent" },
+						{ label: "Maintenance", value: "maintenance" },
+						{ label: "Utilities", value: "utilities" },
+						{ label: "Other", value: "other" },
+					]}
+				/>
 
-				<select
+				<Select
 					className="filter-select"
+					isSearchable={false}
 					value={range}
-					onChange={(e) =>
-						setRange(
-							e.target.value as
-								| "3months"
-								| "6months"
-								| "1year"
-								| "all",
-						)
+					onChange={(v) =>
+						setRange(v as "3months" | "6months" | "1year" | "all")
 					}
-				>
-					<option value="3months">Last 3 Months</option>
-					<option value="6months">Last 6 Months</option>
-					<option value="1year">Last Year</option>
-					<option value="all">All time</option>
-				</select>
+					options={[
+						{ label: "Last 3 Months", value: "3months" },
+						{ label: "Last 6 Months", value: "6months" },
+						{ label: "Last Year", value: "1year" },
+						{ label: "All time", value: "all" },
+					]}
+				/>
 
 				<Box className="search-input">
 					<Input

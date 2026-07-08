@@ -137,16 +137,20 @@ export const EntityPageStyled = styled(Box)`
 		.stat-grid {
 			grid-template-columns: repeat(2, 1fr);
 		}
+		/* Below 1024px the desktop sidebar is still shown, so the content
+		   column is narrow. Let wide data tables scroll horizontally instead
+		   of being clipped by the panel's overflow:hidden. */
+		.table-scroll {
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+		}
+		table {
+			min-width: 640px;
+		}
 	}
 	@media (max-width: 640px) {
 		.stat-grid {
 			grid-template-columns: 1fr;
-		}
-		.table-scroll {
-			overflow-x: auto;
-		}
-		table {
-			min-width: 640px;
 		}
 	}
 `;

@@ -2,7 +2,7 @@
 import { memo, useCallback, useMemo, useState } from "react";
 import { FiCheck, FiPlus, FiTrash2, FiUsers, FiX } from "react-icons/fi";
 import useSWR from "swr";
-import { Box, Button, Input, Text } from "@/components";
+import { Box, Button, Input, Select, Text } from "@/components";
 import { api, fetcher, getErrorMessage } from "@/constants";
 import { useOrganizations, useToast } from "@/hooks";
 import { OrganizationsSettingsStyled } from "./styled";
@@ -28,6 +28,12 @@ interface MembersResponse {
 		invites: InviteRow[];
 	};
 }
+
+const ROLE_OPTIONS = [
+	{ label: "Admin", value: "admin" },
+	{ label: "Manager", value: "manager" },
+	{ label: "Viewer", value: "viewer" },
+];
 
 function OrganizationsSettings() {
 	const toast = useToast();
@@ -267,21 +273,17 @@ function OrganizationsSettings() {
 								placeholder="teammate@example.com"
 								onChange={(e) => setInviteEmail(e.target.value)}
 							/>
-							<select
+							<Select
+								className="role-select"
+								isSearchable={false}
+								options={ROLE_OPTIONS}
 								value={inviteRole}
-								onChange={(e) =>
+								onChange={(v) =>
 									setInviteRole(
-										e.target.value as
-											| "admin"
-											| "manager"
-											| "viewer",
+										v as "admin" | "manager" | "viewer",
 									)
 								}
-							>
-								<option value="admin">Admin</option>
-								<option value="manager">Manager</option>
-								<option value="viewer">Viewer</option>
-							</select>
+							/>
 							<Button
 								type="button"
 								title={
@@ -314,22 +316,21 @@ function OrganizationsSettings() {
 									</Text>
 								</Box>
 								{isAdmin ? (
-									<select
+									<Select
+										className="role-select"
+										isSearchable={false}
+										options={ROLE_OPTIONS}
 										value={m.permission}
-										onChange={(e) =>
+										onChange={(v) =>
 											handleRoleChange(
 												m.memberId,
-												e.target.value as
+												v as
 													| "admin"
 													| "manager"
 													| "viewer",
 											)
 										}
-									>
-										<option value="admin">Admin</option>
-										<option value="manager">Manager</option>
-										<option value="viewer">Viewer</option>
-									</select>
+									/>
 								) : (
 									<Text className="member-role">
 										{m.permission}

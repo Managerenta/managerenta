@@ -1,14 +1,25 @@
 "use client";
 import { useMemo } from "react";
-import ReactSelect, { type GroupBase, type StylesConfig } from "react-select";
+import ReactSelect, {
+	type GroupBase,
+	type OptionsOrGroups,
+	type StylesConfig,
+} from "react-select";
 
 export interface ISelectOption {
 	label: string;
 	value: string;
 }
 
-interface IProps {
+export interface ISelectOptionGroup {
+	label: string;
 	options: ISelectOption[];
+}
+
+type OptionOrGroup = ISelectOption | ISelectOptionGroup;
+
+interface IProps {
+	options: ReadonlyArray<OptionOrGroup>;
 	value?: string | string[] | null;
 	onChange: (value: string) => void;
 	onChangeMulti?: (value: string[]) => void;
@@ -110,20 +121,32 @@ export default function Select({
 	id,
 	className,
 }: IProps) {
+	// Options may be a flat list or grouped ({ label, options }); flatten so a
+	// value can be resolved back to its option regardless of grouping.
+	const flatOptions = useMemo<ISelectOption[]>(
+		() => options.flatMap((o) => ("options" in o ? o.options : [o])),
+		[options],
+	);
+
 	const selected = useMemo(() => {
 		if (isMulti) {
 			const values = Array.isArray(value) ? value : [];
-			return options.filter((o) => values.includes(o.value));
+			return flatOptions.filter((o) => values.includes(o.value));
 		}
-		return options.find((o) => o.value === value) ?? null;
-	}, [options, value, isMulti]);
+		return flatOptions.find((o) => o.value === value) ?? null;
+	}, [flatOptions, value, isMulti]);
 
 	return (
 		<ReactSelect<ISelectOption, boolean, GroupBase<ISelectOption>>
 			inputId={id}
 			className={className}
 			classNamePrefix="mr-select"
-			options={options}
+			options={
+				options as OptionsOrGroups<
+					ISelectOption,
+					GroupBase<ISelectOption>
+				>
+			}
 			value={selected}
 			isMulti={isMulti}
 			isDisabled={isDisabled}

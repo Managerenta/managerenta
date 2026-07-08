@@ -16,14 +16,7 @@ export const TenantsFilterStyled = styled(Box)`
 		flex: 1;
 
 		.filter-dropdown {
-			padding: 10px 14px;
-			border: 1px solid var(--Border-Subtle);
-			border-radius: 8px;
-			font-size: 14px;
-			color: var(--Black);
-			background: var(--Surface-Card);
-			cursor: pointer;
-			min-width: 160px;
+			width: 180px;
 		}
 
 		.search-bar {
@@ -60,13 +53,7 @@ export const TenantsFilterStyled = styled(Box)`
 		gap: 12px;
 
 		.sort-dropdown {
-			padding: 10px 14px;
-			border: 1px solid var(--Border-Subtle);
-			border-radius: 8px;
-			font-size: 14px;
-			color: var(--Black);
-			background: var(--Surface-Card);
-			cursor: pointer;
+			width: 180px;
 		}
 
 		.view-toggle {

@@ -14,6 +14,7 @@ export const NotificationsWrapperStyled = styled(Box)`
 		display: flex;
 		align-items: flex-start;
 		justify-content: space-between;
+		flex-wrap: wrap;
 		gap: 16px;
 	}
 

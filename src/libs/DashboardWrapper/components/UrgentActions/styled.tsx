@@ -163,7 +163,9 @@ export const UrgentActionsStyled = styled(Box)`
 		}
 	}
 
-	@media (max-width: 767px) {
+	/* Below 1024px the sidebar narrows the content column and the single-line
+	   action row squeezes the amount / badge text — let it wrap instead. */
+	@media (max-width: 1024px) {
 		.action-row {
 			flex-wrap: wrap;
 

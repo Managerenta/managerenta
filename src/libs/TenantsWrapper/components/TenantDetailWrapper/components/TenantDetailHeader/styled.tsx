@@ -49,6 +49,7 @@ export const TenantDetailHeaderStyled = styled(Box)`
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		flex-wrap: wrap;
 		gap: 16px;
 
 		.tenant-info {

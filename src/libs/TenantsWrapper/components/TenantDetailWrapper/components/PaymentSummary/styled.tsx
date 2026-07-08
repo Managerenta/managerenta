@@ -134,6 +134,14 @@ export const PaymentSummaryStyled = styled(Box)`
 		}
 	}
 
+	/* Four detail columns don't fit once the sidebar narrows the content
+	   column (<=1024px) — drop to two. */
+	@media (max-width: 1024px) {
+		.payment-details {
+			grid-template-columns: 1fr 1fr;
+		}
+	}
+
 	@media (max-width: 767px) {
 		padding: 16px;
 

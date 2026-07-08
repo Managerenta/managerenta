@@ -1,7 +1,7 @@
 "use client";
-import { memo, useMemo } from "react";
+import { memo } from "react";
 import { FiGrid, FiList, FiSearch } from "react-icons/fi";
-import { Box, Button, Input } from "@/components";
+import { Box, Button, Input, Select } from "@/components";
 import { TenantsFilterStyled } from "./styled";
 
 interface IFilterOption {
@@ -35,32 +35,16 @@ function TenantsFilter({
 	viewMode,
 	onViewModeChange,
 }: IProps) {
-	const renderedFilterOptions = useMemo(() => {
-		return filterOptions.map(({ id, label, value }) => (
-			<option key={id} value={value}>
-				{label}
-			</option>
-		));
-	}, [filterOptions]);
-
-	const renderedSortOptions = useMemo(() => {
-		return sortOptions.map(({ id, label, value }) => (
-			<option key={id} value={value}>
-				{label}
-			</option>
-		));
-	}, [sortOptions]);
-
 	return (
 		<TenantsFilterStyled>
 			<Box className="left-filters">
-				<select
+				<Select
 					className="filter-dropdown"
+					options={filterOptions}
 					value={filterStatus}
-					onChange={(e) => onFilterChange(e.target.value)}
-				>
-					{renderedFilterOptions}
-				</select>
+					onChange={onFilterChange}
+					isSearchable={false}
+				/>
 				<Box className="search-bar">
 					<FiSearch size={16} />
 					<Input
@@ -73,13 +57,13 @@ function TenantsFilter({
 			</Box>
 
 			<Box className="right-filters">
-				<select
+				<Select
 					className="sort-dropdown"
+					options={sortOptions}
 					value={sortBy}
-					onChange={(e) => onSortChange(e.target.value)}
-				>
-					{renderedSortOptions}
-				</select>
+					onChange={onSortChange}
+					isSearchable={false}
+				/>
 				<Box className="view-toggle">
 					<Box
 						className={`toggle-btn ${viewMode === "grid" ? "active" : ""}`}

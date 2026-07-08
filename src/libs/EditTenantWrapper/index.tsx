@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { FiX } from "react-icons/fi";
 import useSWR from "swr";
-import { Box, Button, Image, Text } from "@/components";
+import { Box, Button, Image, Select, Text } from "@/components";
 import { api, fetcher, getErrorMessage } from "@/constants";
 import { useToast } from "@/hooks";
 import type { IRawTenantDetail } from "@/types";
@@ -22,6 +22,15 @@ const EMPTY_FORM = {
 	leaseExpiry: "",
 	rentDueDay: "1",
 };
+
+const RENT_DUE_DAY_OPTIONS = Array.from({ length: 28 }, (_, i) => i + 1).map(
+	(day) => ({
+		label: `${day}${
+			day === 1 ? "st" : day === 2 ? "nd" : day === 3 ? "rd" : "th"
+		} of each month`,
+		value: String(day),
+	}),
+);
 
 function toDateInputValue(iso?: string): string {
 	if (!iso) return "";
@@ -267,27 +276,17 @@ function EditTenantWrapper({ tenantId }: IProps) {
 									Rent Due Day{" "}
 									<span className="optional">(optional)</span>
 								</Text>
-								<select
+								<Select
+									isSearchable={false}
+									options={RENT_DUE_DAY_OPTIONS}
 									value={form.rentDueDay}
-									onChange={handleChange("rentDueDay")}
-								>
-									{Array.from(
-										{ length: 28 },
-										(_, i) => i + 1,
-									).map((day) => (
-										<option key={day} value={String(day)}>
-											{day}
-											{day === 1
-												? "st"
-												: day === 2
-													? "nd"
-													: day === 3
-														? "rd"
-														: "th"}{" "}
-											of each month
-										</option>
-									))}
-								</select>
+									onChange={(v) =>
+										setForm((prev) => ({
+											...prev,
+											rentDueDay: v,
+										}))
+									}
+								/>
 							</Box>
 						</Box>
 

@@ -60,6 +60,20 @@ export const SettingsHeaderStyled = styled(Box)`
 		}
 	}
 
+	/* The tab row is wider than the content column whenever the desktop
+	   sidebar is shown (<=1024px) — let it scroll horizontally instead of
+	   overflowing/clipping the "Notifications" tab. */
+	@media (max-width: 1024px) {
+		.tabs-row {
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+
+			&::-webkit-scrollbar {
+				display: none;
+			}
+		}
+	}
+
 	@media (max-width: 767px) {
 		gap: 16px;
 
@@ -68,13 +82,7 @@ export const SettingsHeaderStyled = styled(Box)`
 		}
 
 		.tabs-row {
-			overflow-x: auto;
 			gap: 0;
-			-webkit-overflow-scrolling: touch;
-
-			&::-webkit-scrollbar {
-				display: none;
-			}
 
 			.tab-item button {
 				padding: 10px 14px;

@@ -26,6 +26,11 @@ export const TenantDetailWrapperStyled = styled(Box)`
 	@media (max-width: 1024px) {
 		.bottom-grid {
 			grid-template-columns: 1fr;
+
+			.left-grid,
+			.right-grid {
+				min-width: 0;
+			}
 		}
 	}
 

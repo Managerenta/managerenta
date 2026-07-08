@@ -74,6 +74,13 @@ export const ContactInfoStyled = styled(Box)`
 		}
 	}
 
+	/* Single column once the sidebar narrows the content area (<=1024px). */
+	@media (max-width: 1024px) {
+		.contact-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+
 	@media (max-width: 767px) {
 		padding: 16px;
 

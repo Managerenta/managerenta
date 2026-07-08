@@ -144,7 +144,9 @@ export const ListedPropertiesStyled = styled(Box)`
 		}
 	}
 
-	@media (max-width: 767px) {
+	/* The dashboard's bottom grid is already single-column at <=1024px, so two
+	   property cards no longer fit side by side in the narrowed content area. */
+	@media (max-width: 1024px) {
 		.properties-grid {
 			grid-template-columns: 1fr;
 		}

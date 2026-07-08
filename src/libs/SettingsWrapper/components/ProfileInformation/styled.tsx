@@ -23,6 +23,10 @@ export const ProfileInformationStyled = styled(Box)`
 		gap: 40px;
 		align-items: flex-start;
 
+		.form-fields {
+			min-width: 0;
+		}
+
 		.avatar-section {
 			display: flex;
 			flex-direction: column;
@@ -177,6 +181,7 @@ export const ProfileInformationStyled = styled(Box)`
 
 			.form-actions {
 				display: flex;
+				flex-wrap: wrap;
 				gap: 12px;
 				margin-top: 8px;
 

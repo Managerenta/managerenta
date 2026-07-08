@@ -117,8 +117,7 @@ export const EditTenantWrapperStyled = styled(Box)`
 				}
 			}
 
-			input,
-			select {
+			> input {
 				width: 100%;
 				padding: 10px 12px;
 				border: 1px solid var(--Border-Subtle);
@@ -144,11 +143,6 @@ export const EditTenantWrapperStyled = styled(Box)`
 					color: #94a3b8;
 					cursor: not-allowed;
 				}
-			}
-
-			select {
-				cursor: pointer;
-				appearance: auto;
 			}
 
 			.current-avatar {

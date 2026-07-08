@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { memo, useCallback, useMemo, useState } from "react";
-import { Box } from "@/components";
+import { Box, Select } from "@/components";
 import { usePropertiesData } from "@/hooks";
 import { Pagination } from "@/layouts";
 import {
@@ -79,17 +79,20 @@ function PropertiesWrapper() {
 			<Box className="pagination-footer">
 				<Box className="items-per-page">
 					<span>Items per page:</span>
-					<select
-						value={pageSize}
-						onChange={(e) => {
-							setPageSize(Number(e.target.value));
+					<Select
+						className="page-size"
+						isSearchable={false}
+						options={[
+							{ label: "6", value: "6" },
+							{ label: "12", value: "12" },
+							{ label: "24", value: "24" },
+						]}
+						value={String(pageSize)}
+						onChange={(v) => {
+							setPageSize(Number(v));
 							setOffset(0);
 						}}
-					>
-						<option value={6}>6</option>
-						<option value={12}>12</option>
-						<option value={24}>24</option>
-					</select>
+					/>
 				</Box>
 
 				<Pagination
