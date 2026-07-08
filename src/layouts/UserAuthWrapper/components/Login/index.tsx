@@ -328,7 +328,7 @@ function Login() {
 		return (
 			<LoginStyled>
 				<Box $grid $centerH $centerV $w="100%" $h="100%" $minH="500px">
-					<Loader loader="moonLoader" color="var(--Main-Blue)" />
+					<Loader loader="moonLoader" color="var(--Brand-Primary)" />
 					<Text>Signing you in…</Text>
 				</Box>
 			</LoginStyled>
