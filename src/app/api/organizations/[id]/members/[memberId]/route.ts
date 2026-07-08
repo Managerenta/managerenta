@@ -6,8 +6,9 @@ import {
 	ErrMustKeepOneAdmin,
 	ErrResourceNotFound,
 } from "@/server/constants";
+import { arn, authorize } from "@/server/iam";
+import { syncOrgMemberRemoved, syncOrgMemberRole } from "@/server/iam/sync";
 import { handleError, ok, withApiHandler, withAuth } from "@/server/lib";
-import { assertOrganizationAdmin } from "@/server/middleware/organizations";
 import { removeMemberDB, setMemberRoleDB } from "@/server/models";
 import { IOrganizationRole } from "@/server/models/organizations/types";
 import { getOrganizationById } from "@/server/services";
@@ -72,10 +73,12 @@ export const PATCH = withApiHandler<RouteContext>(
 	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
 			const { id, memberId } = await context.params;
-			await assertOrganizationAdmin({
-				userId: auth.userId,
-				organizationId: id,
-			});
+			await authorize(
+				auth,
+				"organizations:Update",
+				arn.org.organizations(id, memberId),
+				{ req },
+			);
 			let body: unknown;
 			try {
 				body = await req.json();
@@ -98,6 +101,12 @@ export const PATCH = withApiHandler<RouteContext>(
 			});
 			if (!result) throw ErrInvalidAction;
 			await invalidateOrgCache({ organizationId: id });
+			// Keep IAM group membership in step with the new role.
+			await syncOrgMemberRole({
+				orgId: id,
+				userId: memberId,
+				role: parsed.data.role,
+			});
 			return ok(result, "Role updated");
 		} catch (error) {
 			return handleError(error);
@@ -107,13 +116,15 @@ export const PATCH = withApiHandler<RouteContext>(
 
 export const DELETE = withApiHandler<RouteContext>(
 	{ route: "/api/organizations/[id]/members/[memberId]" },
-	withAuth<RouteContext>(async ({ auth, context }) => {
+	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
 			const { id, memberId } = await context.params;
-			await assertOrganizationAdmin({
-				userId: auth.userId,
-				organizationId: id,
-			});
+			await authorize(
+				auth,
+				"organizations:RemoveMember",
+				arn.org.organizations(id, memberId),
+				{ req },
+			);
 			await assertOwnerInvariants({
 				organizationId: id,
 				memberId,
@@ -122,6 +133,8 @@ export const DELETE = withApiHandler<RouteContext>(
 			const result = await removeMemberDB({ orgId: id, memberId });
 			if (!result) throw ErrInvalidAction;
 			await invalidateOrgCache({ organizationId: id });
+			// Drop all of the removed member's IAM group grants for this org.
+			await syncOrgMemberRemoved({ orgId: id, userId: memberId });
 			return ok(null, "Member removed");
 		} catch (error) {
 			return handleError(error);

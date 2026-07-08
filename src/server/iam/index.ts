@@ -6,6 +6,7 @@ export {
 	authorize,
 	buildContext,
 	decide,
+	resourceScope,
 } from "./authorize";
 export {
 	actionMatches,
@@ -35,6 +36,7 @@ export {
 	seedOrgSystemGroups,
 	seedPlatformSystemPolicies,
 } from "./seed/system-policies";
+export { syncOrgMemberRemoved, syncOrgMemberRole } from "./sync";
 export type {
 	ConditionBlock,
 	ConditionContext,

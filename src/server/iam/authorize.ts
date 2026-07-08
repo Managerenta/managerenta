@@ -15,6 +15,18 @@ import { getIamOperatorByUserIdDB } from "./models";
 import { resolveEffectivePolicies } from "./resolve";
 import type { ConditionContext, Decision, NamedPolicy } from "./types";
 
+/**
+ * The orgId slot to stamp into a resource ARN for the caller's current authz
+ * scope. In an organization it is the org id (the seeded org policies are baked
+ * with it); in personal scope it is the user's own id (the in-engine
+ * `selfScopePolicy` is baked on the user id). Domain route handlers build
+ * resources as `arn.org.SERVICE(resourceScope(auth), id)` so a single
+ * evaluation path covers both scopes.
+ */
+export function resourceScope(auth: AuthResult): string {
+	return auth.organizationId ?? auth.userId;
+}
+
 export interface AuthorizeOverrides {
 	sourceIp?: string;
 	mfaPresent?: boolean;

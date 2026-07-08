@@ -1,7 +1,7 @@
 import { z as zod } from "zod";
 import { ErrInvalidAction, ErrInvalidFields } from "@/server/constants";
+import { arn, authorize } from "@/server/iam";
 import { handleError, ok, withApiHandler, withAuth } from "@/server/lib";
-import { assertOrganizationAdmin } from "@/server/middleware/organizations";
 import { getUsersByIdsDB } from "@/server/models";
 import { IOrganizationRole } from "@/server/models/organizations/types";
 import { getOrganizationById, inviteMember } from "@/server/services";
@@ -71,10 +71,12 @@ export const POST = withApiHandler<RouteContext>(
 	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
 			const { id } = await context.params;
-			await assertOrganizationAdmin({
-				userId: auth.userId,
-				organizationId: id,
-			});
+			await authorize(
+				auth,
+				"organizations:InviteMember",
+				arn.org.organizations(id),
+				{ req },
+			);
 			let body: unknown;
 			try {
 				body = await req.json();

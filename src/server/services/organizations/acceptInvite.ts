@@ -1,10 +1,12 @@
 import mongoose from "mongoose";
 import { hashToken } from "../../constants";
+import { syncOrgMemberRole } from "../../iam/sync";
 import {
 	consumeInviteAndAddMemberDB,
 	findOrganizationByInviteTokenDB,
 	updateUserRawDB,
 } from "../../models";
+import type { IOrganizationRole } from "../../models/organizations/types";
 import getUserById from "../users/getUserById";
 import { invalidateCacheKeys as invalidateUserCache } from "../users/utils";
 import { invalidateCacheKeys } from "./utils";
@@ -12,7 +14,7 @@ import { invalidateCacheKeys } from "./utils";
 type DocWithId = {
 	_id: { toString(): string };
 	name?: string;
-	invites?: { token: string; email: string }[];
+	invites?: { token: string; email: string; role?: IOrganizationRole }[];
 };
 
 export default async function acceptInvite({
@@ -55,6 +57,14 @@ export default async function acceptInvite({
 		update: {
 			$set: { currentOrganizationId: updated._id.toString() },
 		},
+	});
+
+	// Mirror the new membership into IAM at the invited role so authorization
+	// resolves correctly on the member's first request. Best-effort.
+	await syncOrgMemberRole({
+		orgId: updated._id.toString(),
+		userId,
+		role: (invite.role ?? "viewer") as "admin" | "manager" | "viewer",
 	});
 
 	await invalidateUserCache({ id: userId });

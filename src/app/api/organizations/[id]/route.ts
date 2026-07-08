@@ -1,7 +1,7 @@
 import { z as zod } from "zod";
 import { ErrInvalidFields, ErrResourceNotFound } from "@/server/constants";
+import { arn, authorize } from "@/server/iam";
 import { handleError, ok, withApiHandler, withAuth } from "@/server/lib";
-import { assertOrganizationAdmin } from "@/server/middleware/organizations";
 import { Organization } from "@/server/models";
 import { deleteOrganization, getOrganizationById } from "@/server/services";
 
@@ -43,10 +43,12 @@ export const PATCH = withApiHandler<RouteContext>(
 	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
 			const { id } = await context.params;
-			await assertOrganizationAdmin({
-				userId: auth.userId,
-				organizationId: id,
-			});
+			await authorize(
+				auth,
+				"organizations:Update",
+				arn.org.organizations(id),
+				{ req },
+			);
 			let raw: unknown;
 			try {
 				raw = await req.json();
@@ -70,13 +72,15 @@ export const PATCH = withApiHandler<RouteContext>(
 
 export const DELETE = withApiHandler<RouteContext>(
 	{ route: "/api/organizations/[id]" },
-	withAuth<RouteContext>(async ({ auth, context }) => {
+	withAuth<RouteContext>(async ({ req, auth, context }) => {
 		try {
 			const { id } = await context.params;
-			await assertOrganizationAdmin({
-				userId: auth.userId,
-				organizationId: id,
-			});
+			await authorize(
+				auth,
+				"organizations:Delete",
+				arn.org.organizations(id),
+				{ req },
+			);
 			const result = await deleteOrganization({ organizationId: id });
 			if (!result) throw ErrResourceNotFound;
 			return ok(null, "Organization deleted");

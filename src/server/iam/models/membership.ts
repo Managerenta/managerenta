@@ -137,6 +137,50 @@ export async function removeMembershipDB({
 	}
 }
 
+/**
+ * Remove EVERY membership a principal holds within an org scope (system and
+ * custom groups). Used when a member leaves/is removed from an org so no stale
+ * group grants survive. Returns the number of rows deleted (0 on failure).
+ */
+export async function removeAllMembershipsForPrincipalDB({
+	principalType,
+	principalId,
+	orgId,
+	session,
+}: {
+	principalType: "user" | "operator";
+	principalId: string;
+	orgId?: string | null;
+	session?: ClientSession;
+}): Promise<number> {
+	const timer = databaseResponseTimeHistogram.startTimer();
+	try {
+		const result = await IamGroupMembership.deleteMany(
+			{
+				principalType,
+				principalId: toObjectId(principalId),
+				orgId: toObjectIdOrNull(orgId),
+			},
+			{ session },
+		);
+		timer({
+			operation: IOperationType.Delete,
+			collection: collectionName,
+			method: "removeAllMembershipsForPrincipalDB",
+			success: "true",
+		});
+		return result.deletedCount ?? 0;
+	} catch {
+		timer({
+			operation: IOperationType.Delete,
+			collection: collectionName,
+			method: "removeAllMembershipsForPrincipalDB",
+			success: "false",
+		});
+		return 0;
+	}
+}
+
 export async function getMembershipsForPrincipalDB({
 	principalType,
 	principalId,
