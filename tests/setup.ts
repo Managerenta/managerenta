@@ -9,10 +9,14 @@ import { afterAll } from "vitest";
 (process.env as Record<string, string>).NODE_ENV = "test";
 process.env.MONGODB_URI = process.env.MONGODB_URI ?? "mongodb://127.0.0.1:27017";
 process.env.REDIS_URI = process.env.REDIS_URI ?? "redis://127.0.0.1:6379";
-// Include the pid: pool ids are only unique WITHIN one vitest process, so two
-// concurrent `vitest run` invocations (e.g. parallel CI shards or agents)
-// would otherwise share scratch DBs and race each other's clearTestDB/drop.
-process.env.DB_NAME = `managerenta-vitest-${process.pid}-${process.env.VITEST_POOL_ID ?? "0"}`;
+// Name: managerenta-vitest-<runId>-<pid>-<pool>.
+//   - runId (main process pid, set by tests/globalSetup.ts and inherited here)
+//     scopes every scratch DB to this exact `vitest run` so globalSetup's
+//     teardown can drop them all — and so concurrent runs never collide.
+//   - pid + pool keep it unique per worker within the run: pool ids are only
+//     unique WITHIN one vitest process, and workers are reused across files.
+const runId = process.env.VITEST_RUN_ID ?? String(process.pid);
+process.env.DB_NAME = `managerenta-vitest-${runId}-${process.pid}-${process.env.VITEST_POOL_ID ?? "0"}`;
 
 process.env.JWT_ACCESS_TOKEN_SECRET =
 	"vitest-access-secret-0123456789-0123456789-abcdef";

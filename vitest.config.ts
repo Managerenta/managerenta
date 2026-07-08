@@ -14,6 +14,9 @@ export default defineConfig({
 		environment: "node",
 		include: ["tests/**/*.test.ts"],
 		setupFiles: ["tests/setup.ts"],
+		// Runs once in the main process; its teardown drops every scratch DB
+		// this run created (guaranteed net over the per-file afterAll cleanup).
+		globalSetup: ["tests/globalSetup.ts"],
 		hookTimeout: 30000,
 		testTimeout: 30000,
 		coverage: {
