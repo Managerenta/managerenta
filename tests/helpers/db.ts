@@ -19,8 +19,17 @@ export async function clearTestDB(): Promise<void> {
 
 /** Drop the scratch DB entirely and close the connection. */
 export async function dropTestDB(): Promise<void> {
-	if (mongoose.connection.readyState !== 0) {
-		await mongoose.connection.dropDatabase().catch(() => {});
+	if (mongoose.connection.readyState === 0) return;
+
+	// SAFETY: only ever drop a per-worker scratch database. If DB_NAME were
+	// ever misconfigured to point at a real DB (dev/staging/prod), refuse to
+	// drop it and just disconnect. See the "Test cleanup" rule in CLAUDE.md.
+	const name = mongoose.connection.db?.databaseName ?? "";
+	if (!/^managerenta-vitest-/.test(name)) {
 		await mongoose.disconnect().catch(() => {});
+		return;
 	}
+
+	await mongoose.connection.dropDatabase().catch(() => {});
+	await mongoose.disconnect().catch(() => {});
 }

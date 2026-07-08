@@ -4,6 +4,8 @@
 // remote store. Each vitest worker gets its own scratch database name so
 // files can run in parallel without clobbering each other.
 
+import { afterAll } from "vitest";
+
 (process.env as Record<string, string>).NODE_ENV = "test";
 process.env.MONGODB_URI = process.env.MONGODB_URI ?? "mongodb://127.0.0.1:27017";
 process.env.REDIS_URI = process.env.REDIS_URI ?? "redis://127.0.0.1:6379";
@@ -28,3 +30,19 @@ process.env.S3_REGION = "us-east-1";
 process.env.S3_BUCKET = "vitest-fake-bucket";
 process.env.S3_ACCESS_KEY = "AKIAVITESTFAKEKEY000";
 process.env.S3_SECRET_ACCESS_KEY = "vitest-fake-secret-key-not-real-000000000";
+
+// Guarantee every worker drops its scratch database when its test files
+// finish — even if an individual test file forgot to call dropTestDB() or
+// crashed mid-run. Without this net, each `vitest run` orphaned its
+// `managerenta-vitest-<pid>-<pool>` DB and they piled up by the hundreds.
+//
+// This registers a global afterAll (setup-file hooks apply to every test
+// file). dropTestDB is imported dynamically INSIDE the hook on purpose: a
+// top-level import would load the constants module — and capture DB_NAME —
+// before the assignments above run (ES imports are hoisted), pinning the DB
+// name to "". By the time this hook fires the env is set and the module is
+// already cached with the correct name.
+afterAll(async () => {
+	const { dropTestDB } = await import("./helpers/db");
+	await dropTestDB();
+});
