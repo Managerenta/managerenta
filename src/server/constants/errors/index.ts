@@ -6,6 +6,7 @@ import {
 	ErrAccountCreationFailed,
 	ErrAccountRestricted,
 	ErrCannotRemoveOwner,
+	ErrForbidden,
 	ErrGetFileLink,
 	ErrInternalServerError,
 	ErrInvalidAction,
@@ -74,6 +75,7 @@ export function getErrorResponse(error: Error): IErrorResponse {
 
 		case ErrCannotRemoveOwner:
 		case ErrMustKeepOneAdmin:
+		case ErrForbidden:
 			code = 403;
 			break;
 

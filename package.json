@@ -12,6 +12,8 @@
 		"format": "biome format --write",
 		"fix-unsafe": "biome check --write --unsafe",
 		"seed": "node --conditions react-server --import tsx --env-file=.env scripts/seed.ts",
+		"iam:bootstrap-operator": "node --conditions react-server --import tsx --env-file=.env scripts/iam-bootstrap-operator.ts",
+		"iam:migrate": "node --conditions react-server --import tsx --env-file=.env scripts/iam-migrate-roles.ts",
 		"e2e": "playwright test",
 		"test": "vitest run",
 		"test.coverage": "vitest run --coverage"

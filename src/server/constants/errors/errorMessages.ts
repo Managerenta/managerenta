@@ -41,6 +41,10 @@ export const ErrCannotRemoveOwner: Error = new Error(
 export const ErrMustKeepOneAdmin: Error = new Error(
 	"An organization must keep at least one admin",
 );
+// Authenticated but not permitted (IAM authorization denial). Distinct from
+// ErrUnauthorized (401), which the client's axios interceptor redirects to
+// /login — a permission denial must NOT bounce the user to login.
+export const ErrForbidden: Error = new Error("Forbidden");
 
 // 429 error codes
 export const ErrTooManyRequests: Error = new Error(

@@ -7,7 +7,9 @@ export type IAuditAction =
 	| "invite"
 	| "role-change"
 	| "member-remove"
-	| "export";
+	| "export"
+	// IAM authorization denial (engine reason recorded in `description`).
+	| "authz-deny";
 
 export type IAuditEntityType =
 	| "property"
@@ -20,7 +22,8 @@ export type IAuditEntityType =
 	| "organization"
 	| "member"
 	| "user"
-	| "session";
+	| "session"
+	| "iam";
 
 export interface IAuditCreateInput {
 	/** The owner scope the event belongs to (effective owner id). */

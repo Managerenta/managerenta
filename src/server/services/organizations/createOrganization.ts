@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { uploadAndResizeImage } from "../../helpers";
+import { seedOrgOwnerAdmin } from "../../iam/seed/system-policies";
 import { Organization } from "../../models";
 import {
 	type IOrganizationCreateInput,
@@ -44,6 +45,16 @@ export default async function createOrganization({
 		],
 		invites: [],
 	});
+
+	// Seed this org's IAM system groups (OrgAdmin/Manager/Viewer) and auto-join
+	// the owner to OrgAdmin, so the org is IAM-ready from creation. Best-effort:
+	// IAM seeding must never block org creation — the `iam:migrate` backfill
+	// reconciles any org that missed this step.
+	try {
+		await seedOrgOwnerAdmin(doc._id.toString(), doc.ownerId.toString());
+	} catch {
+		// swallow — org creation succeeds regardless of IAM seeding
+	}
 
 	await invalidateCacheKeys({
 		organizationId: doc._id.toString(),
