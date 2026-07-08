@@ -158,6 +158,29 @@ prod target and was left untouched):
 existing org members AND repairs the OrgManager policy). New orgs seed on creation and
 stay in sync via `iam/sync.ts`.
 
+## Bootstrapping the first platform super-admin (operator)
+
+There is NO default/seeded super-admin login. The platform super-admin is an existing
+user promoted to an `IamOperator` via a one-time, secret-gated CLI (no self-service or
+HTTP path — see `scripts/iam-bootstrap-operator.ts`). Steps:
+
+1. **Create/choose the user.** Sign up (or pick an existing) normal account in the app.
+   That account's email + password is the operator's login — you set it at signup.
+2. **Run the bootstrap once**, providing a secret both in the env AND as `--secret`:
+   ```bash
+   IAM_BOOTSTRAP_SECRET=<your-secret> yarn iam:bootstrap-operator \
+     --email you@yourcompany.com --secret <your-secret>
+   ```
+   - `<your-secret>` is any strong secret you pick; it must match in the env and the flag.
+   - Requires `MONGODB_URI` / `DB_NAME` in the env to point at the target database.
+   - Refuses to run if any operator already exists (one-time only); links an existing
+     user (never creates a login); compares the secret with `timingSafeEqual`.
+   - On success it seeds the platform system policies/groups and adds the user to
+     `platform-admins`.
+3. **Log in as that user.** The "Operator Console" nav entry appears and `/admin` becomes
+   accessible. All further operators are then managed through the IAM admin UI — the CLI
+   is only ever needed for this very first operator.
+
 **Verdict.** Production-ready. Remaining optional step: browser-level Playwright driving of
 the console UIs (the APIs + pages are proven via 1085 tests, the build, and the live HTTP
 smoke; UI driving was substituted with those since the env's app DB points at prod Atlas).
