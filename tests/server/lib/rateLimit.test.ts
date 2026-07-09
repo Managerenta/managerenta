@@ -140,7 +140,11 @@ describe("enforceRateLimit", () => {
 describe("applyRateLimitHeaders", () => {
 	it("sets limit and remaining headers", () => {
 		const res = new Response(null);
-		const result: RateLimitResult = { allowed: true, limit: 10, remaining: 4 };
+		const result: RateLimitResult = {
+			allowed: true,
+			limit: 10,
+			remaining: 4,
+		};
 		const out = applyRateLimitHeaders(res, result);
 		expect(out).toBe(res);
 		expect(out.headers.get("X-RateLimit-Limit")).toBe("10");

@@ -34,30 +34,42 @@ describe("assertOrganizationAdmin", () => {
 	});
 
 	it("rejects a manager (admin-only gate)", async () => {
-		withMembers([{ memberId: "u1", permission: IOrganizationRole.MANAGER }]);
-		await expect(assertOrganizationAdmin(args)).rejects.toBe(ErrUnauthorized);
+		withMembers([
+			{ memberId: "u1", permission: IOrganizationRole.MANAGER },
+		]);
+		await expect(assertOrganizationAdmin(args)).rejects.toBe(
+			ErrUnauthorized,
+		);
 	});
 
 	it("rejects a viewer", async () => {
 		withMembers([{ memberId: "u1", permission: IOrganizationRole.VIEWER }]);
-		await expect(assertOrganizationAdmin(args)).rejects.toBe(ErrUnauthorized);
+		await expect(assertOrganizationAdmin(args)).rejects.toBe(
+			ErrUnauthorized,
+		);
 	});
 
 	it("rejects a non-member even if others are admins", async () => {
 		withMembers([
 			{ memberId: "someone-else", permission: IOrganizationRole.ADMIN },
 		]);
-		await expect(assertOrganizationAdmin(args)).rejects.toBe(ErrUnauthorized);
+		await expect(assertOrganizationAdmin(args)).rejects.toBe(
+			ErrUnauthorized,
+		);
 	});
 
 	it("rejects when the organization lookup returns nothing", async () => {
 		mockGetMembers.mockResolvedValue(null as never);
-		await expect(assertOrganizationAdmin(args)).rejects.toBe(ErrUnauthorized);
+		await expect(assertOrganizationAdmin(args)).rejects.toBe(
+			ErrUnauthorized,
+		);
 	});
 
 	it("rejects when the members list is missing", async () => {
 		mockGetMembers.mockResolvedValue({} as never);
-		await expect(assertOrganizationAdmin(args)).rejects.toBe(ErrUnauthorized);
+		await expect(assertOrganizationAdmin(args)).rejects.toBe(
+			ErrUnauthorized,
+		);
 	});
 });
 
@@ -70,7 +82,9 @@ describe("assertOrganizationAdminOrManager", () => {
 	});
 
 	it("passes for a manager", async () => {
-		withMembers([{ memberId: "u1", permission: IOrganizationRole.MANAGER }]);
+		withMembers([
+			{ memberId: "u1", permission: IOrganizationRole.MANAGER },
+		]);
 		await expect(
 			assertOrganizationAdminOrManager(args),
 		).resolves.toBeUndefined();

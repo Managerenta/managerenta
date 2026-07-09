@@ -1,5 +1,13 @@
 import mongoose from "mongoose";
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+	afterAll,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+} from "vitest";
 
 vi.mock("@aws-sdk/s3-request-presigner", () => ({
 	getSignedUrl: vi.fn(async () => "https://fake-s3.example/signed-url"),
@@ -20,11 +28,7 @@ import {
 import { Unit } from "../../../src/server/models/units";
 import { IUnitStatus } from "../../../src/server/models/units/types";
 import { disconnectRedis } from "../../../src/server/databases";
-import {
-	clearTestDB,
-	connectTestDB,
-	dropTestDB,
-} from "../../helpers/db";
+import { clearTestDB, connectTestDB, dropTestDB } from "../../helpers/db";
 
 const USER = "user-props-1";
 const OTHER = "user-props-2";
@@ -89,7 +93,9 @@ describe("getPropertiesDB", () => {
 		await createPropertyDB({ payload: payload({ name: "B" }) });
 		const del = await createPropertyDB({ payload: payload({ name: "C" }) });
 		await deletePropertyDB({ id: del!.id, userId: USER });
-		await createPropertyDB({ payload: payload({ name: "X", userId: OTHER }) });
+		await createPropertyDB({
+			payload: payload({ name: "X", userId: OTHER }),
+		});
 
 		const { properties, total } = await getPropertiesDB({ userId: USER });
 		expect(total).toBe(2);
@@ -97,20 +103,28 @@ describe("getPropertiesDB", () => {
 		// pre-aggregate hook strips internals and adds string id
 		for (const p of properties) {
 			expect(typeof p.id).toBe("string");
-			expect((p as never as { deleted?: boolean }).deleted).toBeUndefined();
+			expect(
+				(p as never as { deleted?: boolean }).deleted,
+			).toBeUndefined();
 			expect((p as never as { __v?: number }).__v).toBeUndefined();
 		}
 	});
 
 	it("returns empty for a user with no properties", async () => {
-		const { properties, total } = await getPropertiesDB({ userId: "nobody" });
+		const { properties, total } = await getPropertiesDB({
+			userId: "nobody",
+		});
 		expect(properties).toEqual([]);
 		expect(total).toBe(0);
 	});
 
 	it("filters by type and treats 'all' as no filter", async () => {
-		await createPropertyDB({ payload: payload({ name: "Apt", type: "Apartment" }) });
-		await createPropertyDB({ payload: payload({ name: "Hse", type: "House" }) });
+		await createPropertyDB({
+			payload: payload({ name: "Apt", type: "Apartment" }),
+		});
+		await createPropertyDB({
+			payload: payload({ name: "Hse", type: "House" }),
+		});
 
 		const houses = await getPropertiesDB({ userId: USER, type: "House" });
 		expect(houses.total).toBe(1);
@@ -122,17 +136,26 @@ describe("getPropertiesDB", () => {
 
 	it("searches name and address case-insensitively", async () => {
 		await createPropertyDB({
-			payload: payload({ name: "Lakeside Manor", address: "9 River Road" }),
+			payload: payload({
+				name: "Lakeside Manor",
+				address: "9 River Road",
+			}),
 		});
 		await createPropertyDB({
 			payload: payload({ name: "Hilltop", address: "1 Mountain Ave" }),
 		});
 
-		const byName = await getPropertiesDB({ userId: USER, search: "lakeside" });
+		const byName = await getPropertiesDB({
+			userId: USER,
+			search: "lakeside",
+		});
 		expect(byName.total).toBe(1);
 		expect(byName.properties[0]?.name).toBe("Lakeside Manor");
 
-		const byAddress = await getPropertiesDB({ userId: USER, search: "MOUNTAIN" });
+		const byAddress = await getPropertiesDB({
+			userId: USER,
+			search: "MOUNTAIN",
+		});
 		expect(byAddress.total).toBe(1);
 		expect(byAddress.properties[0]?.name).toBe("Hilltop");
 	});
@@ -141,7 +164,10 @@ describe("getPropertiesDB", () => {
 		await createPropertyDB({ payload: payload({ name: "Block (A) [1]" }) });
 		await createPropertyDB({ payload: payload({ name: "Block A 1" }) });
 
-		const literal = await getPropertiesDB({ userId: USER, search: "(A) [1]" });
+		const literal = await getPropertiesDB({
+			userId: USER,
+			search: "(A) [1]",
+		});
 		expect(literal.total).toBe(1);
 		expect(literal.properties[0]?.name).toBe("Block (A) [1]");
 
@@ -178,7 +204,10 @@ describe("getPropertiesDB", () => {
 			"Charlie",
 		]);
 
-		const byRevenue = await getPropertiesDB({ userId: USER, sort: "revenue" });
+		const byRevenue = await getPropertiesDB({
+			userId: USER,
+			sort: "revenue",
+		});
 		expect(byRevenue.properties.map((p) => p.name)).toEqual([
 			"Charlie",
 			"Bravo",
@@ -186,7 +215,10 @@ describe("getPropertiesDB", () => {
 		]);
 
 		// "occupancy" falls through to default createdAt desc
-		const byDefault = await getPropertiesDB({ userId: USER, sort: "occupancy" });
+		const byDefault = await getPropertiesDB({
+			userId: USER,
+			sort: "occupancy",
+		});
 		expect(byDefault.properties.map((p) => p.name)).toEqual([
 			"Charlie",
 			"Alpha",
@@ -201,7 +233,11 @@ describe("getPropertiesDB", () => {
 				createdAt: new Date(2024, 0, i + 1),
 			});
 		}
-		const page = await getPropertiesDB({ userId: USER, limit: 2, offset: 2 });
+		const page = await getPropertiesDB({
+			userId: USER,
+			limit: 2,
+			offset: 2,
+		});
 		expect(page.total).toBe(5);
 		expect(page.properties.map((p) => p.name)).toEqual(["P2", "P1"]);
 	});
@@ -265,7 +301,10 @@ describe("getPropertiesDB", () => {
 describe("getPropertyByIdDB", () => {
 	it("returns the property for its owner", async () => {
 		const created = await createPropertyDB({ payload: payload() });
-		const found = await getPropertyByIdDB({ id: created!.id, userId: USER });
+		const found = await getPropertyByIdDB({
+			id: created!.id,
+			userId: USER,
+		});
 		expect(found).not.toBeNull();
 		expect(found?.id).toBe(created!.id);
 		expect(found?.name).toBe("Sunset Villa");
@@ -287,7 +326,9 @@ describe("getPropertyByIdDB", () => {
 	});
 
 	it("returns null for a malformed id", async () => {
-		expect(await getPropertyByIdDB({ id: "not-an-id", userId: USER })).toBeNull();
+		expect(
+			await getPropertyByIdDB({ id: "not-an-id", userId: USER }),
+		).toBeNull();
 	});
 
 	it("returns null for a valid but unknown id", async () => {
@@ -354,7 +395,10 @@ describe("updatePropertyDB", () => {
 describe("deletePropertyDB", () => {
 	it("soft-deletes: flag set in DB, doc still stored", async () => {
 		const created = await createPropertyDB({ payload: payload() });
-		const deleted = await deletePropertyDB({ id: created!.id, userId: USER });
+		const deleted = await deletePropertyDB({
+			id: created!.id,
+			userId: USER,
+		});
 		expect(deleted).not.toBeNull();
 		const inDb = await Property.findById(created!.id).lean();
 		expect(inDb?.deleted).toBe(true);
@@ -362,22 +406,30 @@ describe("deletePropertyDB", () => {
 
 	it("returns null when already deleted or wrong owner", async () => {
 		const created = await createPropertyDB({ payload: payload() });
-		expect(await deletePropertyDB({ id: created!.id, userId: OTHER })).toBeNull();
+		expect(
+			await deletePropertyDB({ id: created!.id, userId: OTHER }),
+		).toBeNull();
 		await deletePropertyDB({ id: created!.id, userId: USER });
-		expect(await deletePropertyDB({ id: created!.id, userId: USER })).toBeNull();
+		expect(
+			await deletePropertyDB({ id: created!.id, userId: USER }),
+		).toBeNull();
 	});
 });
 
 describe("increment/decrement totalUnits", () => {
 	it("increments totalUnits for the owner", async () => {
-		const created = await createPropertyDB({ payload: payload({ totalUnits: 4 }) });
+		const created = await createPropertyDB({
+			payload: payload({ totalUnits: 4 }),
+		});
 		await incrementPropertyTotalUnitsDB({ id: created!.id, userId: USER });
 		const inDb = await Property.findById(created!.id).lean();
 		expect(inDb?.totalUnits).toBe(5);
 	});
 
 	it("does nothing for the wrong owner", async () => {
-		const created = await createPropertyDB({ payload: payload({ totalUnits: 4 }) });
+		const created = await createPropertyDB({
+			payload: payload({ totalUnits: 4 }),
+		});
 		await incrementPropertyTotalUnitsDB({ id: created!.id, userId: OTHER });
 		await decrementPropertyTotalUnitsDB({ id: created!.id, userId: OTHER });
 		const inDb = await Property.findById(created!.id).lean();
@@ -385,7 +437,9 @@ describe("increment/decrement totalUnits", () => {
 	});
 
 	it("decrements but never below zero", async () => {
-		const created = await createPropertyDB({ payload: payload({ totalUnits: 1 }) });
+		const created = await createPropertyDB({
+			payload: payload({ totalUnits: 1 }),
+		});
 		await decrementPropertyTotalUnitsDB({ id: created!.id, userId: USER });
 		let inDb = await Property.findById(created!.id).lean();
 		expect(inDb?.totalUnits).toBe(0);
@@ -408,7 +462,11 @@ describe("getPropertyStatsDB", () => {
 		});
 		await deletePropertyDB({ id: gone!.id, userId: USER });
 		await createPropertyDB({
-			payload: payload({ userId: OTHER, totalUnits: 50, monthlyRent: 5000 }),
+			payload: payload({
+				userId: OTHER,
+				totalUnits: 50,
+				monthlyRent: 5000,
+			}),
 		});
 
 		const stats = await getPropertyStatsDB({ userId: USER });
@@ -434,7 +492,9 @@ describe("getPropertiesByIdsDB", () => {
 	});
 
 	it("returns matching properties, scoped to userId when given", async () => {
-		const mine = await createPropertyDB({ payload: payload({ name: "Mine" }) });
+		const mine = await createPropertyDB({
+			payload: payload({ name: "Mine" }),
+		});
 		const theirs = await createPropertyDB({
 			payload: payload({ name: "Theirs", userId: OTHER }),
 		});
@@ -460,8 +520,8 @@ describe("getPropertiesByIdsDB", () => {
 	});
 
 	it("returns [] when an id is malformed", async () => {
-		expect(await getPropertiesByIdsDB({ ids: ["oops"], userId: USER })).toEqual(
-			[],
-		);
+		expect(
+			await getPropertiesByIdsDB({ ids: ["oops"], userId: USER }),
+		).toEqual([]);
 	});
 });

@@ -25,19 +25,35 @@ describe("getAuditQuerySchema", () => {
 	});
 
 	it("enforces limit boundaries 1..100", () => {
-		expect(getAuditQuerySchema.safeParse({ limit: "1" }).success).toBe(true);
-		expect(getAuditQuerySchema.safeParse({ limit: "100" }).success).toBe(true);
-		expect(getAuditQuerySchema.safeParse({ limit: "0" }).success).toBe(false);
-		expect(getAuditQuerySchema.safeParse({ limit: "101" }).success).toBe(false);
+		expect(getAuditQuerySchema.safeParse({ limit: "1" }).success).toBe(
+			true,
+		);
+		expect(getAuditQuerySchema.safeParse({ limit: "100" }).success).toBe(
+			true,
+		);
+		expect(getAuditQuerySchema.safeParse({ limit: "0" }).success).toBe(
+			false,
+		);
+		expect(getAuditQuerySchema.safeParse({ limit: "101" }).success).toBe(
+			false,
+		);
 	});
 
 	it("rejects non-integer and non-numeric limits", () => {
-		expect(getAuditQuerySchema.safeParse({ limit: "2.5" }).success).toBe(false);
-		expect(getAuditQuerySchema.safeParse({ limit: "abc" }).success).toBe(false);
+		expect(getAuditQuerySchema.safeParse({ limit: "2.5" }).success).toBe(
+			false,
+		);
+		expect(getAuditQuerySchema.safeParse({ limit: "abc" }).success).toBe(
+			false,
+		);
 	});
 
 	it("enforces offset >= 0", () => {
-		expect(getAuditQuerySchema.safeParse({ offset: "0" }).success).toBe(true);
-		expect(getAuditQuerySchema.safeParse({ offset: "-1" }).success).toBe(false);
+		expect(getAuditQuerySchema.safeParse({ offset: "0" }).success).toBe(
+			true,
+		);
+		expect(getAuditQuerySchema.safeParse({ offset: "-1" }).success).toBe(
+			false,
+		);
 	});
 });

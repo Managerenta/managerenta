@@ -137,7 +137,9 @@ describe("buildOtpAuthUrl", () => {
 			account: "user name@example.com",
 			issuer: "My App",
 		});
-		expect(url).toContain(encodeURIComponent("My App:user name@example.com"));
+		expect(url).toContain(
+			encodeURIComponent("My App:user name@example.com"),
+		);
 		expect(new URL(url).searchParams.get("issuer")).toBe("My App");
 	});
 });

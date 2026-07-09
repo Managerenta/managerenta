@@ -39,7 +39,8 @@ describe("preferencesBodySchema", () => {
 			false,
 		);
 		expect(
-			preferencesBodySchema.safeParse({ currency: "C".repeat(9) }).success,
+			preferencesBodySchema.safeParse({ currency: "C".repeat(9) })
+				.success,
 		).toBe(false);
 		expect(
 			preferencesBodySchema.safeParse({ timezone: "T".repeat(21) })
@@ -48,9 +49,9 @@ describe("preferencesBodySchema", () => {
 	});
 
 	it("is strict: rejects unknown keys", () => {
-		expect(
-			preferencesBodySchema.safeParse({ fontSize: 14 }).success,
-		).toBe(false);
+		expect(preferencesBodySchema.safeParse({ fontSize: 14 }).success).toBe(
+			false,
+		);
 	});
 });
 
@@ -126,9 +127,9 @@ describe("remindersBodySchema", () => {
 
 describe("totpEnableBodySchema / totpDisableBodySchema", () => {
 	it("enable requires a 6..8 char token", () => {
-		expect(totpEnableBodySchema.safeParse({ token: "123456" }).success).toBe(
-			true,
-		);
+		expect(
+			totpEnableBodySchema.safeParse({ token: "123456" }).success,
+		).toBe(true);
 		expect(totpEnableBodySchema.safeParse({ token: "12345" }).success).toBe(
 			false,
 		);

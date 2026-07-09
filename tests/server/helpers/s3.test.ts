@@ -19,8 +19,7 @@ const getSignedUrlMock = vi.hoisted(() =>
 );
 
 vi.mock("@aws-sdk/client-s3", async (importOriginal) => {
-	const actual =
-		await importOriginal<typeof import("@aws-sdk/client-s3")>();
+	const actual = await importOriginal<typeof import("@aws-sdk/client-s3")>();
 	return {
 		...actual,
 		S3Client: class {
@@ -69,9 +68,7 @@ describe("s3 helpers (AWS SDK mocked)", () => {
 			const buffer = Buffer.from(
 				`file body ${Date.now()}-${Math.random()}`,
 			);
-			const checksum = createHash("sha256")
-				.update(buffer)
-				.digest("hex");
+			const checksum = createHash("sha256").update(buffer).digest("hex");
 
 			const uri = await uploadFile({
 				basePath: "documents",
@@ -247,9 +244,7 @@ describe("s3 helpers (AWS SDK mocked)", () => {
 				shouldResize: false,
 			});
 
-			expect(result).toMatch(
-				/^properties\/images\/[0-9a-f]{64}\.webp$/,
-			);
+			expect(result).toMatch(/^properties\/images\/[0-9a-f]{64}\.webp$/);
 			const meta = await sharp(
 				sendMock.mock.calls[0][0].input.Body,
 			).metadata();
@@ -316,9 +311,7 @@ describe("s3 helpers (AWS SDK mocked)", () => {
 				'attachment; filename="My Report.pdf"',
 			);
 			expect(
-				await redisRetrieveKeyString<string>(
-					`s3:presigned:att:${key}`,
-				),
+				await redisRetrieveKeyString<string>(`s3:presigned:att:${key}`),
 			).toBe(attachment);
 
 			// Repeat attachment call is served from cache.

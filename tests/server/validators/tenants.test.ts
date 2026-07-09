@@ -193,7 +193,8 @@ describe("addTransactionBodySchema", () => {
 				.success,
 		).toBe(false);
 		expect(
-			addTransactionBodySchema.safeParse({ ...validTx, period: 0 }).success,
+			addTransactionBodySchema.safeParse({ ...validTx, period: 0 })
+				.success,
 		).toBe(false);
 	});
 

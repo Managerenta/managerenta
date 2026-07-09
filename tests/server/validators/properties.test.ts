@@ -48,15 +48,19 @@ describe("createPropertyBodySchema", () => {
 			).toBe(true);
 		}
 		expect(
-			createPropertyBodySchema.safeParse({ ...validCreate, type: "Castle" })
-				.success,
+			createPropertyBodySchema.safeParse({
+				...validCreate,
+				type: "Castle",
+			}).success,
 		).toBe(false);
 	});
 
 	it("rejects negative or fractional totalUnits", () => {
 		expect(
-			createPropertyBodySchema.safeParse({ ...validCreate, totalUnits: -1 })
-				.success,
+			createPropertyBodySchema.safeParse({
+				...validCreate,
+				totalUnits: -1,
+			}).success,
 		).toBe(false);
 		expect(
 			createPropertyBodySchema.safeParse({
@@ -120,21 +124,21 @@ describe("getPropertiesQuerySchema", () => {
 	});
 
 	it("is strict: rejects unknown query params", () => {
-		expect(
-			getPropertiesQuerySchema.safeParse({ page: "2" }).success,
-		).toBe(false);
+		expect(getPropertiesQuerySchema.safeParse({ page: "2" }).success).toBe(
+			false,
+		);
 	});
 
 	it("bounds limit to 1..100", () => {
 		expect(getPropertiesQuerySchema.safeParse({ limit: "0" }).success).toBe(
 			false,
 		);
-		expect(getPropertiesQuerySchema.safeParse({ limit: "100" }).success).toBe(
-			true,
-		);
-		expect(getPropertiesQuerySchema.safeParse({ limit: "101" }).success).toBe(
-			false,
-		);
+		expect(
+			getPropertiesQuerySchema.safeParse({ limit: "100" }).success,
+		).toBe(true);
+		expect(
+			getPropertiesQuerySchema.safeParse({ limit: "101" }).success,
+		).toBe(false);
 	});
 });
 

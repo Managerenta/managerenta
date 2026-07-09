@@ -33,7 +33,9 @@ test.describe("Maintenance", () => {
 		await expect(
 			page.locator(".title", { hasText: "Maintenance" }).first(),
 		).toBeVisible();
-		await expect(page.getByText("Kitchen sink leaking").first()).toBeVisible({
+		await expect(
+			page.getByText("Kitchen sink leaking").first(),
+		).toBeVisible({
 			timeout: 15000,
 		});
 		await expect(
@@ -46,7 +48,9 @@ test.describe("Maintenance", () => {
 	test("search filters requests server-side", async ({ page }) => {
 		await login(page);
 		await page.goto("/maintenance");
-		await expect(page.getByText("Kitchen sink leaking").first()).toBeVisible({
+		await expect(
+			page.getByText("Kitchen sink leaking").first(),
+		).toBeVisible({
 			timeout: 15000,
 		});
 		await page.getByPlaceholder("Search requests…").fill("Generator");
@@ -125,7 +129,9 @@ test.describe("Vendors", () => {
 		await expect(page.getByText("Vendor added")).toBeVisible({
 			timeout: 15000,
 		});
-		await expect(page.getByText("E2E Test Vendor Ltd").first()).toBeVisible();
+		await expect(
+			page.getByText("E2E Test Vendor Ltd").first(),
+		).toBeVisible();
 
 		// verify persisted then cleanup via API
 		const api = await page

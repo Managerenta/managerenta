@@ -23,8 +23,7 @@ const getSignedUrlMock = vi.hoisted(() =>
 );
 
 vi.mock("@aws-sdk/client-s3", async (importOriginal) => {
-	const actual =
-		await importOriginal<typeof import("@aws-sdk/client-s3")>();
+	const actual = await importOriginal<typeof import("@aws-sdk/client-s3")>();
 	return {
 		...actual,
 		S3Client: class {

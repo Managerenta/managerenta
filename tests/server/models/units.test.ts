@@ -75,7 +75,11 @@ describe("createUnitDB", () => {
 
 	it("returns null when required fields are missing", async () => {
 		const unit = await createUnitDB({
-			payload: { name: "No rent", propertyId: PROP, userId: USER } as never,
+			payload: {
+				name: "No rent",
+				propertyId: PROP,
+				userId: USER,
+			} as never,
 		});
 		expect(unit).toBeNull();
 		expect(await Unit.countDocuments({})).toBe(0);
@@ -84,13 +88,22 @@ describe("createUnitDB", () => {
 
 describe("getUnitsByPropertyIdDB", () => {
 	it("returns units for the property scoped by user, sorted by createdAt asc", async () => {
-		await Unit.create({ ...payload({ name: "B" }), createdAt: new Date("2024-02-01") });
-		await Unit.create({ ...payload({ name: "A" }), createdAt: new Date("2024-01-01") });
+		await Unit.create({
+			...payload({ name: "B" }),
+			createdAt: new Date("2024-02-01"),
+		});
+		await Unit.create({
+			...payload({ name: "A" }),
+			createdAt: new Date("2024-01-01"),
+		});
 		await Unit.create(payload({ name: "OtherProp", propertyId: "prop-x" }));
 		await Unit.create(payload({ name: "OtherUser", userId: OTHER }));
 		await Unit.create({ ...payload({ name: "Deleted" }), deleted: true });
 
-		const units = await getUnitsByPropertyIdDB({ propertyId: PROP, userId: USER });
+		const units = await getUnitsByPropertyIdDB({
+			propertyId: PROP,
+			userId: USER,
+		});
 		expect(units.map((u) => u.name)).toEqual(["A", "B"]);
 	});
 
@@ -113,7 +126,10 @@ describe("getUnitsByPropertyIdDB", () => {
 				},
 			}),
 		);
-		const units = await getUnitsByPropertyIdDB({ propertyId: PROP, userId: USER });
+		const units = await getUnitsByPropertyIdDB({
+			propertyId: PROP,
+			userId: USER,
+		});
 		expect(units[0]?.tenant).toEqual({
 			_id: tenantId,
 			name: "Jane Doe",
@@ -123,7 +139,10 @@ describe("getUnitsByPropertyIdDB", () => {
 
 	it("resolves a null avatar when none is stored, and returns a stub tenant for vacant units", async () => {
 		const tenantId = new mongoose.Types.ObjectId().toString();
-		await Unit.create({ ...payload({ name: "Vacant1" }), createdAt: new Date("2024-01-01") });
+		await Unit.create({
+			...payload({ name: "Vacant1" }),
+			createdAt: new Date("2024-01-01"),
+		});
 		await Unit.create({
 			...payload({
 				name: "NoAvatar",
@@ -132,7 +151,10 @@ describe("getUnitsByPropertyIdDB", () => {
 			}),
 			createdAt: new Date("2024-02-01"),
 		});
-		const units = await getUnitsByPropertyIdDB({ propertyId: PROP, userId: USER });
+		const units = await getUnitsByPropertyIdDB({
+			propertyId: PROP,
+			userId: USER,
+		});
 		// Quirk of the current pipeline: the `$addFields: {"tenant.avatar": ...}`
 		// stage materializes a tenant object even when tenant is null, so vacant
 		// units surface a stub tenant instead of null here (unlike getUnitByIdDB
@@ -142,7 +164,11 @@ describe("getUnitsByPropertyIdDB", () => {
 			name: undefined,
 			avatar: null,
 		});
-		expect(units[1]?.tenant).toEqual({ _id: tenantId, name: "Bob", avatar: null });
+		expect(units[1]?.tenant).toEqual({
+			_id: tenantId,
+			name: "Bob",
+			avatar: null,
+		});
 	});
 });
 
@@ -155,7 +181,10 @@ describe("getUnitStatsDB", () => {
 		await Unit.create(payload({ status: "Occupied", tenant }));
 		await Unit.create(payload({ name: "U2", status: "Occupied", tenant }));
 		await Unit.create(payload({ name: "U3" })); // Vacant default
-		await Unit.create({ ...payload({ name: "U4", status: "Occupied", tenant }), deleted: true });
+		await Unit.create({
+			...payload({ name: "U4", status: "Occupied", tenant }),
+			deleted: true,
+		});
 		await Unit.create(payload({ name: "U5", userId: OTHER }));
 
 		expect(await getUnitStatsDB({ userId: USER })).toEqual({
@@ -207,14 +236,20 @@ describe("getVacantUnitsDB", () => {
 				name: "O1",
 				propertyId: prop.id,
 				status: "Occupied",
-				tenant: { tenantId: new mongoose.Types.ObjectId().toString(), name: "T" },
+				tenant: {
+					tenantId: new mongoose.Types.ObjectId().toString(),
+					name: "T",
+				},
 			}),
 		);
 
 		const vacant = await getVacantUnitsDB({ userId: USER });
 		expect(vacant).toHaveLength(1);
 		expect(vacant[0]?.name).toBe("V1");
-		expect(vacant[0]?.property).toEqual({ _id: prop.id, name: "Main Property" });
+		expect(vacant[0]?.property).toEqual({
+			_id: prop.id,
+			name: "Main Property",
+		});
 		expect(vacant[0]?.tenant).toBeNull();
 	});
 
@@ -224,17 +259,24 @@ describe("getVacantUnitsDB", () => {
 				name: "O1",
 				propertyId: new mongoose.Types.ObjectId().toString(),
 				status: "Occupied",
-				tenant: { tenantId: new mongoose.Types.ObjectId().toString(), name: "T" },
+				tenant: {
+					tenantId: new mongoose.Types.ObjectId().toString(),
+					name: "T",
+				},
 			}),
 		);
-		const occupied = await getVacantUnitsDB({ userId: USER, status: "Occupied" });
+		const occupied = await getVacantUnitsDB({
+			userId: USER,
+			status: "Occupied",
+		});
 		expect(occupied).toHaveLength(1);
 		expect(occupied[0]?.name).toBe("O1");
 		expect(occupied[0]?.property).toBeNull();
 	});
 
 	it("scopes by user and applies the limit", async () => {
-		for (let i = 0; i < 3; i++) await Unit.create(payload({ name: `V${i}` }));
+		for (let i = 0; i < 3; i++)
+			await Unit.create(payload({ name: `V${i}` }));
 		await Unit.create(payload({ name: "VX", userId: OTHER }));
 
 		const limited = await getVacantUnitsDB({ userId: USER, limit: 2 });
@@ -286,11 +328,19 @@ describe("updateUnitDB", () => {
 	it("returns null for wrong owner or deleted unit", async () => {
 		const unit = await createUnitDB({ payload: payload() });
 		expect(
-			await updateUnitDB({ id: unit!.id, userId: OTHER, payload: { rent: 1 } }),
+			await updateUnitDB({
+				id: unit!.id,
+				userId: OTHER,
+				payload: { rent: 1 },
+			}),
 		).toBeNull();
 		await deleteUnitDB({ id: unit!.id, userId: USER });
 		expect(
-			await updateUnitDB({ id: unit!.id, userId: USER, payload: { rent: 1 } }),
+			await updateUnitDB({
+				id: unit!.id,
+				userId: USER,
+				payload: { rent: 1 },
+			}),
 		).toBeNull();
 		const inDb = await Unit.findById(unit!.id).lean();
 		expect(inDb?.rent).toBe(800);
@@ -351,13 +401,22 @@ describe("softDeleteUnitsByPropertyDB", () => {
 			userId: USER,
 		});
 		expect(count).toBe(2);
-		expect(await Unit.countDocuments({ propertyId: PROP, userId: USER, deleted: true })).toBe(2);
+		expect(
+			await Unit.countDocuments({
+				propertyId: PROP,
+				userId: USER,
+				deleted: true,
+			}),
+		).toBe(2);
 		expect(await Unit.countDocuments({ deleted: false })).toBe(2);
 	});
 
 	it("returns 0 when nothing matches", async () => {
 		expect(
-			await softDeleteUnitsByPropertyDB({ propertyId: "none", userId: USER }),
+			await softDeleteUnitsByPropertyDB({
+				propertyId: "none",
+				userId: USER,
+			}),
 		).toBe(0);
 	});
 });

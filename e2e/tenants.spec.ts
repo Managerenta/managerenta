@@ -58,8 +58,12 @@ test.describe("Tenants routes", () => {
 			"Ifeanyi Eze",
 			{ timeout: 15000 },
 		);
-		await expect(page.getByText("Contact Information").first()).toBeVisible();
-		await expect(page.getByText("ifeanyi@example.com").first()).toBeVisible();
+		await expect(
+			page.getByText("Contact Information").first(),
+		).toBeVisible();
+		await expect(
+			page.getByText("ifeanyi@example.com").first(),
+		).toBeVisible();
 
 		// Transactions from seed (3 rent + 1 utilities)
 		const tx = await page
@@ -79,16 +83,20 @@ test.describe("Tenants routes", () => {
 		expect(tenant).toBeTruthy();
 
 		await page.goto(`/tenants/${tenant.id}/edit`);
-		await expect(page.locator(".page-title", { hasText: "Edit Tenant" })).toBeVisible({
+		await expect(
+			page.locator(".page-title", { hasText: "Edit Tenant" }),
+		).toBeVisible({
 			timeout: 15000,
 		});
 		const phoneInput = page.getByPlaceholder("+2348012345678");
 		await expect(phoneInput).toHaveValue(/\+234/, { timeout: 10000 });
 		await phoneInput.fill("+2348099999999");
 		await page.getByRole("button", { name: "Save Changes" }).click();
-		await expect(page.getByText("Tenant updated successfully")).toBeVisible({
-			timeout: 15000,
-		});
+		await expect(page.getByText("Tenant updated successfully")).toBeVisible(
+			{
+				timeout: 15000,
+			},
+		);
 
 		// Re-read from API: write persisted
 		const check = await page

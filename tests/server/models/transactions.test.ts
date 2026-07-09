@@ -227,7 +227,9 @@ describe("sumRentCreditsByTenantIdsDB", () => {
 		await makeTxn({ amount: 800, type: "utilities" }); // not rent — excluded
 		await makeTxn({ amount: 1600, tenantId: "other-tenant" }); // other tenant — excluded
 
-		const total = await sumRentCreditsByTenantIdsDB({ tenantIds: [TENANT] });
+		const total = await sumRentCreditsByTenantIdsDB({
+			tenantIds: [TENANT],
+		});
 		expect(total).toBe(300);
 	});
 
@@ -252,8 +254,8 @@ describe("sumRentCreditsByTenantIdsDB", () => {
 		vi.spyOn(Transaction, "aggregate").mockRejectedValueOnce(
 			new Error("boom"),
 		);
-		expect(
-			await sumRentCreditsByTenantIdsDB({ tenantIds: [TENANT] }),
-		).toBe(0);
+		expect(await sumRentCreditsByTenantIdsDB({ tenantIds: [TENANT] })).toBe(
+			0,
+		);
 	});
 });

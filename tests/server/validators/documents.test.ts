@@ -37,7 +37,10 @@ describe("createDocumentFieldsSchema", () => {
 			category: "lease",
 		});
 		expect(result.success).toBe(true);
-		expect(result.data).toEqual({ name: "Lease agreement", category: "lease" });
+		expect(result.data).toEqual({
+			name: "Lease agreement",
+			category: "lease",
+		});
 	});
 
 	it("accepts optional association ids", () => {
@@ -90,7 +93,9 @@ describe("createDocumentFieldsSchema", () => {
 
 describe("documentParamsSchema", () => {
 	it("requires a non-empty id and is strict", () => {
-		expect(documentParamsSchema.safeParse({ id: "abc" }).success).toBe(true);
+		expect(documentParamsSchema.safeParse({ id: "abc" }).success).toBe(
+			true,
+		);
 		expect(documentParamsSchema.safeParse({ id: "" }).success).toBe(false);
 		expect(
 			documentParamsSchema.safeParse({ id: "abc", extra: 1 }).success,
@@ -129,9 +134,9 @@ describe("getDocumentsQuerySchema", () => {
 		expect(getDocumentsQuerySchema.safeParse({ limit: "0" }).success).toBe(
 			false,
 		);
-		expect(getDocumentsQuerySchema.safeParse({ limit: "101" }).success).toBe(
-			false,
-		);
+		expect(
+			getDocumentsQuerySchema.safeParse({ limit: "101" }).success,
+		).toBe(false);
 	});
 });
 

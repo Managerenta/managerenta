@@ -64,16 +64,26 @@ describe("createNotificationDB", () => {
 	});
 
 	it("returns null on invalid channel/kind enums", async () => {
-		expect(await createNotificationDB(payload({ channel: "pigeon" }) as never)).toBeNull();
-		expect(await createNotificationDB(payload({ kind: "gossip" }) as never)).toBeNull();
+		expect(
+			await createNotificationDB(payload({ channel: "pigeon" }) as never),
+		).toBeNull();
+		expect(
+			await createNotificationDB(payload({ kind: "gossip" }) as never),
+		).toBeNull();
 		expect(await Notification.countDocuments({})).toBe(0);
 	});
 });
 
 describe("getNotificationsForUserDB", () => {
 	it("returns the user's notifications newest first with total and unread", async () => {
-		await Notification.create({ ...payload({ title: "Old" }), createdAt: new Date("2024-01-01") });
-		await Notification.create({ ...payload({ title: "New" }), createdAt: new Date("2024-06-01") });
+		await Notification.create({
+			...payload({ title: "Old" }),
+			createdAt: new Date("2024-01-01"),
+		});
+		await Notification.create({
+			...payload({ title: "New" }),
+			createdAt: new Date("2024-06-01"),
+		});
 		await Notification.create(payload({ title: "Foreign", userId: OTHER }));
 
 		const res = await getNotificationsForUserDB({ userId: USER });
@@ -103,11 +113,18 @@ describe("getNotificationsForUserDB", () => {
 		}));
 		await Notification.insertMany(docs);
 
-		const page = await getNotificationsForUserDB({ userId: USER, limit: 2, offset: 1 });
+		const page = await getNotificationsForUserDB({
+			userId: USER,
+			limit: 2,
+			offset: 1,
+		});
 		expect(page.total).toBe(105);
 		expect(page.data.map((n) => n.title)).toEqual(["N103", "N102"]);
 
-		const capped = await getNotificationsForUserDB({ userId: USER, limit: 5000 });
+		const capped = await getNotificationsForUserDB({
+			userId: USER,
+			limit: 5000,
+		});
 		expect(capped.data).toHaveLength(100);
 	});
 
@@ -147,14 +164,19 @@ describe("markNotificationReadDB", () => {
 	it("returns false for another user's notification and leaves it unread", async () => {
 		const doc = await createNotificationDB(payload());
 		expect(
-			await markNotificationReadDB({ userId: OTHER, id: String(doc!._id) }),
+			await markNotificationReadDB({
+				userId: OTHER,
+				id: String(doc!._id),
+			}),
 		).toBe(false);
 		const inDb = await Notification.findById(doc!._id).lean();
 		expect(inDb?.status).toBe("queued");
 	});
 
 	it("returns false for malformed or unknown ids", async () => {
-		expect(await markNotificationReadDB({ userId: USER, id: "junk" })).toBe(false);
+		expect(await markNotificationReadDB({ userId: USER, id: "junk" })).toBe(
+			false,
+		);
 		expect(
 			await markNotificationReadDB({
 				userId: USER,
@@ -178,16 +200,24 @@ describe("markAllNotificationsReadDB", () => {
 		).toBe(2);
 		// failed stays failed
 		expect(
-			await Notification.countDocuments({ userId: USER, status: "failed" }),
+			await Notification.countDocuments({
+				userId: USER,
+				status: "failed",
+			}),
 		).toBe(1);
 		// other user's untouched
 		expect(
-			await Notification.countDocuments({ userId: OTHER, status: "queued" }),
+			await Notification.countDocuments({
+				userId: OTHER,
+				status: "queued",
+			}),
 		).toBe(1);
 	});
 
 	it("returns true even when nothing matched", async () => {
-		expect(await markAllNotificationsReadDB({ userId: "ghost" })).toBe(true);
+		expect(await markAllNotificationsReadDB({ userId: "ghost" })).toBe(
+			true,
+		);
 	});
 
 	it("returns false when the bulk update throws (catch path)", async () => {
@@ -216,6 +246,8 @@ describe("deleteNotificationDB", () => {
 	});
 
 	it("returns false for malformed ids", async () => {
-		expect(await deleteNotificationDB({ userId: USER, id: "not-an-oid" })).toBe(false);
+		expect(
+			await deleteNotificationDB({ userId: USER, id: "not-an-oid" }),
+		).toBe(false);
 	});
 });

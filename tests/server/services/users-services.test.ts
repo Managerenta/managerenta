@@ -249,9 +249,9 @@ describe("users/getUsersByIds + getUsersByEmails caching", () => {
 			{ $set: { name: "Stale Check" } },
 		);
 		const cached = await getUsersByIds({ ids, offset: 0, limit: 10 });
-		expect(
-			cached.find((u) => String(u._id) === a.userId)?.name,
-		).not.toBe("Stale Check");
+		expect(cached.find((u) => String(u._id) === a.userId)?.name).not.toBe(
+			"Stale Check",
+		);
 
 		const fresh = await getUsersByIds({
 			ids,
@@ -313,9 +313,9 @@ describe("users/getUsersByIds + getUsersByEmails caching", () => {
 			offset: 0,
 			limit: 10,
 		});
-		expect(
-			cached.find((u) => u.email === a.payload.email)?.name,
-		).not.toBe("Renamed Behind Emails Cache");
+		expect(cached.find((u) => u.email === a.payload.email)?.name).not.toBe(
+			"Renamed Behind Emails Cache",
+		);
 
 		// unknown email → empty result
 		const none = await getUsersByEmails({
@@ -399,9 +399,7 @@ describe("users/changePassword", () => {
 			}),
 		).rejects.toBe(ErrInvalidCredentials);
 
-		const doc = await User.findById(userId)
-			.select("+refreshTokens")
-			.lean();
+		const doc = await User.findById(userId).select("+refreshTokens").lean();
 		expect(doc?.refreshTokens?.length).toBeGreaterThan(0);
 	});
 

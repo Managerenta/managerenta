@@ -2,12 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { MaintenanceRequest } from "../../../src/server/models/maintenance";
 import getCalendarEvents from "../../../src/server/services/calendar/getCalendarEvents";
 import { clearTestDB, connectTestDB } from "../../helpers/db";
-import {
-	newId,
-	seedProperty,
-	seedTenant,
-	seedUnit,
-} from "../../helpers/seed";
+import { newId, seedProperty, seedTenant, seedUnit } from "../../helpers/seed";
 
 describe("calendar service", () => {
 	beforeAll(async () => {
@@ -86,11 +81,14 @@ describe("calendar service", () => {
 			month: 6, // July (0-based)
 		});
 
-		const byType = (type: string) =>
-			events.filter((e) => e.type === type);
+		const byType = (type: string) => events.filter((e) => e.type === type);
 
 		// Two active tenants → two rent-due events.
-		expect(byType("rent-due").map((e) => [e.date, e.title]).sort()).toEqual([
+		expect(
+			byType("rent-due")
+				.map((e) => [e.date, e.title])
+				.sort(),
+		).toEqual([
 			["2026-07-01", "Rent due · August Alice"],
 			["2026-07-15", "Rent due · Cal Tenant"],
 		]);

@@ -29,7 +29,9 @@ describe("hash (hash.js sha256)", () => {
 
 	it("agrees with node:crypto sha256", () => {
 		const input = "cross-check-input-123";
-		const expected = createHash("sha256").update(input, "utf8").digest("hex");
+		const expected = createHash("sha256")
+			.update(input, "utf8")
+			.digest("hex");
 		expect(hash(input)).toBe(expected);
 	});
 });
@@ -59,7 +61,9 @@ describe("hashToken (node:crypto sha256)", () => {
 	});
 
 	it("handles utf8 multibyte input", () => {
-		const expected = createHash("sha256").update("héllo→世界", "utf8").digest("hex");
+		const expected = createHash("sha256")
+			.update("héllo→世界", "utf8")
+			.digest("hex");
 		expect(hashToken("héllo→世界")).toBe(expected);
 	});
 });

@@ -120,14 +120,10 @@ describe("push service (web-push mocked)", () => {
 			// Wrong user: delete filter finds nothing but resolves true (the
 			// deleteOne API is idempotent); doc must survive.
 			await removeSubscription({ userId: newId(), endpoint });
-			expect(
-				await PushSubscription.countDocuments({ endpoint }),
-			).toBe(1);
+			expect(await PushSubscription.countDocuments({ endpoint })).toBe(1);
 
 			await removeSubscription({ userId, endpoint });
-			expect(
-				await PushSubscription.countDocuments({ endpoint }),
-			).toBe(0);
+			expect(await PushSubscription.countDocuments({ endpoint })).toBe(0);
 		});
 	});
 
@@ -206,9 +202,7 @@ describe("push service (web-push mocked)", () => {
 				body: "B",
 			});
 			expect(result).toEqual({ sent: 0, pruned: 0 });
-			expect(
-				await PushSubscription.countDocuments({ userId }),
-			).toBe(1);
+			expect(await PushSubscription.countDocuments({ userId })).toBe(1);
 		});
 
 		it("returns zeros for a user with no subscriptions", async () => {
@@ -231,9 +225,7 @@ describe("push service without VAPID keys", () => {
 		delete process.env.VAPID_PUBLIC_KEY;
 		delete process.env.VAPID_PRIVATE_KEY;
 		try {
-			const fresh = await import(
-				"../../../src/server/services/push"
-			);
+			const fresh = await import("../../../src/server/services/push");
 			expect(fresh.isWebPushConfigured()).toBe(false);
 			expect(fresh.getVapidPublicKey()).toBeNull();
 			const result = await fresh.sendWebPushToUser({

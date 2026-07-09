@@ -25,7 +25,9 @@ test.describe("Analytics", () => {
 		await expect(page.getByText("Monthly Revenue").first()).toBeVisible({
 			timeout: 15000,
 		});
-		await expect(page.getByText("Revenue vs Expenses").first()).toBeVisible();
+		await expect(
+			page.getByText("Revenue vs Expenses").first(),
+		).toBeVisible();
 		// Data actually loaded: some stat value is populated (5 seeded active
 		// tenants) and the revenue chart left its empty state.
 		await expect(
@@ -33,7 +35,9 @@ test.describe("Analytics", () => {
 		).toBeVisible({ timeout: 15000 });
 		await expect(page.getByText("No transaction data yet.")).toHaveCount(0);
 
-		const resp = await page.context().request.get("/api/analytics?months=6");
+		const resp = await page
+			.context()
+			.request.get("/api/analytics?months=6");
 		expect(resp.status()).toBe(200);
 		const body = await resp.json();
 		expect(body.code).toBe(200);
@@ -100,7 +104,9 @@ test.describe("Audit log", () => {
 		const resp = await page.context().request.get("/api/audit");
 		expect(resp.status()).toBe(200);
 		const body = await resp.json();
-		expect(body.data.total ?? body.data.events.length).toBeGreaterThanOrEqual(5);
+		expect(
+			body.data.total ?? body.data.events.length,
+		).toBeGreaterThanOrEqual(5);
 	});
 });
 
@@ -146,6 +152,8 @@ test.describe("Notifications page", () => {
 			timeout: 15000,
 		});
 		// Failed-delivery state is visible too (seeded failed SMS)
-		await expect(page.getByText("Overdue rent alert").first()).toBeVisible();
+		await expect(
+			page.getByText("Overdue rent alert").first(),
+		).toBeVisible();
 	});
 });

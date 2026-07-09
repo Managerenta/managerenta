@@ -34,8 +34,10 @@ describe("portalMaintenanceBodySchema", () => {
 
 	it("rejects unknown categories (no vendor-only values)", () => {
 		expect(
-			portalMaintenanceBodySchema.safeParse({ ...valid, category: "general" })
-				.success,
+			portalMaintenanceBodySchema.safeParse({
+				...valid,
+				category: "general",
+			}).success,
 		).toBe(false);
 	});
 
@@ -51,7 +53,8 @@ describe("portalMaintenanceBodySchema", () => {
 
 	it("enforces title 1..200 and description 1..2000", () => {
 		expect(
-			portalMaintenanceBodySchema.safeParse({ ...valid, title: "" }).success,
+			portalMaintenanceBodySchema.safeParse({ ...valid, title: "" })
+				.success,
 		).toBe(false);
 		expect(
 			portalMaintenanceBodySchema.safeParse({

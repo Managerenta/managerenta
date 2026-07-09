@@ -50,7 +50,9 @@ describe("events.ts best-effort error handling", () => {
 
 	it("logs a warning when dispatch throws (safeDispatch catch)", async () => {
 		mockedGetUserById.mockResolvedValueOnce(ownerWithPaymentReceived());
-		mockedSendNotification.mockRejectedValueOnce(new Error("dispatch down"));
+		mockedSendNotification.mockRejectedValueOnce(
+			new Error("dispatch down"),
+		);
 		const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
 		await expect(
@@ -72,7 +74,9 @@ describe("events.ts best-effort error handling", () => {
 	it("falls back to a plain currency string when Intl rejects the code (fmtMoney catch)", async () => {
 		mockedGetUserById.mockResolvedValueOnce(ownerWithPaymentReceived());
 		mockedSendNotification.mockResolvedValueOnce(
-			undefined as unknown as Awaited<ReturnType<typeof sendNotification>>,
+			undefined as unknown as Awaited<
+				ReturnType<typeof sendNotification>
+			>,
 		);
 
 		await notifyPaymentReceived({

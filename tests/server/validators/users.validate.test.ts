@@ -91,12 +91,12 @@ describe("updateUserBodySchema", () => {
 	});
 
 	it("still validates partial fields and stays strict", () => {
-		expect(
-			updateUserBodySchema.safeParse({ username: "ab" }).success,
-		).toBe(false);
-		expect(
-			updateUserBodySchema.safeParse({ isAdmin: true }).success,
-		).toBe(false);
+		expect(updateUserBodySchema.safeParse({ username: "ab" }).success).toBe(
+			false,
+		);
+		expect(updateUserBodySchema.safeParse({ isAdmin: true }).success).toBe(
+			false,
+		);
 	});
 });
 
@@ -135,7 +135,9 @@ describe("getUserByEmailQuerySchema / getUserByIdParamsSchema", () => {
 		expect(getUserByIdParamsSchema.safeParse({ id: "u1" }).success).toBe(
 			true,
 		);
-		expect(getUserByIdParamsSchema.safeParse({ id: 5 }).success).toBe(false);
+		expect(getUserByIdParamsSchema.safeParse({ id: 5 }).success).toBe(
+			false,
+		);
 		expect(
 			getUserByIdParamsSchema.safeParse({ id: "u1", other: 1 }).success,
 		).toBe(false);
@@ -154,14 +156,15 @@ describe("getUsersByIdsBodySchema / getUsersByEmailsBodySchema", () => {
 			getUsersByEmailsBodySchema.safeParse({ emails: [] }).success,
 		).toBe(false);
 		expect(
-			getUsersByEmailsBodySchema.safeParse({ emails: ["a@b.co"] }).success,
+			getUsersByEmailsBodySchema.safeParse({ emails: ["a@b.co"] })
+				.success,
 		).toBe(true);
 	});
 
 	it("reject wrong element types", () => {
-		expect(
-			getUsersByIdsBodySchema.safeParse({ ids: [1, 2] }).success,
-		).toBe(false);
+		expect(getUsersByIdsBodySchema.safeParse({ ids: [1, 2] }).success).toBe(
+			false,
+		);
 	});
 });
 
@@ -188,9 +191,9 @@ describe("getUsersByIdsQuerySchema / getUsersByEmailsQuerySchema (pagination)", 
 		expect(
 			getUsersByIdsQuerySchema.safeParse({ limit: "51" }).success,
 		).toBe(false);
-		expect(
-			getUsersByIdsQuerySchema.safeParse({ limit: "0" }).success,
-		).toBe(false);
+		expect(getUsersByIdsQuerySchema.safeParse({ limit: "0" }).success).toBe(
+			false,
+		);
 		expect(
 			getUsersByIdsQuerySchema.safeParse({ offset: "-1" }).success,
 		).toBe(false);

@@ -48,7 +48,9 @@ afterAll(async () => {
 
 describe("createVendorDB", () => {
 	it("creates a vendor and persists it", async () => {
-		const vendor = await createVendorDB({ payload: payload({ rating: 4 }) });
+		const vendor = await createVendorDB({
+			payload: payload({ rating: 4 }),
+		});
 		expect(vendor).not.toBeNull();
 		expect(vendor?.id).toBeTruthy();
 		expect(vendor?.rating).toBe(4);
@@ -60,12 +62,16 @@ describe("createVendorDB", () => {
 
 	it("returns null on invalid specialty enum", async () => {
 		expect(
-			await createVendorDB({ payload: payload({ specialty: "alchemy" }) as never }),
+			await createVendorDB({
+				payload: payload({ specialty: "alchemy" }) as never,
+			}),
 		).toBeNull();
 	});
 
 	it("returns null when rating is out of range (max 5)", async () => {
-		expect(await createVendorDB({ payload: payload({ rating: 7 }) })).toBeNull();
+		expect(
+			await createVendorDB({ payload: payload({ rating: 7 }) }),
+		).toBeNull();
 		expect(await Vendor.countDocuments({})).toBe(0);
 	});
 });
@@ -74,9 +80,13 @@ describe("getVendorsDB", () => {
 	it("lists only the user's non-deleted vendors sorted by name asc", async () => {
 		await createVendorDB({ payload: payload({ name: "Zeta" }) });
 		await createVendorDB({ payload: payload({ name: "Alpha" }) });
-		const gone = await createVendorDB({ payload: payload({ name: "Gone" }) });
+		const gone = await createVendorDB({
+			payload: payload({ name: "Gone" }),
+		});
 		await deleteVendorDB({ id: gone!.id, userId: USER });
-		await createVendorDB({ payload: payload({ name: "Foreign", userId: OTHER }) });
+		await createVendorDB({
+			payload: payload({ name: "Foreign", userId: OTHER }),
+		});
 
 		const { vendors, total } = await getVendorsDB({ userId: USER });
 		expect(total).toBe(2);
@@ -85,10 +95,17 @@ describe("getVendorsDB", () => {
 	});
 
 	it("filters by specialty and treats 'all' as no filter", async () => {
-		await createVendorDB({ payload: payload({ name: "P", specialty: "plumbing" }) });
-		await createVendorDB({ payload: payload({ name: "E", specialty: "electrical" }) });
+		await createVendorDB({
+			payload: payload({ name: "P", specialty: "plumbing" }),
+		});
+		await createVendorDB({
+			payload: payload({ name: "E", specialty: "electrical" }),
+		});
 
-		const electric = await getVendorsDB({ userId: USER, specialty: "electrical" });
+		const electric = await getVendorsDB({
+			userId: USER,
+			specialty: "electrical",
+		});
 		expect(electric.vendors.map((v) => v.name)).toEqual(["E"]);
 
 		const all = await getVendorsDB({ userId: USER, specialty: "all" });
@@ -99,7 +116,9 @@ describe("getVendorsDB", () => {
 		await createVendorDB({
 			payload: payload({ name: "Bright Sparks", company: "Volt Ltd" }),
 		});
-		await createVendorDB({ payload: payload({ name: "Drain Kings", company: "Pipes Inc" }) });
+		await createVendorDB({
+			payload: payload({ name: "Drain Kings", company: "Pipes Inc" }),
+		});
 
 		const byName = await getVendorsDB({ userId: USER, search: "sparks" });
 		expect(byName.total).toBe(1);
@@ -111,8 +130,12 @@ describe("getVendorsDB", () => {
 	});
 
 	it("treats regex metacharacters literally and does not throw", async () => {
-		await createVendorDB({ payload: payload({ name: "Smith & Sons (24/7)" }) });
-		await createVendorDB({ payload: payload({ name: "Smith and Sons 24 7" }) });
+		await createVendorDB({
+			payload: payload({ name: "Smith & Sons (24/7)" }),
+		});
+		await createVendorDB({
+			payload: payload({ name: "Smith and Sons 24 7" }),
+		});
 
 		const literal = await getVendorsDB({ userId: USER, search: "(24/7)" });
 		expect(literal.total).toBe(1);
@@ -168,12 +191,18 @@ describe("getVendorByIdDB", () => {
 
 	it("returns null for wrong owner, deleted vendor, or malformed id", async () => {
 		const vendor = await createVendorDB({ payload: payload() });
-		expect(await getVendorByIdDB({ id: vendor!.id, userId: OTHER })).toBeNull();
+		expect(
+			await getVendorByIdDB({ id: vendor!.id, userId: OTHER }),
+		).toBeNull();
 
 		await deleteVendorDB({ id: vendor!.id, userId: USER });
-		expect(await getVendorByIdDB({ id: vendor!.id, userId: USER })).toBeNull();
+		expect(
+			await getVendorByIdDB({ id: vendor!.id, userId: USER }),
+		).toBeNull();
 
-		expect(await getVendorByIdDB({ id: "not-hex", userId: USER })).toBeNull();
+		expect(
+			await getVendorByIdDB({ id: "not-hex", userId: USER }),
+		).toBeNull();
 	});
 });
 
@@ -194,7 +223,11 @@ describe("updateVendorDB", () => {
 	it("returns null for wrong owner or unknown id", async () => {
 		const vendor = await createVendorDB({ payload: payload() });
 		expect(
-			await updateVendorDB({ id: vendor!.id, userId: OTHER, payload: { name: "X" } }),
+			await updateVendorDB({
+				id: vendor!.id,
+				userId: OTHER,
+				payload: { name: "X" },
+			}),
 		).toBeNull();
 		expect(
 			await updateVendorDB({
@@ -225,15 +258,21 @@ describe("updateVendorDB", () => {
 describe("deleteVendorDB", () => {
 	it("soft-deletes and returns true; repeat delete returns false", async () => {
 		const vendor = await createVendorDB({ payload: payload() });
-		expect(await deleteVendorDB({ id: vendor!.id, userId: USER })).toBe(true);
+		expect(await deleteVendorDB({ id: vendor!.id, userId: USER })).toBe(
+			true,
+		);
 		const inDb = await Vendor.findById(vendor!.id).lean();
 		expect(inDb?.deleted).toBe(true);
-		expect(await deleteVendorDB({ id: vendor!.id, userId: USER })).toBe(false);
+		expect(await deleteVendorDB({ id: vendor!.id, userId: USER })).toBe(
+			false,
+		);
 	});
 
 	it("returns false for wrong owner or malformed id", async () => {
 		const vendor = await createVendorDB({ payload: payload() });
-		expect(await deleteVendorDB({ id: vendor!.id, userId: OTHER })).toBe(false);
+		expect(await deleteVendorDB({ id: vendor!.id, userId: OTHER })).toBe(
+			false,
+		);
 		expect(await deleteVendorDB({ id: "bad", userId: USER })).toBe(false);
 		const inDb = await Vendor.findById(vendor!.id).lean();
 		expect(inDb?.deleted).toBe(false);

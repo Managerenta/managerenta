@@ -18,7 +18,13 @@ describe("loginBodySchema", () => {
 	});
 
 	it("rejects malformed emails", () => {
-		for (const email of ["not-an-email", "a@b", "a b@c.com", "", "@x.com"]) {
+		for (const email of [
+			"not-an-email",
+			"a@b",
+			"a b@c.com",
+			"",
+			"@x.com",
+		]) {
 			expect(
 				loginBodySchema.safeParse({ email, password: "x" }).success,
 			).toBe(false);
@@ -46,7 +52,8 @@ describe("loginBodySchema", () => {
 	it("rejects missing fields and wrong types", () => {
 		expect(loginBodySchema.safeParse({}).success).toBe(false);
 		expect(
-			loginBodySchema.safeParse({ email: "a@b.co", password: 123 }).success,
+			loginBodySchema.safeParse({ email: "a@b.co", password: 123 })
+				.success,
 		).toBe(false);
 	});
 

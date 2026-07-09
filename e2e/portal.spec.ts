@@ -44,14 +44,16 @@ test.describe("Tenant portal (public token link)", () => {
 			timeout: 15000,
 		});
 		await expect(anon.getByText("Payment History").first()).toBeVisible();
-		await expect(anon.getByText("Outstanding Balance").first()).toBeVisible();
+		await expect(
+			anon.getByText("Outstanding Balance").first(),
+		).toBeVisible();
 
 		// Data integration bar: the seeded rent payments must actually render
 		// (regression guard — a `deleted:false` filter on the field-less
 		// transactions collection once silently emptied this).
-		await expect(
-			anon.getByText(/Rent for/i).first(),
-		).toBeVisible({ timeout: 15000 });
+		await expect(anon.getByText(/Rent for/i).first()).toBeVisible({
+			timeout: 15000,
+		});
 		await expect(anon.getByText("No transactions yet.")).toHaveCount(0);
 		// Total Paid reflects the seeded credits (₦3,600,000), not ₦0.
 		await expect(anon.getByText(/₦\s?3,600,000/)).toBeVisible();
@@ -120,9 +122,11 @@ test.describe("Properties CRUD", () => {
 			.click();
 		await page.getByPlaceholder("e.g. 500000").fill("300000");
 		await page.getByRole("button", { name: "Add Property" }).click();
-		await expect(page.getByText("Property added successfully")).toBeVisible({
-			timeout: 15000,
-		});
+		await expect(page.getByText("Property added successfully")).toBeVisible(
+			{
+				timeout: 15000,
+			},
+		);
 
 		const api = await page
 			.context()

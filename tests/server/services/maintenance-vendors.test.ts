@@ -221,9 +221,7 @@ describe("maintenance service", () => {
 		expect(raw?.deleted).toBe(true);
 
 		// Foreign delete → false.
-		expect(
-			await deleteMaintenance({ id: newId(), userId }),
-		).toBe(false);
+		expect(await deleteMaintenance({ id: newId(), userId })).toBe(false);
 	});
 });
 

@@ -145,13 +145,17 @@ describe("deleteOrganizationDB (soft delete)", () => {
 		expect(result).not.toBeNull();
 		const raw = await rawOrg(org.id);
 		expect(raw?.deleted).toBe(true);
-		expect(await getOrganizationByIdDB({ id: org.id.toString() })).toBeNull();
+		expect(
+			await getOrganizationByIdDB({ id: org.id.toString() }),
+		).toBeNull();
 	});
 
 	it("returns null when deleting twice or for an unknown id", async () => {
 		const org = await makeOrg(2);
 		await deleteOrganizationDB({ id: org.id.toString() });
-		expect(await deleteOrganizationDB({ id: org.id.toString() })).toBeNull();
+		expect(
+			await deleteOrganizationDB({ id: org.id.toString() }),
+		).toBeNull();
 		expect(await deleteOrganizationDB({ id: unknownId() })).toBeNull();
 	});
 });
@@ -165,7 +169,9 @@ describe("member management", () => {
 			members: [{ memberId, permission: IOrganizationRole.MANAGER }],
 		});
 		expect(result?.members).toHaveLength(1);
-		expect(result?.members[0].memberId.toString()).toBe(memberId.toString());
+		expect(result?.members[0].memberId.toString()).toBe(
+			memberId.toString(),
+		);
 		expect(result?.members[0].permission).toBe(IOrganizationRole.MANAGER);
 	});
 
@@ -244,7 +250,9 @@ describe("member management", () => {
 			id: org.id.toString(),
 			members: [{ memberId: m1, permission: IOrganizationRole.VIEWER }],
 		});
-		const result = await getOrganizationMembersDB({ id: org.id.toString() });
+		const result = await getOrganizationMembersDB({
+			id: org.id.toString(),
+		});
 		expect(result?.members).toHaveLength(1);
 		expect(result?.members[0].memberId.toString()).toBe(m1.toString());
 		expect(
@@ -347,7 +355,11 @@ describe("getOrganizationsDB", () => {
 
 	it("escapes regex metacharacters: a name containing regex syntax finds itself", async () => {
 		await createOrganizationDB({
-			payload: { ownerId: oid(), name: "weird (a+) [name]", description: "d" },
+			payload: {
+				ownerId: oid(),
+				name: "weird (a+) [name]",
+				description: "d",
+			},
 		});
 		const found = await getOrganizationsDB({
 			name: "weird (a+) [name]",
@@ -390,18 +402,26 @@ describe("getOrganizationByIdDB / getOrganizationByNameDB", () => {
 		expect(await getOrganizationByIdDB({ id: unknownId() })).toBeNull();
 		const org = await makeOrg(2);
 		await deleteOrganizationDB({ id: org.id.toString() });
-		expect(await getOrganizationByIdDB({ id: org.id.toString() })).toBeNull();
+		expect(
+			await getOrganizationByIdDB({ id: org.id.toString() }),
+		).toBeNull();
 	});
 
 	it("finds by name case-insensitively with escaped regex chars", async () => {
 		await createOrganizationDB({
-			payload: { ownerId: oid(), name: "dots.and+plus", description: "d" },
+			payload: {
+				ownerId: oid(),
+				name: "dots.and+plus",
+				description: "d",
+			},
 		});
 		const found = await getOrganizationByNameDB({ name: "DOTS.AND+PLUS" });
 		expect(found?.name).toBe("dots.and+plus");
 		// Unescaped "." would match "dotsXand..." — prove the literal dot is
 		// required by searching a string that only matches under regex rules.
-		expect(await getOrganizationByNameDB({ name: "dotsXand+plus" })).toBeNull();
+		expect(
+			await getOrganizationByNameDB({ name: "dotsXand+plus" }),
+		).toBeNull();
 	});
 
 	it("returns null for an unknown name", async () => {
@@ -416,12 +436,20 @@ describe("getOrganizationsByIdsDB / getOrganizationsCountDB", () => {
 		const c = await makeOrg(3);
 		await deleteOrganizationDB({ id: c.id.toString() });
 		const ids = [a, b, c].map((o) => o.id.toString());
-		const all = await getOrganizationsByIdsDB({ ids, offset: 0, limit: 10 });
+		const all = await getOrganizationsByIdsDB({
+			ids,
+			offset: 0,
+			limit: 10,
+		});
 		expect(all.map((o) => o.name).sort()).toEqual([
 			"test org 1",
 			"test org 2",
 		]);
-		const paged = await getOrganizationsByIdsDB({ ids, offset: 1, limit: 10 });
+		const paged = await getOrganizationsByIdsDB({
+			ids,
+			offset: 1,
+			limit: 10,
+		});
 		expect(paged).toHaveLength(1);
 	});
 
@@ -476,19 +504,23 @@ describe("getOrganizationsForMemberDB", () => {
 
 	it("returns [] for a user with no orgs and excludes deleted orgs", async () => {
 		const u1 = oid();
-		expect(await getOrganizationsForMemberDB({ userId: u1.toString() })).toEqual(
-			[],
-		);
+		expect(
+			await getOrganizationsForMemberDB({ userId: u1.toString() }),
+		).toEqual([]);
 		const org = await makeOrg(1, u1);
 		await deleteOrganizationDB({ id: org.id.toString() });
-		expect(await getOrganizationsForMemberDB({ userId: u1.toString() })).toEqual(
-			[],
-		);
+		expect(
+			await getOrganizationsForMemberDB({ userId: u1.toString() }),
+		).toEqual([]);
 	});
 });
 
 describe("invites", () => {
-	function invite(overrides: Partial<Parameters<typeof addOrganizationInviteDB>[0]["invite"]> = {}) {
+	function invite(
+		overrides: Partial<
+			Parameters<typeof addOrganizationInviteDB>[0]["invite"]
+		> = {},
+	) {
 		return {
 			email: "invitee@example.com",
 			token: "invite-token-1",
@@ -512,7 +544,10 @@ describe("invites", () => {
 
 	it("addOrganizationInviteDB returns null for an unknown org", async () => {
 		expect(
-			await addOrganizationInviteDB({ id: unknownId(), invite: invite() }),
+			await addOrganizationInviteDB({
+				id: unknownId(),
+				invite: invite(),
+			}),
 		).toBeNull();
 	});
 
@@ -522,7 +557,9 @@ describe("invites", () => {
 			id: org.id.toString(),
 			invite: invite({ token: "find-me" }),
 		});
-		const found = await findOrganizationByInviteTokenDB({ token: "find-me" });
+		const found = await findOrganizationByInviteTokenDB({
+			token: "find-me",
+		});
 		expect(found?.name).toBe("test org 2");
 		expect(
 			await findOrganizationByInviteTokenDB({ token: "missing" }),
@@ -533,7 +570,10 @@ describe("invites", () => {
 		const org = await makeOrg(3);
 		await addOrganizationInviteDB({
 			id: org.id.toString(),
-			invite: invite({ token: "consume-me", role: IOrganizationRole.VIEWER }),
+			invite: invite({
+				token: "consume-me",
+				role: IOrganizationRole.VIEWER,
+			}),
 		});
 		const memberId = oid();
 		const result = await consumeInviteAndAddMemberDB({
@@ -593,7 +633,10 @@ describe("invites", () => {
 		});
 		await addOrganizationInviteDB({
 			id: org.id.toString(),
-			invite: invite({ token: "again-tok", role: IOrganizationRole.VIEWER }),
+			invite: invite({
+				token: "again-tok",
+				role: IOrganizationRole.VIEWER,
+			}),
 		});
 		const result = await consumeInviteAndAddMemberDB({
 			orgId: org.id.toString(),
@@ -615,7 +658,10 @@ describe("invites", () => {
 			invite: invite({ token: "revoke-me" }),
 		});
 		expect(
-			await revokeInviteDB({ orgId: org.id.toString(), token: "revoke-me" }),
+			await revokeInviteDB({
+				orgId: org.id.toString(),
+				token: "revoke-me",
+			}),
 		).toBe(true);
 		const raw = await rawOrg(org.id);
 		expect(raw?.invites).toHaveLength(0);

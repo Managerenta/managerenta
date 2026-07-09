@@ -145,9 +145,7 @@ describe("auth/login", () => {
 
 		const tokens = await refreshTokensOf(signupSession.userId);
 		expect(
-			tokens.some(
-				(t) => t.refreshToken === result.session.refreshToken,
-			),
+			tokens.some((t) => t.refreshToken === result.session.refreshToken),
 		).toBe(true);
 	});
 
@@ -274,7 +272,9 @@ describe("auth/reLoginUserWithRefreshToken", () => {
 		// Force the deadline into the past directly in the scratch DB.
 		await User.updateOne(
 			{
-				_id: new mongoose.Types.ObjectId(session.userId) as unknown as string,
+				_id: new mongoose.Types.ObjectId(
+					session.userId,
+				) as unknown as string,
 				"refreshTokens.refreshToken": session.refreshToken,
 			},
 			{
@@ -358,7 +358,9 @@ describe("auth/removeExpiredUsersTokens", () => {
 		// Expire only the first session's token.
 		await User.updateOne(
 			{
-				_id: new mongoose.Types.ObjectId(session.userId) as unknown as string,
+				_id: new mongoose.Types.ObjectId(
+					session.userId,
+				) as unknown as string,
 				"refreshTokens.refreshToken": session.refreshToken,
 			},
 			{

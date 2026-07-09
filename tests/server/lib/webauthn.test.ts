@@ -45,15 +45,15 @@ describe("getRpId", () => {
 
 describe("getExpectedOrigins (RP ID = localhost)", () => {
 	it("echoes back an origin whose host equals the RP ID", () => {
-		expect(getExpectedOrigins(req({ origin: "http://localhost:3000" }))).toEqual(
-			["http://localhost:3000"],
-		);
+		expect(
+			getExpectedOrigins(req({ origin: "http://localhost:3000" })),
+		).toEqual(["http://localhost:3000"]);
 	});
 
 	it("rejects a foreign origin and falls back to the RP default", () => {
-		expect(getExpectedOrigins(req({ origin: "https://evil.com" }))).toEqual([
-			"http://localhost",
-		]);
+		expect(getExpectedOrigins(req({ origin: "https://evil.com" }))).toEqual(
+			["http://localhost"],
+		);
 	});
 
 	it("falls back on a malformed origin header", () => {
@@ -82,14 +82,18 @@ describe("getExpectedOrigins (RP ID = managerenta.com)", () => {
 			mod.getExpectedOrigins(req({ origin: "https://managerenta.com" })),
 		).toEqual(["https://managerenta.com"]);
 		expect(
-			mod.getExpectedOrigins(req({ origin: "https://app.managerenta.com" })),
+			mod.getExpectedOrigins(
+				req({ origin: "https://app.managerenta.com" }),
+			),
 		).toEqual(["https://app.managerenta.com"]);
 	});
 
 	it("rejects a suffix-lookalike host and uses the https fallback", async () => {
 		const mod = await importWithDomain();
 		expect(
-			mod.getExpectedOrigins(req({ origin: "https://evilmanagerenta.com" })),
+			mod.getExpectedOrigins(
+				req({ origin: "https://evilmanagerenta.com" }),
+			),
 		).toEqual(["https://managerenta.com"]);
 	});
 
@@ -115,7 +119,9 @@ describe("challenge store (real Redis)", () => {
 	});
 
 	it("returns null for a challenge that was never stored", async () => {
-		expect(await consumeChallenge(`vitest-${randomUUID()}`, "nope")).toBeNull();
+		expect(
+			await consumeChallenge(`vitest-${randomUUID()}`, "nope"),
+		).toBeNull();
 	});
 
 	it("returns null (and still deletes) when the stored payload is corrupt", async () => {

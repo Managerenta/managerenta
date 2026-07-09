@@ -22,7 +22,9 @@ describe("connectMongoDB", () => {
 		const conn = await connectMongoDB();
 		expect(conn.connection.readyState).toBe(1);
 		expect(conn.connection.db?.databaseName).toBe(process.env.DB_NAME);
-		expect(conn.connection.db?.databaseName).toMatch(/^managerenta-vitest-/);
+		expect(conn.connection.db?.databaseName).toMatch(
+			/^managerenta-vitest-/,
+		);
 		expect(conn.connection.db?.databaseName).not.toBe("managerenta");
 	});
 

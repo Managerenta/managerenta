@@ -1,7 +1,4 @@
-import {
-	redisDeleteKeys,
-	redisUpdateKeyString,
-} from "../../../databases";
+import { redisDeleteKeys, redisUpdateKeyString } from "../../../databases";
 import type { IUser } from "../../../models/users/types";
 import { getQueryKey as getQueryKeyUserByEmail } from "../getUserByEmail";
 import {

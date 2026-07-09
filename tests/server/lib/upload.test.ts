@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-	ErrInvalidFields,
-	ErrInvalidFileType,
-} from "@/server/constants";
+import { ErrInvalidFields, ErrInvalidFileType } from "@/server/constants";
 import {
 	parseMultipart,
 	singleFile,
@@ -34,9 +31,7 @@ function fileOf(buf: Buffer, name: string, type: string): File {
 	return new File([new Uint8Array(buf)], name, { type });
 }
 
-function multipartRequest(
-	entries: Array<[string, string | File]>,
-): Request {
+function multipartRequest(entries: Array<[string, string | File]>): Request {
 	const fd = new FormData();
 	for (const [key, value] of entries) fd.append(key, value);
 	return new Request("http://localhost:3000/api/upload", {
@@ -144,9 +139,9 @@ describe("parseMultipart — multipart bodies", () => {
 			["a", fileOf(pngBuffer(16), "a.png", "image/png")],
 			["b", fileOf(pngBuffer(16), "b.png", "image/png")],
 		]);
-		await expect(parseMultipart(req, { maxTotalBytes: 20 })).rejects.toThrow(
-			"Request payload too large",
-		);
+		await expect(
+			parseMultipart(req, { maxTotalBytes: 20 }),
+		).rejects.toThrow("Request payload too large");
 	});
 
 	it("groups repeated file fields under the same key", async () => {

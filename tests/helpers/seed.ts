@@ -144,7 +144,10 @@ export async function seedTransaction({
  */
 export async function waitFor<T>(
 	predicate: () => Promise<T | null | undefined | false>,
-	{ timeoutMs = 5000, intervalMs = 50 }: {
+	{
+		timeoutMs = 5000,
+		intervalMs = 50,
+	}: {
 		timeoutMs?: number;
 		intervalMs?: number;
 	} = {},

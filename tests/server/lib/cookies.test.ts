@@ -42,9 +42,7 @@ vi.mock("next/headers", () => ({
 	cookies: async () => cookieStore.api,
 }));
 
-async function importCookies(): Promise<
-	typeof import("@/server/lib/cookies")
-> {
+async function importCookies(): Promise<typeof import("@/server/lib/cookies")> {
 	vi.resetModules();
 	return import("@/server/lib/cookies");
 }

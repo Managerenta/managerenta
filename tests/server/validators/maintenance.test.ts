@@ -48,8 +48,10 @@ describe("createMaintenanceBodySchema", () => {
 	it("accepts each priority level", () => {
 		for (const priority of ["low", "medium", "high", "urgent"]) {
 			expect(
-				createMaintenanceBodySchema.safeParse({ ...validCreate, priority })
-					.success,
+				createMaintenanceBodySchema.safeParse({
+					...validCreate,
+					priority,
+				}).success,
 			).toBe(true);
 		}
 	});
@@ -82,7 +84,9 @@ describe("createMaintenanceBodySchema", () => {
 		});
 		expect(dated.success).toBe(true);
 		expect(dated.data?.scheduledDate).toBeInstanceOf(Date);
-		expect(dated.data?.scheduledDate?.toISOString()).toContain("2026-08-01");
+		expect(dated.data?.scheduledDate?.toISOString()).toContain(
+			"2026-08-01",
+		);
 	});
 
 	it("rejects an unparseable scheduledDate", () => {
@@ -152,16 +156,20 @@ describe("updateMaintenanceBodySchema", () => {
 	});
 
 	it("rejects an empty title on update", () => {
-		expect(updateMaintenanceBodySchema.safeParse({ title: "" }).success).toBe(
-			false,
-		);
+		expect(
+			updateMaintenanceBodySchema.safeParse({ title: "" }).success,
+		).toBe(false);
 	});
 });
 
 describe("maintenanceParamsSchema", () => {
 	it("requires a non-empty id and is strict", () => {
-		expect(maintenanceParamsSchema.safeParse({ id: "m1" }).success).toBe(true);
-		expect(maintenanceParamsSchema.safeParse({ id: "" }).success).toBe(false);
+		expect(maintenanceParamsSchema.safeParse({ id: "m1" }).success).toBe(
+			true,
+		);
+		expect(maintenanceParamsSchema.safeParse({ id: "" }).success).toBe(
+			false,
+		);
 		expect(
 			maintenanceParamsSchema.safeParse({ id: "m1", other: 1 }).success,
 		).toBe(false);
@@ -188,7 +196,8 @@ describe("getMaintenanceQuerySchema", () => {
 			getMaintenanceQuerySchema.safeParse({ status: "closed" }).success,
 		).toBe(false);
 		expect(
-			getMaintenanceQuerySchema.safeParse({ priority: "extreme" }).success,
+			getMaintenanceQuerySchema.safeParse({ priority: "extreme" })
+				.success,
 		).toBe(false);
 	});
 });

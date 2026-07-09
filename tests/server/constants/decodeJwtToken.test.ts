@@ -13,7 +13,9 @@ function payload(overrides: Record<string, unknown> = {}) {
 		ip: "203.0.113.9",
 		date: new Date(now).toISOString(),
 		expiresIn: new Date(now + 60 * 60 * 1000).toISOString(),
-		refreshTokenExpiresIn: new Date(now + 30 * 24 * 60 * 60 * 1000).toISOString(),
+		refreshTokenExpiresIn: new Date(
+			now + 30 * 24 * 60 * 60 * 1000,
+		).toISOString(),
 		...overrides,
 	};
 }

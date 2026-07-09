@@ -39,7 +39,8 @@ describe("createOrganizationBodySchema", () => {
 
 	it("enforces name 1..100 and description 5..256", () => {
 		expect(
-			createOrganizationBodySchema.safeParse({ ...valid, name: "" }).success,
+			createOrganizationBodySchema.safeParse({ ...valid, name: "" })
+				.success,
 		).toBe(false);
 		expect(
 			createOrganizationBodySchema.safeParse({
@@ -78,10 +79,13 @@ describe("createOrganizationBodySchema", () => {
 describe("deleteOrganizationParamsSchema", () => {
 	it("requires organizationId as a string and is strict", () => {
 		expect(
-			deleteOrganizationParamsSchema.safeParse({ organizationId: "org-1" })
-				.success,
+			deleteOrganizationParamsSchema.safeParse({
+				organizationId: "org-1",
+			}).success,
 		).toBe(true);
-		expect(deleteOrganizationParamsSchema.safeParse({}).success).toBe(false);
+		expect(deleteOrganizationParamsSchema.safeParse({}).success).toBe(
+			false,
+		);
 		expect(
 			deleteOrganizationParamsSchema.safeParse({ organizationId: 42 })
 				.success,

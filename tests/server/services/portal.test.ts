@@ -154,11 +154,7 @@ describe("portal service", () => {
 				userId: ownerId,
 				propertyId,
 				unitId,
-				moveInDate: new Date(
-					now.getFullYear(),
-					now.getMonth() + 3,
-					1,
-				),
+				moveInDate: new Date(now.getFullYear(), now.getMonth() + 3, 1),
 			});
 
 			const summary = await getPortalSummary({ tenantId, ownerId });

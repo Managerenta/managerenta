@@ -36,7 +36,10 @@ afterAll(async () => {
 describe("createAuditEventDB", () => {
 	it("appends an audit event with createdAt and metadata", async () => {
 		const event = await createAuditEventDB({
-			payload: payload({ metadata: { before: null, after: { name: "X" } }, ip: "1.2.3.4" }),
+			payload: payload({
+				metadata: { before: null, after: { name: "X" } },
+				ip: "1.2.3.4",
+			}),
 		});
 		expect(event).not.toBeNull();
 		expect(event?.id).toBeTruthy();
@@ -47,7 +50,9 @@ describe("createAuditEventDB", () => {
 		expect(inDb?.metadata).toEqual({ before: null, after: { name: "X" } });
 		expect(inDb?.ip).toBe("1.2.3.4");
 		// append-only schema: no updatedAt
-		expect((inDb as never as { updatedAt?: Date })?.updatedAt).toBeUndefined();
+		expect(
+			(inDb as never as { updatedAt?: Date })?.updatedAt,
+		).toBeUndefined();
 	});
 
 	it("returns null when required fields are missing", async () => {
@@ -60,8 +65,14 @@ describe("createAuditEventDB", () => {
 
 describe("getAuditEventsDB", () => {
 	it("returns only the owner's events, newest first, with string ids", async () => {
-		await AuditEvent.create({ ...payload({ action: "old" }), createdAt: new Date("2024-01-01") });
-		await AuditEvent.create({ ...payload({ action: "new" }), createdAt: new Date("2024-06-01") });
+		await AuditEvent.create({
+			...payload({ action: "old" }),
+			createdAt: new Date("2024-01-01"),
+		});
+		await AuditEvent.create({
+			...payload({ action: "new" }),
+			createdAt: new Date("2024-06-01"),
+		});
 		await AuditEvent.create(payload({ ownerId: OTHER, action: "foreign" }));
 
 		const { events, total } = await getAuditEventsDB({ ownerId: OWNER });
@@ -72,14 +83,24 @@ describe("getAuditEventsDB", () => {
 	});
 
 	it("filters by entityType and action; 'all' disables the filter", async () => {
-		await createAuditEventDB({ payload: payload({ entityType: "property", action: "create" }) });
-		await createAuditEventDB({ payload: payload({ entityType: "tenant", action: "delete" }) });
+		await createAuditEventDB({
+			payload: payload({ entityType: "property", action: "create" }),
+		});
+		await createAuditEventDB({
+			payload: payload({ entityType: "tenant", action: "delete" }),
+		});
 
-		const byEntity = await getAuditEventsDB({ ownerId: OWNER, entityType: "tenant" });
+		const byEntity = await getAuditEventsDB({
+			ownerId: OWNER,
+			entityType: "tenant",
+		});
 		expect(byEntity.total).toBe(1);
 		expect(byEntity.events[0]?.entityType).toBe("tenant");
 
-		const byAction = await getAuditEventsDB({ ownerId: OWNER, action: "create" });
+		const byAction = await getAuditEventsDB({
+			ownerId: OWNER,
+			action: "create",
+		});
 		expect(byAction.total).toBe(1);
 		expect(byAction.events[0]?.action).toBe("create");
 
@@ -105,7 +126,11 @@ describe("getAuditEventsDB", () => {
 		}));
 		await AuditEvent.insertMany(docs);
 
-		const page = await getAuditEventsDB({ ownerId: OWNER, limit: 2, offset: 1 });
+		const page = await getAuditEventsDB({
+			ownerId: OWNER,
+			limit: 2,
+			offset: 1,
+		});
 		expect(page.total).toBe(55);
 		expect(page.events.map((e) => e.action)).toEqual(["a53", "a52"]);
 

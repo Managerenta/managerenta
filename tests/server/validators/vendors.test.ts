@@ -99,9 +99,9 @@ describe("updateVendorBodySchema", () => {
 	});
 
 	it("still validates provided fields", () => {
-		expect(
-			updateVendorBodySchema.safeParse({ rating: "6" }).success,
-		).toBe(false);
+		expect(updateVendorBodySchema.safeParse({ rating: "6" }).success).toBe(
+			false,
+		);
 		expect(
 			updateVendorBodySchema.safeParse({ specialty: "unknown" }).success,
 		).toBe(false);

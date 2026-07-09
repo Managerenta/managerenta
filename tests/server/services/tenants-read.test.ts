@@ -238,9 +238,7 @@ describe("tenant read models (getTenants / getTenantById)", () => {
 			// Last covered period ended 9 Jun (in the past) → next due is
 			// the current month's due day; 10 Jul already passed vs NOW
 			// (15 Jul) → pushed to 10 Aug.
-			expect(new Date(result.nextDueDate)).toEqual(
-				new Date(2026, 7, 10),
-			);
+			expect(new Date(result.nextDueDate)).toEqual(new Date(2026, 7, 10));
 
 			// Overdue: 15 Jul > 10 Jul with money owing → 5 days.
 			expect(result.overdueStatus).toBe(true);
@@ -291,9 +289,7 @@ describe("tenant read models (getTenants / getTenantById)", () => {
 
 			const result = await getTenantById({ id: tenantId, userId });
 			// Next due: rentDueDay of the month after the covered window.
-			expect(new Date(result.nextDueDate)).toEqual(
-				new Date(2026, 9, 10),
-			);
+			expect(new Date(result.nextDueDate)).toEqual(new Date(2026, 9, 10));
 			expect(result.paymentStats.outstandingBalance).toBe(0);
 			expect(result.overdueStatus).toBe(false);
 		});

@@ -5,8 +5,7 @@ import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 // Keep the real Redis client (rate limiting is exercised against local
 // Redis) but stub out the MongoDB connection — handler only awaits it.
 vi.mock("@/server/databases", async (importOriginal) => {
-	const actual =
-		await importOriginal<typeof import("@/server/databases")>();
+	const actual = await importOriginal<typeof import("@/server/databases")>();
 	return {
 		...actual,
 		connectMongoDB: vi.fn().mockResolvedValue(undefined),
@@ -88,7 +87,10 @@ describe("withApiHandler — rate limiting", () => {
 	it("passes under the limit, applies rate-limit headers, and connects mongo", async () => {
 		const handler = vi.fn(async () => Response.json({ ok: true }));
 		const wrapped = withApiHandler(
-			{ route: "/api/rl-ok", rateLimit: { windowMs: 60_000, maxRequests: 5 } },
+			{
+				route: "/api/rl-ok",
+				rateLimit: { windowMs: 60_000, maxRequests: 5 },
+			},
 			handler,
 		);
 
@@ -115,7 +117,10 @@ describe("withApiHandler — rate limiting", () => {
 		);
 		const ip = uniqueIp();
 
-		const first = await wrapped(makeReq("GET", { "x-real-ip": ip }), undefined);
+		const first = await wrapped(
+			makeReq("GET", { "x-real-ip": ip }),
+			undefined,
+		);
 		const second = await wrapped(
 			makeReq("GET", { "x-real-ip": ip }),
 			undefined,

@@ -307,9 +307,9 @@ describe("tenants service", () => {
 				unitId,
 			});
 
-			await expect(
-				deleteTenant({ id: newId(), userId }),
-			).rejects.toBe(ErrTenantNotFound);
+			await expect(deleteTenant({ id: newId(), userId })).rejects.toBe(
+				ErrTenantNotFound,
+			);
 			await expect(
 				deleteTenant({ id: tenantId, userId: newId() }),
 			).rejects.toBe(ErrTenantNotFound);

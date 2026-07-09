@@ -50,7 +50,9 @@ function userPayload(n: number): IUserCreateInput {
 }
 
 async function makeUser(n: number, extra: Partial<IUserCreateInput> = {}) {
-	const user = await createUserDB({ payload: { ...userPayload(n), ...extra } });
+	const user = await createUserDB({
+		payload: { ...userPayload(n), ...extra },
+	});
 	expect(user).not.toBeNull();
 	// biome-ignore lint/style/noNonNullAssertion: asserted above
 	return user!;
@@ -371,14 +373,19 @@ describe("getUserByPasskeyCredentialIdDB", () => {
 describe("loginUserDB / refresh token trimming", () => {
 	it("returns a JWT payload and stores the refresh token", async () => {
 		const user = await makeUser(1);
-		const payload = await loginUserDB({ id: user._id.toString(), ip: "1.2.3.4" });
+		const payload = await loginUserDB({
+			id: user._id.toString(),
+			ip: "1.2.3.4",
+		});
 		expect(payload?.accessToken).toBeTruthy();
 		expect(payload?.refreshToken).toBeTruthy();
 		expect(payload?.userId).toBe(user._id.toString());
 
 		const raw = await User.findById(user._id).select("+refreshTokens");
 		expect(raw?.refreshTokens).toHaveLength(1);
-		expect(raw?.refreshTokens?.[0].refreshToken).toBe(payload?.refreshToken);
+		expect(raw?.refreshTokens?.[0].refreshToken).toBe(
+			payload?.refreshToken,
+		);
 	});
 
 	it("keeps at most 3 refresh tokens, dropping the oldest", async () => {
@@ -605,7 +612,10 @@ describe("changePasswordDB", () => {
 
 	it("returns false for an unknown user", async () => {
 		expect(
-			await changePasswordDB({ id: unknownId(), password: "irrelevant1" }),
+			await changePasswordDB({
+				id: unknownId(),
+				password: "irrelevant1",
+			}),
 		).toBe(false);
 	});
 });
@@ -652,7 +662,9 @@ describe("getUserByIdDB", () => {
 describe("getUserByEmailDB", () => {
 	it("normalizes case and whitespace before matching", async () => {
 		const user = await makeUser(1, { email: "findme@example.com" });
-		const found = await getUserByEmailDB({ email: "  FINDME@EXAMPLE.COM " });
+		const found = await getUserByEmailDB({
+			email: "  FINDME@EXAMPLE.COM ",
+		});
 		expect(found?.email).toBe(user.email);
 	});
 
@@ -662,7 +674,9 @@ describe("getUserByEmailDB", () => {
 	});
 
 	it("returns null for an unknown email", async () => {
-		expect(await getUserByEmailDB({ email: "ghost@example.com" })).toBeNull();
+		expect(
+			await getUserByEmailDB({ email: "ghost@example.com" }),
+		).toBeNull();
 	});
 });
 
@@ -707,7 +721,11 @@ describe("getUsersByEmailsDB", () => {
 		const all = await getUsersByEmailsDB({ emails, offset: 0, limit: 10 });
 		expect(all.map((u) => u.email).sort()).toEqual([u1.email, u2.email]);
 
-		const limited = await getUsersByEmailsDB({ emails, offset: 0, limit: 1 });
+		const limited = await getUsersByEmailsDB({
+			emails,
+			offset: 0,
+			limit: 1,
+		});
 		expect(limited).toHaveLength(1);
 	});
 

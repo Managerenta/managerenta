@@ -21,18 +21,18 @@ describe("addUnitBodySchema", () => {
 	});
 
 	it("rejects negative rent and accepts zero", () => {
-		expect(addUnitBodySchema.safeParse({ name: "A1", rent: -1 }).success).toBe(
-			false,
-		);
-		expect(addUnitBodySchema.safeParse({ name: "A1", rent: 0 }).success).toBe(
-			true,
-		);
+		expect(
+			addUnitBodySchema.safeParse({ name: "A1", rent: -1 }).success,
+		).toBe(false);
+		expect(
+			addUnitBodySchema.safeParse({ name: "A1", rent: 0 }).success,
+		).toBe(true);
 	});
 
 	it("enforces name length 1..200", () => {
-		expect(addUnitBodySchema.safeParse({ name: "", rent: 10 }).success).toBe(
-			false,
-		);
+		expect(
+			addUnitBodySchema.safeParse({ name: "", rent: 10 }).success,
+		).toBe(false);
 		expect(
 			addUnitBodySchema.safeParse({ name: "n".repeat(201), rent: 10 })
 				.success,
@@ -49,7 +49,8 @@ describe("addUnitParamsSchema", () => {
 			false,
 		);
 		expect(
-			addUnitParamsSchema.safeParse({ propertyId: "p1", id: "x" }).success,
+			addUnitParamsSchema.safeParse({ propertyId: "p1", id: "x" })
+				.success,
 		).toBe(false);
 	});
 });
@@ -68,13 +69,15 @@ describe("getUnitsQuerySchema", () => {
 		expect(getUnitsQuerySchema.safeParse({ status: "Free" }).success).toBe(
 			false,
 		);
-		expect(getUnitsQuerySchema.safeParse({ status: "Occupied" }).success).toBe(
-			true,
-		);
+		expect(
+			getUnitsQuerySchema.safeParse({ status: "Occupied" }).success,
+		).toBe(true);
 	});
 
 	it("bounds limit to 1..100", () => {
-		expect(getUnitsQuerySchema.safeParse({ limit: "0" }).success).toBe(false);
+		expect(getUnitsQuerySchema.safeParse({ limit: "0" }).success).toBe(
+			false,
+		);
 		expect(getUnitsQuerySchema.safeParse({ limit: "101" }).success).toBe(
 			false,
 		);
@@ -103,7 +106,11 @@ describe("updateUnitBodySchema", () => {
 		expect(
 			updateUnitBodySchema.safeParse({ nickname: "loft" }).success,
 		).toBe(false);
-		expect(updateUnitBodySchema.safeParse({ name: "" }).success).toBe(false);
-		expect(updateUnitBodySchema.safeParse({ rent: -1 }).success).toBe(false);
+		expect(updateUnitBodySchema.safeParse({ name: "" }).success).toBe(
+			false,
+		);
+		expect(updateUnitBodySchema.safeParse({ rent: -1 }).success).toBe(
+			false,
+		);
 	});
 });

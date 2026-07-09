@@ -13,7 +13,9 @@ import { newId } from "../../helpers/seed";
 
 // Mock the only true external: provider HTTP calls via axios.
 const postMock = vi.hoisted(() =>
-	vi.fn(async (_url?: any, _data?: any, _config?: any) => ({ data: { id: "x" } })),
+	vi.fn(async (_url?: any, _data?: any, _config?: any) => ({
+		data: { id: "x" },
+	})),
 );
 vi.mock("axios", () => ({
 	default: { post: postMock },
@@ -76,9 +78,7 @@ describe("notification transports (Resend / Twilio HTTP mocked)", () => {
 			text: "Email body",
 			from: "Vitest <vitest@managerenta.test>",
 		});
-		expect(config.headers.Authorization).toBe(
-			"Bearer re_vitest_fake_key",
-		);
+		expect(config.headers.Authorization).toBe("Bearer re_vitest_fake_key");
 
 		const doc = await Notification.findOne({ userId }).lean();
 		expect(doc?.status).toBe("sent");

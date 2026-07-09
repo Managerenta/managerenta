@@ -145,9 +145,10 @@ describe("properties service", () => {
 
 			const afterCreate = await getProperties({ userId });
 			expect(afterCreate.total).toBe(2);
-			expect(
-				afterCreate.data.map((p) => p.name).sort(),
-			).toEqual(["Alpha", "Via Service"]);
+			expect(afterCreate.data.map((p) => p.name).sort()).toEqual([
+				"Alpha",
+				"Via Service",
+			]);
 		});
 	});
 

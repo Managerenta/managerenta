@@ -69,11 +69,15 @@ describe("twoFactorTicket", () => {
 	});
 
 	it("rejects payloads without a userId", () => {
-		const missing = sign({ data: { nonce: "dd".repeat(16) } }, derivedSecret, {
-			algorithm: "HS256",
-			audience: "2fa-challenge",
-			expiresIn: 300,
-		});
+		const missing = sign(
+			{ data: { nonce: "dd".repeat(16) } },
+			derivedSecret,
+			{
+				algorithm: "HS256",
+				audience: "2fa-challenge",
+				expiresIn: 300,
+			},
+		);
 		expect(verifyTwoFactorTicket(missing)).toBeNull();
 	});
 });

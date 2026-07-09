@@ -70,7 +70,10 @@ async function makeUser(emailPrefix = "member") {
 	return { ...payload, userId: session.userId };
 }
 
-async function makeOrg(ownerId: string, overrides: Record<string, unknown> = {}) {
+async function makeOrg(
+	ownerId: string,
+	overrides: Record<string, unknown> = {},
+) {
 	const doc = await createOrganization({
 		payload: {
 			ownerId: new mongoose.Types.ObjectId(ownerId),
@@ -290,9 +293,7 @@ describe("organizations/acceptInvite", () => {
 		// invite NOT consumed, mallory NOT a member
 		expect(doc?.invites).toHaveLength(1);
 		expect(
-			doc?.members?.some(
-				(m) => m.memberId.toString() === mallory.userId,
-			),
+			doc?.members?.some((m) => m.memberId.toString() === mallory.userId),
 		).toBe(false);
 
 		const user = await getUserById({
@@ -347,9 +348,7 @@ describe("organizations/acceptInvite", () => {
 
 		const doc = await Organization.findById(org._id).lean();
 		expect(
-			doc?.members?.some(
-				(m) => m.memberId.toString() === invitee.userId,
-			),
+			doc?.members?.some((m) => m.memberId.toString() === invitee.userId),
 		).toBe(false);
 	});
 });
@@ -469,9 +468,8 @@ describe("organizations/members management", () => {
 		const doc = await Organization.findById(org._id).lean();
 		expect(doc?.members).toHaveLength(2);
 		expect(
-			doc?.members?.find(
-				(m) => m.memberId.toString() === member.userId,
-			)?.permission,
+			doc?.members?.find((m) => m.memberId.toString() === member.userId)
+				?.permission,
 		).toBe(IOrganizationRole.MANAGER);
 	});
 
@@ -502,15 +500,11 @@ describe("organizations/members management", () => {
 
 		const doc = await Organization.findById(org._id).lean();
 		expect(
-			doc?.members?.some(
-				(m) => m.memberId.toString() === member.userId,
-			),
+			doc?.members?.some((m) => m.memberId.toString() === member.userId),
 		).toBe(false);
 		// the owner's membership survives
 		expect(
-			doc?.members?.some(
-				(m) => m.memberId.toString() === owner.userId,
-			),
+			doc?.members?.some((m) => m.memberId.toString() === owner.userId),
 		).toBe(true);
 	});
 
@@ -626,10 +620,7 @@ describe("organizations/query services", () => {
 			limit: 10,
 			refreshCache: true,
 		});
-		expect(all.map((o) => o.name).sort()).toEqual([
-			orgA.name,
-			orgB.name,
-		]);
+		expect(all.map((o) => o.name).sort()).toEqual([orgA.name, orgB.name]);
 
 		const asc = await getOrganizations({
 			name: stem,
@@ -674,10 +665,10 @@ describe("organizations/query services", () => {
 			limit: 10,
 			refreshCache: true,
 		});
-		const ids = result.map((o) => String(o.id ?? (o as { _id?: unknown })._id)).sort();
-		expect(ids).toEqual(
-			[orgA._id.toString(), orgB._id.toString()].sort(),
-		);
+		const ids = result
+			.map((o) => String(o.id ?? (o as { _id?: unknown })._id))
+			.sort();
+		expect(ids).toEqual([orgA._id.toString(), orgB._id.toString()].sort());
 		expect(ids).not.toContain(orgC._id.toString());
 
 		// same query again → served from cache
@@ -686,7 +677,11 @@ describe("organizations/query services", () => {
 			offset: 0,
 			limit: 10,
 		});
-		expect(cached.map((o) => String(o.id ?? (o as { _id?: unknown })._id)).sort()).toEqual(ids);
+		expect(
+			cached
+				.map((o) => String(o.id ?? (o as { _id?: unknown })._id))
+				.sort(),
+		).toEqual(ids);
 
 		// unknown ids → []
 		expect(
@@ -813,7 +808,9 @@ describe("organizations/getMyOrganizations", () => {
 		);
 
 		const mine = await getMyOrganizations({ userId: member.userId });
-		const ids = mine.map((o) => String(o.id ?? (o as { _id?: unknown })._id));
+		const ids = mine.map((o) =>
+			String(o.id ?? (o as { _id?: unknown })._id),
+		);
 		expect(ids).toContain(orgA._id.toString());
 		expect(ids).toContain(orgB._id.toString());
 

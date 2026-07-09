@@ -104,7 +104,10 @@ describe("getTenantsDB", () => {
 			{ $set: { status: "Inactive" } },
 		);
 
-		const activeOnly = await getTenantsDB({ userId: USER, status: "Active" });
+		const activeOnly = await getTenantsDB({
+			userId: USER,
+			status: "Active",
+		});
 		expect(activeOnly.tenants.map((t) => t.name)).toEqual([active.name]);
 		expect(activeOnly.total).toBe(1);
 
@@ -205,10 +208,14 @@ describe("getTenantByIdDB", () => {
 	});
 
 	it("returns null for unknown or soft-deleted tenants", async () => {
-		expect(await getTenantByIdDB({ id: unknownId(), userId: USER })).toBeNull();
+		expect(
+			await getTenantByIdDB({ id: unknownId(), userId: USER }),
+		).toBeNull();
 		const tenant = await makeTenant(3);
 		await deleteTenantDB({ id: tenant.id, userId: USER });
-		expect(await getTenantByIdDB({ id: tenant.id, userId: USER })).toBeNull();
+		expect(
+			await getTenantByIdDB({ id: tenant.id, userId: USER }),
+		).toBeNull();
 	});
 });
 
@@ -265,8 +272,12 @@ describe("deleteTenantDB", () => {
 		expect(
 			await deleteTenantDB({ id: tenant.id, userId: OTHER_USER }),
 		).toBeNull();
-		expect(await deleteTenantDB({ id: tenant.id, userId: USER })).not.toBeNull();
-		expect(await deleteTenantDB({ id: tenant.id, userId: USER })).toBeNull();
+		expect(
+			await deleteTenantDB({ id: tenant.id, userId: USER }),
+		).not.toBeNull();
+		expect(
+			await deleteTenantDB({ id: tenant.id, userId: USER }),
+		).toBeNull();
 	});
 });
 
@@ -286,7 +297,10 @@ describe("softDeleteTenantsByPropertyDB", () => {
 		});
 		expect(count).toBe(2);
 
-		const deleted = await Tenant.find({ propertyId: "prop-A", userId: USER });
+		const deleted = await Tenant.find({
+			propertyId: "prop-A",
+			userId: USER,
+		});
 		for (const t of deleted) {
 			expect(t.deleted).toBe(true);
 			expect(t.status).toBe("Inactive");
@@ -392,7 +406,9 @@ describe("getTenantsByIdsDB", () => {
 		});
 		expect(scoped.map((t) => t.name)).toEqual(["Tenant 1"]);
 
-		const unscoped = await getTenantsByIdsDB({ ids: [mine.id, foreign.id] });
+		const unscoped = await getTenantsByIdsDB({
+			ids: [mine.id, foreign.id],
+		});
 		expect(unscoped).toHaveLength(2);
 	});
 

@@ -25,8 +25,7 @@ import {
 // Avatar/image branches call sharp for real and upload to S3 — mock only S3.
 const sendMock = vi.hoisted(() => vi.fn(async (_command?: any) => ({})));
 vi.mock("@aws-sdk/client-s3", async (importOriginal) => {
-	const actual =
-		await importOriginal<typeof import("@aws-sdk/client-s3")>();
+	const actual = await importOriginal<typeof import("@aws-sdk/client-s3")>();
 	return {
 		...actual,
 		S3Client: class {
@@ -36,10 +35,8 @@ vi.mock("@aws-sdk/client-s3", async (importOriginal) => {
 });
 vi.mock("@aws-sdk/s3-request-presigner", () => ({
 	getSignedUrl: vi.fn(
-		async (
-			_client: unknown,
-			command: { input: { Key: string } },
-		) => `https://signed.example.test/${command.input.Key}`,
+		async (_client: unknown, command: { input: { Key: string } }) =>
+			`https://signed.example.test/${command.input.Key}`,
 	),
 }));
 
@@ -101,9 +98,7 @@ describe("image upload branches (S3 mocked, real sharp)", () => {
 			/^properties\/images\/[0-9a-f]{64}\.webp$/,
 		);
 		expect(sendMock).toHaveBeenCalledTimes(1);
-		expect(sendMock.mock.calls[0][0].input.ContentType).toBe(
-			"image/webp",
-		);
+		expect(sendMock.mock.calls[0][0].input.ContentType).toBe("image/webp");
 	});
 
 	it("updateProperty replaces the image only when a buffer is supplied", async () => {
@@ -116,9 +111,7 @@ describe("image upload branches (S3 mocked, real sharp)", () => {
 			payload: { image: await tinyPng() },
 		});
 		const storedImage = sendMock.mock.calls[0][0].input.Key as string;
-		expect(storedImage).toMatch(
-			/^properties\/images\/[0-9a-f]{64}\.webp$/,
-		);
+		expect(storedImage).toMatch(/^properties\/images\/[0-9a-f]{64}\.webp$/);
 		// The read path presigns the stored key.
 		expect(withImage?.image).toBe(
 			`https://signed.example.test/${storedImage}`,

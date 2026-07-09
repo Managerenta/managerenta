@@ -46,7 +46,9 @@ afterAll(async () => {
 
 describe("upsertPushSubscriptionDB", () => {
 	it("inserts a new subscription", async () => {
-		expect(await upsertPushSubscriptionDB({ payload: payload() })).toBe(true);
+		expect(await upsertPushSubscriptionDB({ payload: payload() })).toBe(
+			true,
+		);
 		const inDb = await PushSubscription.findOne({
 			endpoint: "https://push.example/ep-1",
 		}).lean();
@@ -59,7 +61,9 @@ describe("upsertPushSubscriptionDB", () => {
 		vi.spyOn(PushSubscription, "findOneAndUpdate").mockRejectedValueOnce(
 			new Error("boom"),
 		);
-		expect(await upsertPushSubscriptionDB({ payload: payload() })).toBe(false);
+		expect(await upsertPushSubscriptionDB({ payload: payload() })).toBe(
+			false,
+		);
 	});
 
 	it("updates in place on the same endpoint (no duplicate) and revives deleted", async () => {
@@ -100,7 +104,10 @@ describe("getPushSubscriptionsByUserDB", () => {
 			payload: payload({ endpoint: "https://push.example/ep-2" }),
 		});
 		await upsertPushSubscriptionDB({
-			payload: payload({ endpoint: "https://push.example/ep-3", userId: OTHER }),
+			payload: payload({
+				endpoint: "https://push.example/ep-3",
+				userId: OTHER,
+			}),
 		});
 		await PushSubscription.updateOne(
 			{ endpoint: "https://push.example/ep-2" },
@@ -113,14 +120,18 @@ describe("getPushSubscriptionsByUserDB", () => {
 	});
 
 	it("returns [] for a user with no subscriptions", async () => {
-		expect(await getPushSubscriptionsByUserDB({ userId: "ghost" })).toEqual([]);
+		expect(await getPushSubscriptionsByUserDB({ userId: "ghost" })).toEqual(
+			[],
+		);
 	});
 
 	it("returns [] when the query throws (catch path)", async () => {
 		vi.spyOn(PushSubscription, "find").mockImplementationOnce(() => {
 			throw new Error("boom");
 		});
-		expect(await getPushSubscriptionsByUserDB({ userId: USER })).toEqual([]);
+		expect(await getPushSubscriptionsByUserDB({ userId: USER })).toEqual(
+			[],
+		);
 	});
 });
 

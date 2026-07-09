@@ -1,23 +1,21 @@
 import { describe, expect, it } from "vitest";
 import { csrfReject } from "@/server/lib/csrf";
 
-function req(
-	method: string,
-	headers: Record<string, string> = {},
-): Request {
+function req(method: string, headers: Record<string, string> = {}): Request {
 	return new Request("http://localhost:3000/api/test", { method, headers });
 }
 
 describe("csrfReject", () => {
 	describe("safe methods", () => {
-		it.each(["GET", "HEAD", "OPTIONS"])(
-			"allows %s even with a hostile origin",
-			(method) => {
-				expect(
-					csrfReject(req(method, { origin: "https://evil.com" })),
-				).toBeNull();
-			},
-		);
+		it.each([
+			"GET",
+			"HEAD",
+			"OPTIONS",
+		])("allows %s even with a hostile origin", (method) => {
+			expect(
+				csrfReject(req(method, { origin: "https://evil.com" })),
+			).toBeNull();
+		});
 
 		it("allows GET with no origin signal at all", () => {
 			expect(csrfReject(req("GET"))).toBeNull();
@@ -41,14 +39,16 @@ describe("csrfReject", () => {
 			).toBeNull();
 		});
 
-		it.each(["POST", "PUT", "PATCH", "DELETE"])(
-			"rejects %s from a non-whitelisted origin",
-			(method) => {
-				expect(csrfReject(req(method, { origin: "https://evil.com" }))).toBe(
-					"Origin not allowed",
-				);
-			},
-		);
+		it.each([
+			"POST",
+			"PUT",
+			"PATCH",
+			"DELETE",
+		])("rejects %s from a non-whitelisted origin", (method) => {
+			expect(
+				csrfReject(req(method, { origin: "https://evil.com" })),
+			).toBe("Origin not allowed");
+		});
 
 		it("rejects a lookalike domain that only embeds the real one", () => {
 			expect(
@@ -80,7 +80,9 @@ describe("csrfReject", () => {
 		it("allows POST when Referer resolves to a whitelisted origin", () => {
 			expect(
 				csrfReject(
-					req("POST", { referer: "https://managerenta.com/some/page?x=1" }),
+					req("POST", {
+						referer: "https://managerenta.com/some/page?x=1",
+					}),
 				),
 			).toBeNull();
 		});
@@ -92,9 +94,9 @@ describe("csrfReject", () => {
 		});
 
 		it("rejects a malformed Referer", () => {
-			expect(csrfReject(req("POST", { referer: "not a url at all" }))).toBe(
-				"Malformed Referer",
-			);
+			expect(
+				csrfReject(req("POST", { referer: "not a url at all" })),
+			).toBe("Malformed Referer");
 		});
 	});
 

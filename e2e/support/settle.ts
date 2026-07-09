@@ -18,7 +18,10 @@ import type { Page } from "@playwright/test";
  */
 export async function waitForApiIdle(
 	page: Page,
-	{ quietMs = 600, timeoutMs = 15_000 }: { quietMs?: number; timeoutMs?: number } = {},
+	{
+		quietMs = 600,
+		timeoutMs = 15_000,
+	}: { quietMs?: number; timeoutMs?: number } = {},
 ): Promise<void> {
 	let inFlight = 0;
 	let lastActivity = Date.now();

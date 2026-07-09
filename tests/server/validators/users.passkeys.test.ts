@@ -128,12 +128,14 @@ describe("passkeyAuthVerifyBodySchema", () => {
 describe("passkeyTwoFactorStartBodySchema", () => {
 	it("requires a ticket 20..2048 chars, strict", () => {
 		expect(
-			passkeyTwoFactorStartBodySchema.safeParse({ ticket: "t".repeat(20) })
-				.success,
+			passkeyTwoFactorStartBodySchema.safeParse({
+				ticket: "t".repeat(20),
+			}).success,
 		).toBe(true);
 		expect(
-			passkeyTwoFactorStartBodySchema.safeParse({ ticket: "t".repeat(19) })
-				.success,
+			passkeyTwoFactorStartBodySchema.safeParse({
+				ticket: "t".repeat(19),
+			}).success,
 		).toBe(false);
 		expect(
 			passkeyTwoFactorStartBodySchema.safeParse({

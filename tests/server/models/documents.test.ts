@@ -1,6 +1,16 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+	afterAll,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+} from "vitest";
 
-const getSignedUrlMock = vi.fn(async () => "https://fake-s3.example/signed-doc");
+const getSignedUrlMock = vi.fn(
+	async () => "https://fake-s3.example/signed-doc",
+);
 vi.mock("@aws-sdk/s3-request-presigner", () => ({
 	getSignedUrl: (...args: unknown[]) => getSignedUrlMock(...(args as [])),
 }));
@@ -84,7 +94,10 @@ describe("getDocumentsDB", () => {
 			...payload({ name: "New" }),
 			createdAt: new Date("2024-06-01"),
 		});
-		await DocumentModel.create({ ...payload({ name: "Del" }), deleted: true });
+		await DocumentModel.create({
+			...payload({ name: "Del" }),
+			deleted: true,
+		});
 		await DocumentModel.create(payload({ name: "Foreign", userId: OTHER }));
 
 		const { documents, total } = await getDocumentsDB({ userId: USER });
@@ -98,16 +111,32 @@ describe("getDocumentsDB", () => {
 
 	it("filters by category, propertyId, tenantId; 'all' disables category filter", async () => {
 		await DocumentModel.create(
-			payload({ name: "A", category: "lease", propertyId: "p1", tenantId: "t1" }),
+			payload({
+				name: "A",
+				category: "lease",
+				propertyId: "p1",
+				tenantId: "t1",
+			}),
 		);
 		await DocumentModel.create(
-			payload({ name: "B", category: "receipt", propertyId: "p2", tenantId: "t2" }),
+			payload({
+				name: "B",
+				category: "receipt",
+				propertyId: "p2",
+				tenantId: "t2",
+			}),
 		);
 
-		const byCategory = await getDocumentsDB({ userId: USER, category: "receipt" });
+		const byCategory = await getDocumentsDB({
+			userId: USER,
+			category: "receipt",
+		});
 		expect(byCategory.documents.map((d) => d.name)).toEqual(["B"]);
 
-		const byProperty = await getDocumentsDB({ userId: USER, propertyId: "p1" });
+		const byProperty = await getDocumentsDB({
+			userId: USER,
+			propertyId: "p1",
+		});
 		expect(byProperty.documents.map((d) => d.name)).toEqual(["A"]);
 
 		const byTenant = await getDocumentsDB({ userId: USER, tenantId: "t2" });
@@ -119,7 +148,9 @@ describe("getDocumentsDB", () => {
 
 	it("searches name and fileName case-insensitively", async () => {
 		await DocumentModel.create(payload({ name: "Insurance policy" }));
-		await DocumentModel.create(payload({ name: "Other", fileName: "POLICY-scan.pdf" }));
+		await DocumentModel.create(
+			payload({ name: "Other", fileName: "POLICY-scan.pdf" }),
+		);
 		await DocumentModel.create(payload({ name: "Unrelated" }));
 
 		const res = await getDocumentsDB({ userId: USER, search: "policy" });
@@ -127,10 +158,15 @@ describe("getDocumentsDB", () => {
 	});
 
 	it("treats regex metacharacters literally and does not throw", async () => {
-		await DocumentModel.create(payload({ name: "Receipt (Jan) [final].pdf" }));
+		await DocumentModel.create(
+			payload({ name: "Receipt (Jan) [final].pdf" }),
+		);
 		await DocumentModel.create(payload({ name: "Receipt Jan final.pdf" }));
 
-		const literal = await getDocumentsDB({ userId: USER, search: "(Jan) [final]" });
+		const literal = await getDocumentsDB({
+			userId: USER,
+			search: "(Jan) [final]",
+		});
 		expect(literal.total).toBe(1);
 		expect(literal.documents[0]?.name).toBe("Receipt (Jan) [final].pdf");
 
@@ -145,7 +181,11 @@ describe("getDocumentsDB", () => {
 		}));
 		await DocumentModel.insertMany(docs);
 
-		const page = await getDocumentsDB({ userId: USER, limit: 2, offset: 1 });
+		const page = await getDocumentsDB({
+			userId: USER,
+			limit: 2,
+			offset: 1,
+		});
 		expect(page.total).toBe(55);
 		expect(page.documents.map((d) => d.name)).toEqual(["D53", "D52"]);
 
@@ -165,17 +205,24 @@ describe("getDocumentsDB", () => {
 describe("getDocumentByIdDB", () => {
 	it("returns the document for its owner with a presigned url", async () => {
 		const created = await createDocumentDB({ payload: payload() });
-		const found = await getDocumentByIdDB({ id: created!.id, userId: USER });
+		const found = await getDocumentByIdDB({
+			id: created!.id,
+			userId: USER,
+		});
 		expect(found?.id).toBe(created!.id);
 		expect(found?.url).toBe("https://fake-s3.example/signed-doc");
 	});
 
 	it("returns null for wrong owner, deleted doc, or malformed id", async () => {
 		const created = await createDocumentDB({ payload: payload() });
-		expect(await getDocumentByIdDB({ id: created!.id, userId: OTHER })).toBeNull();
+		expect(
+			await getDocumentByIdDB({ id: created!.id, userId: OTHER }),
+		).toBeNull();
 
 		await deleteDocumentDB({ id: created!.id, userId: USER });
-		expect(await getDocumentByIdDB({ id: created!.id, userId: USER })).toBeNull();
+		expect(
+			await getDocumentByIdDB({ id: created!.id, userId: USER }),
+		).toBeNull();
 
 		expect(await getDocumentByIdDB({ id: "###", userId: USER })).toBeNull();
 	});
@@ -184,15 +231,21 @@ describe("getDocumentByIdDB", () => {
 describe("deleteDocumentDB", () => {
 	it("soft-deletes and returns true; repeat delete returns false", async () => {
 		const created = await createDocumentDB({ payload: payload() });
-		expect(await deleteDocumentDB({ id: created!.id, userId: USER })).toBe(true);
+		expect(await deleteDocumentDB({ id: created!.id, userId: USER })).toBe(
+			true,
+		);
 		const inDb = await DocumentModel.findById(created!.id).lean();
 		expect(inDb?.deleted).toBe(true);
-		expect(await deleteDocumentDB({ id: created!.id, userId: USER })).toBe(false);
+		expect(await deleteDocumentDB({ id: created!.id, userId: USER })).toBe(
+			false,
+		);
 	});
 
 	it("returns false for wrong owner and leaves the doc intact", async () => {
 		const created = await createDocumentDB({ payload: payload() });
-		expect(await deleteDocumentDB({ id: created!.id, userId: OTHER })).toBe(false);
+		expect(await deleteDocumentDB({ id: created!.id, userId: OTHER })).toBe(
+			false,
+		);
 		const inDb = await DocumentModel.findById(created!.id).lean();
 		expect(inDb?.deleted).toBe(false);
 	});

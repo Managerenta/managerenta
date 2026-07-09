@@ -52,7 +52,11 @@ describe("api", () => {
 		mockedAxios.patch.mockResolvedValueOnce(response);
 		const options = { timeout: 5000 };
 
-		const result = await api().patch("https://example.test/x", { b: 2 }, options);
+		const result = await api().patch(
+			"https://example.test/x",
+			{ b: 2 },
+			options,
+		);
 
 		expect(mockedAxios.patch).toHaveBeenCalledExactlyOnceWith(
 			"https://example.test/x",

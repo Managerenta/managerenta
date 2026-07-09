@@ -36,7 +36,9 @@ describe("getClientIp — untrusted proxy (TRUSTED_PROXY=0, the default)", () =>
 
 	it("takes the FIRST x-forwarded-for hop when the proxy is untrusted", () => {
 		expect(
-			getClientIp(req({ "x-forwarded-for": "3.3.3.3, 4.4.4.4, 5.5.5.5" })),
+			getClientIp(
+				req({ "x-forwarded-for": "3.3.3.3, 4.4.4.4, 5.5.5.5" }),
+			),
 		).toBe("3.3.3.3");
 	});
 
@@ -47,7 +49,9 @@ describe("getClientIp — untrusted proxy (TRUSTED_PROXY=0, the default)", () =>
 	});
 
 	it("returns unknown for a garbage XFF made only of separators", () => {
-		expect(getClientIp(req({ "x-forwarded-for": " , ,, " }))).toBe("unknown");
+		expect(getClientIp(req({ "x-forwarded-for": " , ,, " }))).toBe(
+			"unknown",
+		);
 	});
 
 	it("returns unknown when no forwarding headers exist", () => {
