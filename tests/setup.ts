@@ -7,7 +7,8 @@
 import { afterAll } from "vitest";
 
 (process.env as Record<string, string>).NODE_ENV = "test";
-process.env.MONGODB_URI = process.env.MONGODB_URI ?? "mongodb://127.0.0.1:27017";
+process.env.MONGODB_URI =
+	process.env.MONGODB_URI ?? "mongodb://127.0.0.1:27017";
 process.env.REDIS_URI = process.env.REDIS_URI ?? "redis://127.0.0.1:6379";
 // Name: managerenta-vitest-<runId>-<pid>-<pool>.
 //   - runId (main process pid, set by tests/globalSetup.ts and inherited here)

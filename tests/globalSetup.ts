@@ -21,8 +21,7 @@ export default function setup(): () => Promise<void> {
 	process.env.VITEST_RUN_ID = runId;
 
 	return async () => {
-		const uri =
-			process.env.MONGODB_URI ?? "mongodb://127.0.0.1:27017";
+		const uri = process.env.MONGODB_URI ?? "mongodb://127.0.0.1:27017";
 		const prefix = `managerenta-vitest-${runId}-`;
 
 		const conn = await mongoose.createConnection(uri).asPromise();
@@ -37,7 +36,10 @@ export default function setup(): () => Promise<void> {
 
 			await Promise.all(
 				targets.map((name) =>
-					conn.useDb(name).dropDatabase().catch(() => {}),
+					conn
+						.useDb(name)
+						.dropDatabase()
+						.catch(() => {}),
 				),
 			);
 
