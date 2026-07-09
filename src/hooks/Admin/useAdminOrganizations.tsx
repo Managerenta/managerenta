@@ -23,7 +23,9 @@ export function useAdminOrganizations(search: string) {
 	const key = `/api/admin/organizations?search=${encodeURIComponent(
 		search,
 	)}&offset=0&limit=20`;
-	const { data, isLoading } = useSWR<{ data?: IAdminOrgList }>(key, fetcher);
+	const { data, isLoading } = useSWR<{ data?: IAdminOrgList }>(key, fetcher, {
+		revalidateOnMount: true,
+	});
 	return {
 		organizations: data?.data?.organizations ?? [],
 		total: data?.data?.total ?? 0,

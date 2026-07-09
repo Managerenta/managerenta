@@ -90,8 +90,14 @@ export const AdminShellStyled = styled(Box)`
 		color: var(--Text-Secondary);
 		font-size: 13px;
 		text-decoration: none;
+		border: none;
 		border-top: 1px solid var(--Border-Subtle);
 		margin-top: 8px;
+		width: 100%;
+		background: transparent;
+		cursor: pointer;
+		font-family: inherit;
+		text-align: left;
 	}
 	.back-link:hover {
 		color: var(--Text-Primary);

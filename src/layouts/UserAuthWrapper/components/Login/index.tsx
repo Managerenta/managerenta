@@ -83,7 +83,23 @@ function Login() {
 	const completeLogin = async () => {
 		setIsRedirecting(true);
 		await reAuthenticateUserSession();
-		router.replace(nextDestination);
+		// Platform operators live only in the operator console — send them there
+		// rather than the landlord app, unless they were explicitly deep-linked
+		// to an /admin route. Non-operators (or a failed probe) fall through to
+		// the normal destination.
+		let destination = nextDestination;
+		try {
+			const who = await api().get("/api/admin/whoami", { baseURL: "" });
+			if (who.data?.data?.operator === true) {
+				destination = nextDestination.startsWith("/admin")
+					? nextDestination
+					: "/admin";
+			}
+		} catch {
+			// Not an operator (whoami requires auth but never 403s) or a transient
+			// failure — keep the default destination.
+		}
+		router.replace(destination);
 		router.refresh();
 	};
 

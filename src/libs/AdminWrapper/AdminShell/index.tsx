@@ -1,16 +1,17 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { type ReactNode, useEffect } from "react";
+import { type ReactNode, useContext, useEffect } from "react";
 import {
 	FiActivity,
-	FiArrowLeft,
 	FiBarChart2,
 	FiGrid,
 	FiHome,
+	FiLogOut,
 	FiShield,
 } from "react-icons/fi";
 import { Box, Loader, Text } from "@/components";
+import { AppContextProvider } from "@/hooks";
 import { useWhoami } from "@/hooks/Admin";
 import { AdminShellStyled } from "./styled";
 
@@ -39,10 +40,16 @@ export default function AdminShell({ children }: { children: ReactNode }) {
 	const pathname = usePathname();
 	const router = useRouter();
 	const { operator, isLoading } = useWhoami();
+	const { deleteAllCookies } = useContext(AppContextProvider);
 
 	useEffect(() => {
 		if (!isLoading && !operator) router.replace("/dashboard");
 	}, [isLoading, operator, router]);
+
+	const handleSignOut = async () => {
+		await deleteAllCookies();
+		router.push("/login");
+	};
 
 	if (isLoading) {
 		return (
@@ -83,10 +90,14 @@ export default function AdminShell({ children }: { children: ReactNode }) {
 				))}
 
 				<Box className="nav-spacer" />
-				<Link href="/dashboard" className="back-link">
-					<FiArrowLeft size={16} />
-					<span>Back to app</span>
-				</Link>
+				<button
+					type="button"
+					className="back-link"
+					onClick={handleSignOut}
+				>
+					<FiLogOut size={16} />
+					<span>Sign out</span>
+				</button>
 			</Box>
 
 			<Box className="admin-main">

@@ -34,6 +34,7 @@ export function useAdminAudit({
 	const { data, isLoading } = useSWR<{ data?: IAdminAuditList }>(
 		`/api/admin/audit?${params.toString()}`,
 		fetcher,
+		{ revalidateOnMount: true },
 	);
 	return {
 		events: data?.data?.events ?? [],

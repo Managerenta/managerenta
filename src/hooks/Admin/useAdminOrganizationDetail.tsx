@@ -31,6 +31,7 @@ export function useAdminOrganizationDetail(id: string) {
 	const { data, isLoading, mutate } = useSWR<{ data?: IAdminOrgDetail }>(
 		id ? key : null,
 		fetcher,
+		{ revalidateOnMount: true },
 	);
 	return { detail: data?.data, isLoading, mutate };
 }

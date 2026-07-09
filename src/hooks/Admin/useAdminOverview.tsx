@@ -21,6 +21,7 @@ export function useAdminOverview() {
 	const { data, isLoading } = useSWR<{ data?: IAdminOverview }>(
 		"/api/admin/overview",
 		fetcher,
+		{ revalidateOnMount: true },
 	);
 	return { overview: data?.data, isLoading };
 }

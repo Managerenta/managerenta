@@ -2,6 +2,12 @@
 import mongoose from "mongoose";
 import { connectMongoDB, disconnectMongoDB } from "../src/server/databases";
 import {
+	IamGroup as _IamGroup,
+	IamGroupMembership as _IamGroupMembership,
+	IamOperator as _IamOperator,
+	IamPolicy as _IamPolicy,
+} from "../src/server/iam/models";
+import {
 	AuditEvent as _AuditEvent,
 	DocumentModel as _DocumentModel,
 	MaintenanceRequest as _MaintenanceRequest,
@@ -15,12 +21,6 @@ import {
 	Vendor as _Vendor,
 } from "../src/server/models";
 import { Transaction as _Transaction } from "../src/server/models/tenants/transactions";
-import {
-	IamGroup as _IamGroup,
-	IamGroupMembership as _IamGroupMembership,
-	IamOperator as _IamOperator,
-	IamPolicy as _IamPolicy,
-} from "../src/server/iam/models";
 
 // Cast models to `any` to bypass mongoose's strict `create()` overload union
 // resolution. Seed scripts don't benefit from full schema type safety.
@@ -97,7 +97,12 @@ async function run() {
 
 	console.log("Seeding users…");
 	// The User schema's pre-save hook bcrypt-hashes plaintext passwords.
-	const [landlord, secondary] = await User.create([
+	// `operator` is a dedicated platform-staff account that owns no landlord
+	// data — promote it with `yarn iam:bootstrap-operator --email ops@example.com`.
+	// Operators are confined to the /admin console, so keeping this account
+	// separate from the landlord accounts is what lets the landlord flows
+	// (and the landlord e2e suite) keep working.
+	const [landlord, secondary, operatorUser] = await User.create([
 		{
 			username: "abdullah",
 			email: "abdullah@example.com",
@@ -114,9 +119,19 @@ async function run() {
 			phone: "+2348033456712",
 			avatar: "https://i.pravatar.cc/200?img=44",
 		},
+		{
+			username: "ops",
+			email: "ops@example.com",
+			password: "password123",
+			name: "Ops Admin",
+			phone: "+2348030000000",
+			avatar: "https://i.pravatar.cc/200?img=5",
+		},
 	]);
 
-	if (!landlord || !secondary) throw new Error("User creation failed");
+	if (!landlord || !secondary || !operatorUser) {
+		throw new Error("User creation failed");
+	}
 	const landlordId = landlord._id.toString();
 
 	console.log("Seeding properties…");
@@ -672,6 +687,9 @@ async function run() {
 	console.log("\nDemo accounts (password: password123):");
 	console.log("  • Landlord  — abdullah@example.com");
 	console.log("  • Landlord  — amina@example.com");
+	console.log(
+		"  • Operator  — ops@example.com (run: yarn iam:bootstrap-operator --email ops@example.com)",
+	);
 
 	await disconnectMongoDB();
 	await mongoose.disconnect();

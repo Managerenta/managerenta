@@ -184,3 +184,51 @@ HTTP path — see `scripts/iam-bootstrap-operator.ts`). Steps:
 **Verdict.** Production-ready. Remaining optional step: browser-level Playwright driving of
 the console UIs (the APIs + pages are proven via 1085 tests, the build, and the live HTTP
 smoke; UI driving was substituted with those since the env's app DB points at prod Atlas).
+
+---
+
+# Validation run #2 — browser driving of the operator console (evidence)
+
+This run completed the "remaining optional step" above: it drove every route in a real
+Chromium browser (Playwright) against a local dev DB, and fixed the bugs that surfaced —
+none of which the API-level smoke could catch.
+
+**Bugs found & fixed (all confirmed broken → fixed with re-run evidence):**
+
+1. **Operator console was completely unreachable (critical).** Every `/admin/*` page bounced
+   the operator back to `/dashboard` and the "Operator Console" nav entry never appeared.
+   Root cause: the global `SWRConfig` sets `revalidateOnMount:false`, and every hook in the
+   app opts back in with `{revalidateOnMount:true}` — but the 7 Admin hooks
+   (`useWhoami`, `useAdminOverview/Analytics/Audit/Iam/Organizations/OrganizationDetail`)
+   omitted it, so `whoami` never fetched → `operator` stayed false → the gate redirected.
+   Fix: added the option to all 10 Admin `useSWR` calls. Now all 5 console pages render
+   seeded cross-tenant data and the console is fully interactive (verified create+delete of
+   an IAM group persists through the API).
+
+2. **Seed left orphaned IAM state.** `seed.ts` wiped domain collections but not the IAM
+   collections, so re-seeding orphaned every operator/group/membership against a deleted
+   user and `iam:bootstrap-operator` then refused to run. Fix: `clean()` now also wipes
+   `iamgroups/iamgroupmemberships/iamoperators/iampolicies`. Added a dedicated
+   `ops@example.com` platform-staff account (owns no landlord data).
+
+3. **Property/tenant deletes 404'd.** `deleteProperty`/`deleteTenant` use multi-document
+   transactions, which MongoDB only supports on a replica set. The local dev Mongo was a
+   standalone, so every cascade delete threw `ErrPropertyNotFound`. Not an app bug (prod
+   Atlas is a replica set) — fixed the environment: dedicated single-node replica set +
+   `.env` `MONGODB_URI=mongodb://127.0.0.1:27020/?directConnection=true`, documented inline
+   in `.env`. Note: `vitest.config.ts` does not load `.env`, so run the unit suite with
+   `MONGODB_URI=...27020...` for the transaction tests.
+
+**Product change (requested):** platform operators are now confined to the operator console.
+On login they route straight to `/admin`; the landlord shell (`DashboardWrapper`) redirects
+any operator to `/admin`; `AdminShell`'s "Back to app" was replaced with "Sign out" (the
+console is self-contained). This is a UX layer — the security boundary remains the server:
+landlord→admin API = 403, unauth = 401, operator→admin = 200 (all re-verified).
+
+**Evidence:** e2e **74/74 green** (Playwright/Chromium; new `e2e/full-app-drive.spec.ts`
+drives all 11 app routes + 5 console routes for console/network/error-boundary cleanliness,
+and `e2e/admin-console.spec.ts` drives console interactions, confinement, and sign-out).
+Unit **1085/1085 green**, coverage 95.66% stmt / 97.19% line (replica-set Mongo).
+`next build` exit 0 (81 pages). `ts.check` + `ts.check.test` clean, Biome clean.
+Secret-leak scan (working tree + full git history): **clean** (only a fake `AKIA…FAKEKEY`
+test constant and already-`[REDACTED]` placeholders; `.env*` never committed).

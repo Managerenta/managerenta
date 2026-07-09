@@ -53,19 +53,28 @@ export function useAdminOperators() {
 	const { data, isLoading } = useSWR<{ data?: IAdminOperator[] }>(
 		key,
 		fetcher,
+		{ revalidateOnMount: true },
 	);
 	return { operators: data?.data ?? [], isLoading, mutateKey: key };
 }
 
 export function useAdminGroups() {
 	const key = "/api/admin/iam/groups";
-	const { data, isLoading } = useSWR<{ data?: IAdminGroup[] }>(key, fetcher);
+	const { data, isLoading } = useSWR<{ data?: IAdminGroup[] }>(key, fetcher, {
+		revalidateOnMount: true,
+	});
 	return { groups: data?.data ?? [], isLoading, mutateKey: key };
 }
 
 export function useAdminPolicies() {
 	const key = "/api/admin/iam/policies";
-	const { data, isLoading } = useSWR<{ data?: IAdminPolicy[] }>(key, fetcher);
+	const { data, isLoading } = useSWR<{ data?: IAdminPolicy[] }>(
+		key,
+		fetcher,
+		{
+			revalidateOnMount: true,
+		},
+	);
 	return { policies: data?.data ?? [], isLoading, mutateKey: key };
 }
 
@@ -74,6 +83,7 @@ export function useAdminGroupMembers(groupId: string | null) {
 	const { data, isLoading, mutate } = useSWR<{ data?: IAdminGroupMember[] }>(
 		key,
 		fetcher,
+		{ revalidateOnMount: true },
 	);
 	return { members: data?.data ?? [], isLoading, mutate };
 }

@@ -8,9 +8,13 @@ export interface IWhoami {
 }
 
 export function useWhoami() {
+	// The global SWRConfig disables revalidateOnMount; without this the whoami
+	// probe never fires and the operator gate treats every user as a
+	// non-operator, bouncing them out of /admin. Match the codebase convention.
 	const { data, isLoading } = useSWR<{ data?: IWhoami }>(
 		"/api/admin/whoami",
 		fetcher,
+		{ revalidateOnMount: true },
 	);
 	return {
 		operator: data?.data?.operator === true,

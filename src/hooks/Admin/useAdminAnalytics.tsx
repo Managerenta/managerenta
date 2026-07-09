@@ -13,6 +13,7 @@ export function useAdminAnalytics(months: number) {
 	const { data, isLoading } = useSWR<{ data?: IAdminAnalytics }>(
 		`/api/admin/analytics?months=${months}`,
 		fetcher,
+		{ revalidateOnMount: true },
 	);
 	return { analytics: data?.data, isLoading };
 }
