@@ -1,7 +1,7 @@
 "use client";
 import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { FiDownload, FiFile, FiTrash2, FiUploadCloud } from "react-icons/fi";
-import { Box, Button, Select, Text } from "@/components";
+import { Box, Button, Input, Select, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
 import { useDocuments, usePropertyOptions, useToast } from "@/hooks";
 import { Badge, EntityPageStyled, Modal, StatCard } from "../shared/entity";
@@ -168,7 +168,7 @@ function DocumentsWrapper() {
 			</Box>
 
 			<Box className="toolbar">
-				<input
+				<Input
 					className="search"
 					placeholder="Search documents…"
 					value={search}
@@ -254,7 +254,7 @@ function DocumentsWrapper() {
 					</Box>
 					<Box className="field full">
 						<Text className="field-label">Display Name</Text>
-						<input
+						<Input
 							value={name}
 							onChange={(e) => setName(e.target.value)}
 							placeholder="Defaults to file name"

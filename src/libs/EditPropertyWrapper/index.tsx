@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { FiX } from "react-icons/fi";
 import useSWR from "swr";
-import { Box, Button, Image, Select, Text } from "@/components";
+import { Box, Button, Image, Input, Select, Text } from "@/components";
 import { api, fetcher, getErrorMessage } from "@/constants";
 import { useToast } from "@/hooks";
 import { EditPropertyWrapperStyled } from "./styled";
@@ -183,7 +183,7 @@ function EditPropertyWrapper({ propertyId }: IProps) {
 									Property Name{" "}
 									<span className="required">*</span>
 								</Text>
-								<input
+								<Input
 									type="text"
 									placeholder="e.g. Sunshine Apartments"
 									value={form.name}
@@ -195,7 +195,7 @@ function EditPropertyWrapper({ propertyId }: IProps) {
 								<Text className="field-label">
 									Address <span className="required">*</span>
 								</Text>
-								<input
+								<Input
 									type="text"
 									placeholder="e.g. 12 Park Lane, Lagos"
 									value={form.address}
@@ -229,7 +229,7 @@ function EditPropertyWrapper({ propertyId }: IProps) {
 									Total Units{" "}
 									<span className="optional">(optional)</span>
 								</Text>
-								<input
+								<Input
 									type="number"
 									min="1"
 									placeholder="e.g. 10"
@@ -243,7 +243,7 @@ function EditPropertyWrapper({ propertyId }: IProps) {
 									Monthly Rent per Unit (₦){" "}
 									<span className="optional">(optional)</span>
 								</Text>
-								<input
+								<Input
 									type="number"
 									min="0"
 									placeholder="e.g. 500000"

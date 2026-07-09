@@ -3,7 +3,7 @@ import { memo, useCallback, useMemo, useState } from "react";
 import { BsCalculator } from "react-icons/bs";
 import { FiAlertCircle, FiCheckCircle, FiHome, FiTool } from "react-icons/fi";
 import useSWR from "swr";
-import { Box, Button, Select, Text } from "@/components";
+import { Box, Button, Input, Select, Text } from "@/components";
 import { api, fetcher, getErrorMessage } from "@/constants";
 import { useToast } from "@/hooks";
 import { categoryOptions } from "../shared/options";
@@ -235,7 +235,7 @@ function PortalWrapper({ token }: { token: string }) {
 					<Box className="maint-form">
 						<Box className="mf-field full">
 							<Text className="mf-label">What's the issue?</Text>
-							<input
+							<Input
 								value={form.title}
 								onChange={(e) =>
 									setForm((p) => ({

@@ -8,7 +8,7 @@ import {
 	FiStar,
 	FiTrash2,
 } from "react-icons/fi";
-import { Box, Button, Select, Text } from "@/components";
+import { Box, Button, Input, Select, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
 import { useToast, useVendors } from "@/hooks";
 import type { IVendor } from "@/types";
@@ -249,7 +249,7 @@ function VendorsWrapper() {
 			</Box>
 
 			<Box className="toolbar">
-				<input
+				<Input
 					className="search"
 					placeholder="Search vendors…"
 					value={search}
@@ -313,7 +313,7 @@ function VendorsWrapper() {
 						<Text className="field-label">
 							Name<span className="req">*</span>
 						</Text>
-						<input
+						<Input
 							value={form.name}
 							onChange={(e) => set("name")(e.target.value)}
 							placeholder="Contact / business name"
@@ -321,7 +321,7 @@ function VendorsWrapper() {
 					</Box>
 					<Box className="field">
 						<Text className="field-label">Company</Text>
-						<input
+						<Input
 							value={form.company}
 							onChange={(e) => set("company")(e.target.value)}
 						/>
@@ -339,7 +339,7 @@ function VendorsWrapper() {
 					</Box>
 					<Box className="field">
 						<Text className="field-label">Rating (0–5)</Text>
-						<input
+						<Input
 							type="number"
 							min="0"
 							max="5"
@@ -350,14 +350,14 @@ function VendorsWrapper() {
 					</Box>
 					<Box className="field">
 						<Text className="field-label">Phone</Text>
-						<input
+						<Input
 							value={form.phone}
 							onChange={(e) => set("phone")(e.target.value)}
 						/>
 					</Box>
 					<Box className="field">
 						<Text className="field-label">Email</Text>
-						<input
+						<Input
 							type="email"
 							value={form.email}
 							onChange={(e) => set("email")(e.target.value)}
@@ -365,7 +365,7 @@ function VendorsWrapper() {
 					</Box>
 					<Box className="field full">
 						<Text className="field-label">Address</Text>
-						<input
+						<Input
 							value={form.address}
 							onChange={(e) => set("address")(e.target.value)}
 						/>

@@ -1,6 +1,6 @@
 "use client";
 import { memo, useCallback, useState } from "react";
-import { Box, Button, Text } from "@/components";
+import { Box, Button, Input, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
 import { useToast } from "@/hooks";
 import ModalWrapper from "../ModalWrapper";
@@ -82,7 +82,7 @@ function PropertyModal({ open, close, mode, onSuccess }: IProps) {
 						<Text className="field-label">
 							Unit Name <span className="required">*</span>
 						</Text>
-						<input
+						<Input
 							type="text"
 							placeholder={unitNamePlaceholder}
 							value={unitForm.name}
@@ -94,7 +94,7 @@ function PropertyModal({ open, close, mode, onSuccess }: IProps) {
 						<Text className="field-label">
 							Monthly Rent (₦) <span className="required">*</span>
 						</Text>
-						<input
+						<Input
 							type="number"
 							min="1"
 							placeholder="e.g. 150000"

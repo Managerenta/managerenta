@@ -2,7 +2,7 @@
 import { memo, useMemo, useState } from "react";
 import { FiChevronDown, FiChevronRight, FiTrash2 } from "react-icons/fi";
 import { mutate as globalMutate } from "swr";
-import { Box, Button, Select, Text } from "@/components";
+import { Box, Button, Input, Select, Text } from "@/components";
 import { api } from "@/constants";
 import { useToast } from "@/hooks";
 import {
@@ -89,7 +89,7 @@ function OperatorsSection() {
 	return (
 		<Box className="section">
 			<Box className="create-row">
-				<input
+				<Input
 					placeholder="User id (24-char ObjectId) to promote to operator"
 					value={userId}
 					onChange={(e) => setUserId(e.target.value)}
@@ -235,7 +235,7 @@ function GroupMembersPanel({ groupId }: { groupId: string }) {
 				</Text>
 			) : null}
 			<Box className="inline-form">
-				<input
+				<Input
 					placeholder="Operator user id to add"
 					value={principalId}
 					onChange={(e) => setPrincipalId(e.target.value)}
@@ -381,7 +381,7 @@ function GroupsSection() {
 	return (
 		<Box className="section">
 			<Box className="create-row">
-				<input
+				<Input
 					placeholder="New group name"
 					value={name}
 					onChange={(e) => setName(e.target.value)}
@@ -572,7 +572,7 @@ function PoliciesSection() {
 	return (
 		<Box className="section">
 			<Box className="create-row column">
-				<input
+				<Input
 					placeholder="New policy name"
 					value={name}
 					onChange={(e) => setName(e.target.value)}

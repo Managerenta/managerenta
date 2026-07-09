@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { memo, useEffect, useMemo, useState } from "react";
-import { Box, Text } from "@/components";
+import { Box, Input, Text } from "@/components";
 import { useAdminOrganizations } from "@/hooks/Admin";
 import { Badge, EntityPageStyled, StatCard } from "../../../shared/entity";
 import AdminShell from "../../AdminShell";
@@ -101,7 +101,7 @@ function OrganizationsContent() {
 			</Box>
 
 			<Box className="toolbar">
-				<input
+				<Input
 					className="search"
 					placeholder="Search organizations by name…"
 					value={query}

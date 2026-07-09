@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { FiX } from "react-icons/fi";
 import useSWR from "swr";
-import { Box, Button, Image, Select, Text } from "@/components";
+import { Box, Button, Image, Input, Select, Text } from "@/components";
 import { api, fetcher, getErrorMessage } from "@/constants";
 import { useToast } from "@/hooks";
 import type { IRawTenantDetail } from "@/types";
@@ -167,7 +167,7 @@ function EditTenantWrapper({ tenantId }: IProps) {
 							{tenant ? (
 								<Box className="form-field full">
 									<Text className="field-label">Unit</Text>
-									<input
+									<Input
 										type="text"
 										value={`${tenant.property} — ${tenant.unit}`}
 										disabled
@@ -183,7 +183,7 @@ function EditTenantWrapper({ tenantId }: IProps) {
 									Full Name{" "}
 									<span className="required">*</span>
 								</Text>
-								<input
+								<Input
 									type="text"
 									placeholder="e.g. Chioma Okoro"
 									value={form.name}
@@ -195,7 +195,7 @@ function EditTenantWrapper({ tenantId }: IProps) {
 								<Text className="field-label">
 									Phone <span className="required">*</span>
 								</Text>
-								<input
+								<Input
 									type="tel"
 									placeholder="+2348012345678"
 									value={form.phone}
@@ -207,7 +207,7 @@ function EditTenantWrapper({ tenantId }: IProps) {
 								<Text className="field-label">
 									Email <span className="required">*</span>
 								</Text>
-								<input
+								<Input
 									type="email"
 									placeholder="tenant@email.com"
 									value={form.email}

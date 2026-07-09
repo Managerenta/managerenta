@@ -9,7 +9,7 @@ import {
 	FiTool,
 	FiTrash2,
 } from "react-icons/fi";
-import { Box, Button, Select, Text } from "@/components";
+import { Box, Button, Input, Select, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
 import {
 	useMaintenance,
@@ -252,7 +252,7 @@ function MaintenanceWrapper() {
 			</Box>
 
 			<Box className="toolbar">
-				<input
+				<Input
 					className="search"
 					placeholder="Search requests…"
 					value={search}
@@ -327,7 +327,7 @@ function MaintenanceWrapper() {
 						<Text className="field-label">
 							Title<span className="req">*</span>
 						</Text>
-						<input
+						<Input
 							value={form.title}
 							onChange={(e) => set("title")(e.target.value)}
 							placeholder="e.g. Leaking kitchen tap"
@@ -388,7 +388,7 @@ function MaintenanceWrapper() {
 					</Box>
 					<Box className="field">
 						<Text className="field-label">Estimated Cost (₦)</Text>
-						<input
+						<Input
 							type="number"
 							min="0"
 							value={form.cost}

@@ -2,7 +2,7 @@
 import { memo, useEffect, useMemo, useState } from "react";
 import { FiChevronDown, FiChevronRight } from "react-icons/fi";
 import { mutate as globalMutate } from "swr";
-import { Box, Button, Select, Text } from "@/components";
+import { Box, Button, Input, Select, Text } from "@/components";
 import { api } from "@/constants";
 import { useToast } from "@/hooks";
 import {
@@ -241,7 +241,7 @@ function UsersContent() {
 			</Box>
 
 			<Box className="toolbar">
-				<input
+				<Input
 					className="search"
 					placeholder="Search users by name, email or username…"
 					value={query}

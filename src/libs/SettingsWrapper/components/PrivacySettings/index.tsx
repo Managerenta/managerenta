@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { memo, useCallback, useState } from "react";
-import { Box, Button, Text } from "@/components";
+import { Box, Button, Input, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
 import { useToast } from "@/hooks";
 import { PrivacySettingsStyled } from "./styled";
@@ -86,7 +86,7 @@ function PrivacySettings() {
 					transaction history. This cannot be undone. Type{" "}
 					<b>DELETE</b> to confirm.
 				</Text>
-				<input
+				<Input
 					className="confirm-input"
 					placeholder="Type DELETE to confirm"
 					value={confirmText}

@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { FiX } from "react-icons/fi";
 import useSWR from "swr";
-import { Box, Button, Select, Text } from "@/components";
+import { Box, Button, Input, Select, Text } from "@/components";
 import { api, fetcher, getErrorMessage } from "@/constants";
 import { useToast } from "@/hooks";
 import { AddTenantWrapperStyled } from "./styled";
@@ -209,7 +209,7 @@ function AddTenantWrapper() {
 							Unit <span className="required">*</span>
 						</Text>
 						{hasPreselectedUnit && preselectedUnit ? (
-							<input
+							<Input
 								type="text"
 								value={`${preselectedUnit.propertyName} — ${preselectedUnit.name}`}
 								disabled
@@ -249,7 +249,7 @@ function AddTenantWrapper() {
 						<Text className="field-label">
 							Full Name <span className="required">*</span>
 						</Text>
-						<input
+						<Input
 							type="text"
 							placeholder="e.g. Chioma Okoro"
 							value={form.name}
@@ -261,7 +261,7 @@ function AddTenantWrapper() {
 						<Text className="field-label">
 							Phone <span className="required">*</span>
 						</Text>
-						<input
+						<Input
 							type="tel"
 							placeholder="+2348012345678"
 							value={form.phone}
@@ -273,7 +273,7 @@ function AddTenantWrapper() {
 						<Text className="field-label">
 							Email <span className="required">*</span>
 						</Text>
-						<input
+						<Input
 							type="email"
 							placeholder="tenant@email.com"
 							value={form.email}

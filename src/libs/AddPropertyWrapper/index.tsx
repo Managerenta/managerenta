@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { memo, useCallback, useState } from "react";
 import { FiX } from "react-icons/fi";
-import { Box, Button, Select, Text } from "@/components";
+import { Box, Button, Input, Select, Text } from "@/components";
 import { api, getErrorMessage } from "@/constants";
 import { useToast } from "@/hooks";
 import { AddPropertyWrapperStyled } from "./styled";
@@ -123,7 +123,7 @@ function AddPropertyWrapper() {
 						<Text className="field-label">
 							Property Name <span className="required">*</span>
 						</Text>
-						<input
+						<Input
 							type="text"
 							placeholder="e.g. Sunshine Apartments"
 							value={propertyForm.name}
@@ -135,7 +135,7 @@ function AddPropertyWrapper() {
 						<Text className="field-label">
 							Address <span className="required">*</span>
 						</Text>
-						<input
+						<Input
 							type="text"
 							placeholder="e.g. 12 Park Lane, Lagos"
 							value={propertyForm.address}
@@ -168,7 +168,7 @@ function AddPropertyWrapper() {
 							Monthly Rent per Unit (₦){" "}
 							<span className="optional">(optional)</span>
 						</Text>
-						<input
+						<Input
 							type="number"
 							min="0"
 							placeholder="e.g. 500000"
