@@ -81,11 +81,18 @@ export interface IUserCreateInput {
 	currentOrganizationId?: string;
 }
 
+export type UserStatus = "active" | "suspended";
+
 export interface IUser extends IUserCreateInput {
 	_id: string;
 	createdAt: Date;
 	updatedAt: Date;
 	deleted: boolean;
+	// Reversible operator lever, distinct from `deleted` (the soft-delete flag).
+	// A suspended account is blocked from authenticating (password, 2FA, passkey
+	// and refresh-token paths all fail closed) but is otherwise preserved and can
+	// be reactivated from the operator console. Defaults to "active".
+	status: UserStatus;
 	refreshTokens?: {
 		refreshToken: string;
 		deadline: Date;

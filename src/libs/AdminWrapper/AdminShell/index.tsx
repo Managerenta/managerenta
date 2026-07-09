@@ -9,6 +9,7 @@ import {
 	FiHome,
 	FiLogOut,
 	FiShield,
+	FiUsers,
 } from "react-icons/fi";
 import { Box, Loader, Text } from "@/components";
 import { AppContextProvider } from "@/hooks";
@@ -22,6 +23,7 @@ const NAV_ITEMS = [
 		href: "/admin/organizations",
 		icon: <FiGrid size={18} />,
 	},
+	{ label: "Users", href: "/admin/users", icon: <FiUsers size={18} /> },
 	{ label: "IAM", href: "/admin/iam", icon: <FiShield size={18} /> },
 	{
 		label: "Analytics",

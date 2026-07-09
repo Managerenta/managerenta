@@ -13,8 +13,10 @@ import {
 	useAdminOperators,
 	useAdminPolicies,
 } from "@/hooks/Admin";
+import type { PolicyDocument } from "@/server/iam/types";
 import { Badge } from "../../../shared/entity";
 import AdminShell from "../../AdminShell";
+import PolicyBuilder from "./PolicyBuilderView";
 import { IamStyled } from "./styled";
 
 const OBJECT_ID = /^[0-9a-fA-F]{24}$/;
@@ -410,17 +412,6 @@ function GroupsSection() {
 }
 
 // ── Policies ─────────────────────────────────────────────────────────────────
-const NEW_POLICY_TEMPLATE = `{
-  "version": "2025-01-01",
-  "statements": [
-    {
-      "effect": "Allow",
-      "action": ["organizations:List"],
-      "resource": ["arn:mr:platform:::organizations"]
-    }
-  ]
-}`;
-
 function PolicyCard({
 	policy,
 	mutateKey,
@@ -431,26 +422,23 @@ function PolicyCard({
 	const toast = useToast();
 	const isCustomer = policy.managedBy === "customer";
 	const [editing, setEditing] = useState(false);
-	const [draft, setDraft] = useState("");
+	const [draft, setDraft] = useState<PolicyDocument | null>(null);
 	const [busy, setBusy] = useState(false);
 
 	const startEdit = () => {
-		setDraft(JSON.stringify(policy.document, null, 2));
+		setDraft(policy.document as unknown as PolicyDocument);
 		setEditing(true);
 	};
 
 	const saveEdit = async () => {
-		let document: unknown;
-		try {
-			document = JSON.parse(draft);
-		} catch {
-			toast.push("Document is not valid JSON", { type: "warn" });
+		if (!draft) {
+			toast.push("Fix the policy before saving", { type: "warn" });
 			return;
 		}
 		setBusy(true);
 		try {
 			await api().patch(`/api/admin/iam/policies/${policy._id}`, {
-				document,
+				document: draft,
 			});
 			toast.push("Policy updated", { type: "success" });
 			setEditing(false);
@@ -515,9 +503,11 @@ function PolicyCard({
 
 			{editing ? (
 				<Box className="create-row column">
-					<textarea
-						value={draft}
-						onChange={(e) => setDraft(e.target.value)}
+					<PolicyBuilder
+						initialDocument={
+							policy.document as unknown as PolicyDocument
+						}
+						onChange={setDraft}
 					/>
 					<Button
 						title="Save policy"
@@ -539,30 +529,36 @@ function PoliciesSection() {
 	const { policies, isLoading, mutateKey } = useAdminPolicies();
 	const toast = useToast();
 	const [name, setName] = useState("");
-	const [doc, setDoc] = useState(NEW_POLICY_TEMPLATE);
+	const [doc, setDoc] = useState<PolicyDocument | null>(null);
 	const [busy, setBusy] = useState(false);
+	// Remount the builder after a successful create so it resets to all-Off.
+	const [builderKey, setBuilderKey] = useState(0);
 
 	const createPolicy = async () => {
 		if (!name.trim()) {
 			toast.push("Give the policy a name", { type: "warn" });
 			return;
 		}
-		let document: unknown;
-		try {
-			document = JSON.parse(doc);
-		} catch {
-			toast.push("Document is not valid JSON", { type: "warn" });
+		if (!doc) {
+			toast.push("Fix the policy document before creating", {
+				type: "warn",
+			});
+			return;
+		}
+		if (doc.statements.length === 0) {
+			toast.push("Grant at least one permission", { type: "warn" });
 			return;
 		}
 		setBusy(true);
 		try {
 			await api().post("/api/admin/iam/policies", {
 				name: name.trim(),
-				document,
+				document: doc,
 			});
 			toast.push("Policy created", { type: "success" });
 			setName("");
-			setDoc(NEW_POLICY_TEMPLATE);
+			setDoc(null);
+			setBuilderKey((k) => k + 1);
 			await globalMutate(mutateKey);
 		} catch (e) {
 			toast.push(errMessage(e, "Could not create policy"), {
@@ -581,10 +577,7 @@ function PoliciesSection() {
 					value={name}
 					onChange={(e) => setName(e.target.value)}
 				/>
-				<textarea
-					value={doc}
-					onChange={(e) => setDoc(e.target.value)}
-				/>
+				<PolicyBuilder key={builderKey} onChange={setDoc} />
 				<Button
 					title="Create policy"
 					variant="primary"

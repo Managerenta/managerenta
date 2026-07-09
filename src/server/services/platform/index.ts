@@ -1,3 +1,4 @@
+export * from "./adminUsers";
 export { default as getPlatformAnalytics } from "./getPlatformAnalytics";
 export { default as getPlatformOrganizationDetail } from "./getPlatformOrganizationDetail";
 export { default as getPlatformOrganizations } from "./getPlatformOrganizations";

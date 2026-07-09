@@ -19,6 +19,7 @@ import {
 	type IUser,
 	type IUserCreateInput,
 	type IUserMethods,
+	type UserStatus,
 } from "./types";
 import { generateAuthToken } from "./utils";
 
@@ -68,6 +69,15 @@ const schema = new mongoose.Schema<IUser, UserModel, IUserMethods>(
 			type: Boolean,
 			default: false,
 			select: false,
+		},
+		// Reversible suspension lever for the operator console. Unlike `deleted`
+		// this is part of the default projection so it is visible in the admin
+		// user directory and returned on the login lookup for the auth gate.
+		status: {
+			type: String,
+			enum: ["active", "suspended"],
+			default: "active",
+			index: true,
 		},
 		refreshTokens: [
 			{
@@ -729,6 +739,55 @@ export async function deleteUserDB({
 	}
 }
 
+/**
+ * Set a user's reversible suspension status. Suspending also purges every
+ * refresh token so any live session is immediately unable to refresh — combined
+ * with the login/refresh gates the account is fully locked out until reactivated.
+ * Returns the updated (post-write) user, or null on failure.
+ */
+export async function setUserStatusDB({
+	id,
+	status,
+	session,
+}: {
+	id: string;
+	status: UserStatus;
+	session?: ClientSession;
+}): Promise<IUser | null> {
+	const timer = databaseResponseTimeHistogram.startTimer();
+	try {
+		const update =
+			status === "suspended"
+				? { $set: { status, refreshTokens: [] } }
+				: { $set: { status } };
+		const result = await User.findByIdAndUpdate(
+			new mongoose.Types.ObjectId(id),
+			update,
+			{
+				returnDocument: "after",
+				projection: { refreshTokens: 0 },
+				session,
+			},
+		);
+		if (!result) throw ErrUserNotFound;
+		timer({
+			operation: IOperationType.Update,
+			collection: collectionName,
+			method: "setUserStatusDB",
+			success: "true",
+		});
+		return result;
+	} catch {
+		timer({
+			operation: IOperationType.Update,
+			collection: collectionName,
+			method: "setUserStatusDB",
+			success: "false",
+		});
+		return null;
+	}
+}
+
 export async function loginUserDB({
 	id,
 	ip,
@@ -741,11 +800,20 @@ export async function loginUserDB({
 	const timer = databaseResponseTimeHistogram.startTimer();
 
 	try {
-		const result = await (
-			await User.findById(new mongoose.Types.ObjectId(id), null, {
-				session,
-			})
-		)?.generateAuthToken(ip);
+		const userDoc = await User.findById(
+			new mongoose.Types.ObjectId(id),
+			null,
+			{ session },
+		);
+		// Fail closed if the account was suspended after the first factor
+		// succeeded (e.g. a suspension landed inside the 2FA ticket window).
+		// The password/2FA/passkey routes all funnel session minting through
+		// here, so this one guard covers every login entry point.
+		if (!userDoc || (userDoc as unknown as IUser).status === "suspended") {
+			throw ErrInvalidAction;
+		}
+
+		const result = await userDoc.generateAuthToken(ip);
 
 		if (!result) throw ErrInvalidAction;
 
@@ -829,6 +897,9 @@ export async function reLoginUserWithRefreshTokenDB({
 		const filter = {
 			_id: new mongoose.Types.ObjectId(id),
 			deleted: false,
+			// A suspended account must not be able to refresh an existing
+			// session. `$ne` also matches legacy docs with no status field.
+			status: { $ne: "suspended" },
 			refreshTokens: {
 				$elemMatch: {
 					refreshToken,

@@ -4,4 +4,5 @@ export * from "./useAdminIam";
 export * from "./useAdminOrganizationDetail";
 export * from "./useAdminOrganizations";
 export * from "./useAdminOverview";
+export * from "./useAdminUsers";
 export * from "./useWhoami";

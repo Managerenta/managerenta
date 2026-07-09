@@ -178,6 +178,27 @@ export async function listIamGroupsDB({
 	}
 }
 
+/**
+ * Every group on a plane, across all orgs. Used by the operator console to
+ * present the full set of org groups a user can be added to (each labelled with
+ * its owning org). Sorted by orgId then name for a stable grouped display.
+ */
+export async function listGroupsByPlaneDB({
+	plane,
+	session,
+}: {
+	plane: Plane;
+	session?: ClientSession;
+}): Promise<IIamGroup[]> {
+	try {
+		return await IamGroup.find({ plane }, null, { session })
+			.sort({ orgId: 1, name: 1 })
+			.lean<IIamGroup[]>();
+	} catch {
+		return [];
+	}
+}
+
 /** Delete a customer-managed group. System groups are immutable and never removed. */
 export async function deleteIamGroupDB({
 	id,

@@ -1,5 +1,9 @@
 import { compare } from "bcrypt";
-import { ErrInvalidCredentials, signTwoFactorTicket } from "../../constants";
+import {
+	ErrAccountRestricted,
+	ErrInvalidCredentials,
+	signTwoFactorTicket,
+} from "../../constants";
 import { getUserByEmailWithPasswordDB, loginUserDB } from "../../models";
 import type { IJwtPayload } from "../../types";
 
@@ -21,6 +25,13 @@ export default async function login({
 
 	const isPasswordValid = await compare(password, user.password);
 	if (!isPasswordValid) throw ErrInvalidCredentials;
+
+	// A suspended account is fully locked out. Check AFTER the password compare
+	// so the response does not reveal whether the address maps to a real (but
+	// suspended) account to someone who does not already know the password.
+	if ((user as { status?: string }).status === "suspended") {
+		throw ErrAccountRestricted;
+	}
 
 	// If 2FA is enabled the password step alone is not sufficient. Issue a
 	// short-lived challenge ticket; the caller must complete the second step

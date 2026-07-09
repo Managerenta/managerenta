@@ -164,6 +164,143 @@ test.describe("Operator console", () => {
 		expect([401, 403]).toContain(resp.status());
 	});
 
+	test("Users section lists platform users; search filters through the backend", async ({
+		page,
+	}) => {
+		await page.goto("/admin");
+		await page.getByRole("link", { name: "Users", exact: true }).click();
+		await page.waitForURL(/\/admin\/users$/);
+		await expect(
+			page.getByText("Every end-user on the platform.", { exact: false }),
+		).toBeVisible();
+
+		// Seeded users render as cards.
+		await expect(page.getByTestId("user-card").first()).toBeVisible({
+			timeout: 10000,
+		});
+		await expect(page.getByText("amina@example.com")).toBeVisible();
+
+		// Search hits the backend.
+		await page.locator("input.search").fill("zzz-no-such-user");
+		await expect(page.getByText("No users match your search.")).toBeVisible(
+			{ timeout: 10000 },
+		);
+		await page.locator("input.search").fill("amina");
+		await expect(page.getByText("amina@example.com")).toBeVisible({
+			timeout: 10000,
+		});
+	});
+
+	test("suspend + reactivate a user persists through the API", async ({
+		page,
+	}) => {
+		const statusOfAmina = async (): Promise<string | undefined> => {
+			const resp = await page
+				.context()
+				.request.get("/api/admin/users?search=amina&offset=0&limit=20");
+			const body = await resp.json();
+			return (body.data?.users ?? []).find(
+				(u: { email: string }) => u.email === "amina@example.com",
+			)?.status;
+		};
+
+		const aminaCard = () =>
+			page.locator('[data-testid="user-card"]', {
+				hasText: "amina@example.com",
+			});
+
+		await page.goto("/admin/users");
+		await page.locator("input.search").fill("amina");
+		await expect(aminaCard()).toBeVisible({ timeout: 10000 });
+
+		// Suspend → the write persists server-side…
+		await aminaCard()
+			.getByRole("button", { name: /^suspend$/i })
+			.click();
+		await expect.poll(statusOfAmina, { timeout: 10000 }).toBe("suspended");
+
+		// …and a fresh load of the page reflects the suspended state.
+		await page.goto("/admin/users");
+		await page.locator("input.search").fill("amina");
+		await expect(
+			aminaCard().getByText("suspended", { exact: true }),
+		).toBeVisible({ timeout: 10000 });
+
+		// Reactivate → back to active (leave the seed as we found it).
+		await aminaCard()
+			.getByRole("button", { name: /^reactivate$/i })
+			.click();
+		await expect.poll(statusOfAmina, { timeout: 10000 }).toBe("active");
+
+		await page.goto("/admin/users");
+		await page.locator("input.search").fill("amina");
+		await expect(
+			aminaCard().getByText("active", { exact: true }),
+		).toBeVisible({ timeout: 10000 });
+	});
+
+	test("user group-membership panel loads a user's memberships", async ({
+		page,
+	}) => {
+		await page.goto("/admin/users");
+		await page.locator("input.search").fill("amina");
+		const card = page.locator('[data-testid="user-card"]', {
+			hasText: "amina@example.com",
+		});
+		await expect(card).toBeVisible({ timeout: 10000 });
+		await card.getByRole("button", { name: /manage groups/i }).click();
+		// The panel fetches the user's detail (memberships) and renders.
+		await expect(card.getByTestId("membership-panel")).toBeVisible({
+			timeout: 10000,
+		});
+		await expect(card.getByText("Group memberships")).toBeVisible();
+	});
+
+	test("create a policy with the friendly builder (radio → JSON) persists", async ({
+		page,
+	}) => {
+		const policyName = `pw-policy-${Date.now()}`;
+		await page.goto("/admin/iam");
+		await page.getByText("Policies", { exact: true }).click();
+
+		await page.getByPlaceholder("New policy name").fill(policyName);
+
+		// Drive the per-service 3-way radio: grant Properties Full, Billing Read.
+		await page.getByTestId("svc-properties-full").click();
+		await page.getByTestId("svc-billing-read").click();
+
+		// The Advanced (JSON) view reflects the generated document.
+		await page.getByRole("button", { name: /Advanced \(JSON\)/i }).click();
+		const preview = page.getByTestId("policy-json-preview");
+		await expect(preview).toContainText("properties:*");
+		await expect(preview).toContainText("billing:Read");
+
+		await page.getByRole("button", { name: /^create policy$/i }).click();
+		await expect(page.getByText(policyName)).toBeVisible({
+			timeout: 10000,
+		});
+
+		// The persisted document carries exactly what the builder generated.
+		const listResp = await page
+			.context()
+			.request.get("/api/admin/iam/policies");
+		const listBody = await listResp.json();
+		const created = (listBody.data ?? []).find(
+			(p: { name: string }) => p.name === policyName,
+		);
+		expect(created, "policy should exist server-side").toBeTruthy();
+		const asText = JSON.stringify(created.document);
+		expect(asText).toContain("properties:*");
+		expect(asText).toContain("mr:platform:properties:*:property/*");
+
+		// Clean up so the suite stays idempotent.
+		const card = page.locator(".iam-card", { hasText: policyName });
+		await card.getByRole("button", { name: /^delete$/i }).click();
+		await expect(page.getByText(policyName)).toHaveCount(0, {
+			timeout: 10000,
+		});
+	});
+
 	test("create + delete a custom IAM group persists through the API", async ({
 		page,
 	}) => {

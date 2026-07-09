@@ -179,4 +179,96 @@ export const IamStyled = styled(Box)`
 		overflow: auto;
 		font-family: monospace;
 	}
+
+	/* ── Friendly policy builder ─────────────────────────────────────────── */
+	.policy-builder {
+		display: flex;
+		flex-direction: column;
+		gap: 14px;
+		width: 100%;
+	}
+	.builder-grid {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+	.builder-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		flex-wrap: wrap;
+		padding: 8px 10px;
+		border: 1px solid var(--Border-Subtle);
+		border-radius: var(--mr-radius-sm);
+		background: var(--Surface-Card);
+	}
+	.builder-row .svc-label {
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--Text-Primary);
+	}
+	.segmented {
+		display: inline-flex;
+		border: 1px solid var(--Border-Subtle);
+		border-radius: var(--mr-radius-sm);
+		overflow: hidden;
+	}
+	.segmented .seg {
+		padding: 7px 14px;
+		font-size: 13px;
+		font-weight: 600;
+		background: var(--Surface-Card);
+		color: var(--Text-Secondary);
+		border: none;
+		border-left: 1px solid var(--Border-Subtle);
+		cursor: pointer;
+		transition: all var(--mr-dur-fast);
+	}
+	.segmented .seg:first-child {
+		border-left: none;
+	}
+	.segmented .seg:hover {
+		color: var(--Text-Primary);
+	}
+	.segmented .seg.active.off {
+		background: var(--mr-color-subtle);
+		color: var(--Text-Primary);
+	}
+	.segmented .seg.active.read {
+		background: var(--mr-color-brand-soft);
+		color: var(--mr-color-brand);
+	}
+	.segmented .seg.active.full {
+		background: var(--mr-color-brand);
+		color: var(--mr-color-brand-on);
+	}
+	.advanced-wrap {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+	.advanced-body {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+	.advanced-body textarea {
+		width: 100%;
+		min-height: 200px;
+		padding: 10px 14px;
+		border: 1px solid var(--Border-Subtle);
+		border-radius: var(--mr-radius-sm);
+		background: var(--Surface-Card);
+		color: var(--Text-Primary);
+		font-size: 13px;
+		font-family: monospace;
+		resize: vertical;
+	}
+	.advanced-note {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		flex-wrap: wrap;
+	}
 `;

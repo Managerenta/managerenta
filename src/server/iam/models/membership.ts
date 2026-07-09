@@ -217,6 +217,32 @@ export async function listMembershipsForOrgDB({
 	}
 }
 
+/**
+ * Every membership a principal holds across ALL org scopes. Unlike
+ * {@link getMembershipsForPrincipalDB} this does not filter by orgId, so the
+ * operator console can show a user's full group membership matrix regardless of
+ * which org each group belongs to.
+ */
+export async function listMembershipsForPrincipalAllOrgsDB({
+	principalType,
+	principalId,
+	session,
+}: {
+	principalType: "user" | "operator";
+	principalId: string;
+	session?: ClientSession;
+}): Promise<IIamGroupMembership[]> {
+	try {
+		return await IamGroupMembership.find(
+			{ principalType, principalId: toObjectId(principalId) },
+			null,
+			{ session },
+		).lean<IIamGroupMembership[]>();
+	} catch {
+		return [];
+	}
+}
+
 export async function getMembershipsForPrincipalDB({
 	principalType,
 	principalId,
