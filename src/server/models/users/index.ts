@@ -1214,11 +1214,14 @@ export async function getUserByEmailWithPasswordDB({
 	const timer = databaseResponseTimeHistogram.startTimer();
 	try {
 		const normalized = (email ?? "").trim().toLowerCase();
+		// `security.passkeys` is `select: false`, but the login service needs to
+		// know whether the account has a registered passkey to decide if a second
+		// factor is required — so pull it in alongside the password.
 		const result = await User.findOne(
 			{ email: normalized, deleted: false },
 			null,
 			{ session },
-		).select("+password");
+		).select("+password +security.passkeys");
 
 		if (!result) throw ErrUserNotFound;
 

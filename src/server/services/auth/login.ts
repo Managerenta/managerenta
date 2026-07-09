@@ -8,7 +8,14 @@ import { getUserByEmailWithPasswordDB, loginUserDB } from "../../models";
 import type { IJwtPayload } from "../../types";
 
 export type LoginResult =
-	| { twoFactorRequired: true; ticket: string }
+	| {
+			twoFactorRequired: true;
+			ticket: string;
+			// Which second-factor methods this account can complete the challenge
+			// with, so the UI renders the right step (a passkey-only account has
+			// no authenticator code to type).
+			methods: { totp: boolean; passkey: boolean };
+	  }
 	| { twoFactorRequired: false; session: IJwtPayload };
 
 export default async function login({
@@ -33,17 +40,22 @@ export default async function login({
 		throw ErrAccountRestricted;
 	}
 
-	// If 2FA is enabled the password step alone is not sufficient. Issue a
+	// If the account has any second factor registered — TOTP 2FA or at least
+	// one passkey — the password step alone is not sufficient. Issue a
 	// short-lived challenge ticket; the caller must complete the second step
 	// at /api/auth/login/2fa before any session cookie is set. NEVER short
 	// circuit this — without this branch, 2FA is decorative (see
-	// SECURITY_REVIEW.md S1).
-	if (user.security?.twoFactorEnabled) {
+	// SECURITY_REVIEW.md S1). A registered passkey counts as an opt-in to a
+	// second factor even when TOTP was never enabled.
+	const hasTotp = !!user.security?.twoFactorEnabled;
+	const hasPasskey = (user.security?.passkeys?.length ?? 0) > 0;
+	if (hasTotp || hasPasskey) {
 		const userId = user._id?.toString();
 		if (!userId) throw ErrInvalidCredentials;
 		return {
 			twoFactorRequired: true,
 			ticket: signTwoFactorTicket(userId),
+			methods: { totp: hasTotp, passkey: hasPasskey },
 		};
 	}
 

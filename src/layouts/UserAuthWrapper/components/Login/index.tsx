@@ -29,6 +29,11 @@ function isPasskeySupported(): boolean {
 
 type Step = "credentials" | "two-factor";
 
+interface TwoFactorMethods {
+	totp: boolean;
+	passkey: boolean;
+}
+
 interface LoginState {
 	email: string;
 	password: string;
@@ -74,6 +79,10 @@ function Login() {
 	const [isRedirecting, setIsRedirecting] = useState(false);
 	const [step, setStep] = useState<Step>("credentials");
 	const [twoFactorTicket, setTwoFactorTicket] = useState<string | null>(null);
+	const [methods, setMethods] = useState<TwoFactorMethods>({
+		totp: true,
+		passkey: false,
+	});
 
 	const { reAuthenticateUserSession } = useContext(AppContextProvider);
 	const router = useRouter();
@@ -123,6 +132,12 @@ function Login() {
 			const data = res.data?.data;
 			if (data?.twoFactorRequired && data?.ticket) {
 				setTwoFactorTicket(data.ticket);
+				// Fall back to a TOTP-only assumption if the server didn't send
+				// method hints (older response shape) so the step still renders.
+				setMethods({
+					totp: data.methods?.totp ?? true,
+					passkey: data.methods?.passkey ?? false,
+				});
 				setStep("two-factor");
 				setIsLoading(false);
 				return;
@@ -175,6 +190,7 @@ function Login() {
 
 	const handleCancelTwoFactor = () => {
 		setTwoFactorTicket(null);
+		setMethods({ totp: true, passkey: false });
 		setStep("credentials");
 		dispatch({ type: "RESET_TWO_FACTOR" });
 	};
@@ -351,6 +367,37 @@ function Login() {
 		);
 	}
 
+	// Passkey-only account: no authenticator code exists to type, so we skip
+	// the TOTP form entirely and lead straight with the passkey ceremony.
+	if (step === "two-factor" && !methods.totp) {
+		return (
+			<LoginStyled>
+				<Header
+					title="Verify it's you"
+					subtext="Use your passkey to finish signing in."
+				/>
+
+				<Button
+					type="button"
+					title={isLoading ? "Verifying..." : "Verify with a passkey"}
+					handleClick={handlePasskeyTwoFactor}
+					disabled={isLoading}
+					leadingIcon={<FaFingerprint />}
+				/>
+
+				<Box className="options">
+					<Box
+						className="forgot-password"
+						onClick={handleCancelTwoFactor}
+						style={{ cursor: "pointer" }}
+					>
+						<Text>Back</Text>
+					</Box>
+				</Box>
+			</LoginStyled>
+		);
+	}
+
 	if (step === "two-factor") {
 		return (
 			<LoginStyled>
@@ -400,16 +447,18 @@ function Login() {
 					/>
 				</form>
 
-				<Button
-					type="button"
-					title="Use a passkey instead"
-					handleClick={handlePasskeyTwoFactor}
-					disabled={isLoading}
-					background="transparent"
-					color="var(--Main-Blue)"
-					border="1px solid var(--Main-Blue)"
-					borderRadius="8px"
-				/>
+				{methods.passkey ? (
+					<Button
+						type="button"
+						title="Use a passkey instead"
+						handleClick={handlePasskeyTwoFactor}
+						disabled={isLoading}
+						background="transparent"
+						color="var(--Main-Blue)"
+						border="1px solid var(--Main-Blue)"
+						borderRadius="8px"
+					/>
+				) : null}
 
 				<Box className="options">
 					<Box

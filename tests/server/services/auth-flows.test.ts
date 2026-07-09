@@ -12,7 +12,7 @@ import {
 	verifyTwoFactorTicket,
 } from "../../../src/server/constants";
 import { disconnectRedis } from "../../../src/server/databases";
-import { updateUserRawDB, User } from "../../../src/server/models";
+import { User, updateUserRawDB } from "../../../src/server/models";
 import {
 	login,
 	logout,
@@ -202,6 +202,9 @@ describe("auth/login", () => {
 		expect(result.twoFactorRequired).toBe(true);
 		if (!result.twoFactorRequired) throw new Error("unreachable");
 
+		// A TOTP account advertises the totp method and no passkey.
+		expect(result.methods).toEqual({ totp: true, passkey: false });
+
 		// The ticket is a domain-separated challenge for THIS user...
 		const ticketPayload = verifyTwoFactorTicket(result.ticket);
 		expect(ticketPayload?.userId).toBe(session.userId);
@@ -226,6 +229,53 @@ describe("auth/login", () => {
 		await expect(
 			login({ email: payload.email, password: "wrong" }),
 		).rejects.toBe(ErrInvalidCredentials);
+	});
+
+	it("requires a second factor when only a passkey is registered (no TOTP)", async () => {
+		const { payload, session } = await signupUser();
+		const tokensBefore = await refreshTokensOf(session.userId);
+
+		// Register a passkey but leave TOTP 2FA disabled. A registered passkey
+		// alone must still gate the password step behind a second factor.
+		const registered = await updateUserRawDB({
+			id: session.userId,
+			update: {
+				$push: {
+					"security.passkeys": {
+						credentialId: `cred_${uniq("pk")}`,
+						publicKey: "cHVibGljLWtleQ",
+						counter: 0,
+						transports: ["internal"],
+						label: "Test passkey",
+						createdAt: new Date(),
+					},
+				},
+			},
+		});
+		expect(registered).not.toBeNull();
+
+		const result = await login({
+			email: payload.email,
+			password: payload.password,
+			ip: "10.0.0.11",
+		});
+		expect(result).not.toBeNull();
+		if (!result) throw new Error("unreachable");
+		expect(result.twoFactorRequired).toBe(true);
+		if (!result.twoFactorRequired) throw new Error("unreachable");
+
+		// Passkey is the only advertised method — there is no TOTP to type.
+		expect(result.methods).toEqual({ totp: false, passkey: true });
+
+		const ticketPayload = verifyTwoFactorTicket(result.ticket);
+		expect(ticketPayload?.userId).toBe(session.userId);
+
+		// No session was minted by the password step alone.
+		expect(
+			(result as unknown as Record<string, unknown>).session,
+		).toBeUndefined();
+		const tokensAfter = await refreshTokensOf(session.userId);
+		expect(tokensAfter.length).toBe(tokensBefore.length);
 	});
 });
 

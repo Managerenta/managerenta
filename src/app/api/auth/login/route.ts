@@ -62,10 +62,15 @@ export const POST = withApiHandler(
 
 			if (result.twoFactorRequired) {
 				// Don't set any auth cookie yet — the password step alone does
-				// not grant a session when 2FA is enabled.
+				// not grant a session when a second factor is registered. Pass
+				// the available methods so the client renders the right step.
 				return applyRateLimitHeaders(
 					ok(
-						{ twoFactorRequired: true, ticket: result.ticket },
+						{
+							twoFactorRequired: true,
+							ticket: result.ticket,
+							methods: result.methods,
+						},
 						"Two-factor authentication required",
 					),
 					rl,
