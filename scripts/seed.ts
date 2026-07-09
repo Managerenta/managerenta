@@ -15,6 +15,12 @@ import {
 	Vendor as _Vendor,
 } from "../src/server/models";
 import { Transaction as _Transaction } from "../src/server/models/tenants/transactions";
+import {
+	IamGroup as _IamGroup,
+	IamGroupMembership as _IamGroupMembership,
+	IamOperator as _IamOperator,
+	IamPolicy as _IamPolicy,
+} from "../src/server/iam/models";
 
 // Cast models to `any` to bypass mongoose's strict `create()` overload union
 // resolution. Seed scripts don't benefit from full schema type safety.
@@ -30,6 +36,10 @@ const DocumentModel = _DocumentModel as any;
 const Notification = _Notification as any;
 const AuditEvent = _AuditEvent as any;
 const PushSubscription = _PushSubscription as any;
+const IamGroup = _IamGroup as any;
+const IamGroupMembership = _IamGroupMembership as any;
+const IamOperator = _IamOperator as any;
+const IamPolicy = _IamPolicy as any;
 
 async function clean() {
 	await Promise.all([
@@ -45,6 +55,15 @@ async function clean() {
 		Notification.deleteMany({}),
 		AuditEvent.deleteMany({}),
 		PushSubscription.deleteMany({}),
+		// IAM collections are keyed by user/org _ids that this seed re-creates
+		// from scratch. Wiping domain data but leaving IAM behind orphans every
+		// operator/group/membership against a now-deleted user (bootstrap then
+		// refuses to run — "operators already exist"). Clear them together so a
+		// reseed yields a truly clean slate and the operator can be re-bootstrapped.
+		IamGroup.deleteMany({}),
+		IamGroupMembership.deleteMany({}),
+		IamOperator.deleteMany({}),
+		IamPolicy.deleteMany({}),
 	]);
 }
 

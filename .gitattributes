@@ -1,0 +1,17 @@
+# Normalize line endings. All text files are stored and checked out with LF
+# so tooling (biome) is consistent across Windows/macOS/Linux and CI. Git
+# auto-detects binary content and leaves it untouched; the explicit rules
+# below are belt-and-suspenders for common binary asset types.
+* text=auto eol=lf
+
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.webp binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.eot   binary
+*.pdf   binary
