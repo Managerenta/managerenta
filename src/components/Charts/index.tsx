@@ -58,10 +58,13 @@ export function GroupedBarChart({
 			role="img"
 			aria-label="bar chart"
 		>
-			{ticks.map((t) => {
+			{ticks.map((t, ti) => {
 				const y = padT + plotH - (t / max) * plotH;
 				return (
-					<g key={t}>
+					// Key by index: rounded tick values collide (e.g. all 0 when
+					// max is 0, or [0,0,1,1,1] at low max). The list is fixed
+					// and never reordered, so the index is a stable unique key.
+					<g key={ti}>
 						<line
 							x1={padL}
 							x2={width - padR}
