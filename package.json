@@ -25,7 +25,7 @@
 		"@react-pdf/renderer": "^4.5.1",
 		"@simplewebauthn/browser": "^13.3.0",
 		"@simplewebauthn/server": "^13.3.0",
-		"axios": "^1.16.0",
+		"axios": "^1.18.0",
 		"bcrypt": "^6.0.0",
 		"cron": "^4.4.0",
 		"hash.js": "^1.1.7",
